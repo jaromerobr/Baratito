@@ -34,14 +34,65 @@ void main() async {
     ),
   );
 
-  // Initialize Supabase
-  await SupabaseClientHelper.initialize();
+  // Initialize Supabase (guarded so missing dart-defines don't crash the app)
+  var supabaseReady = false;
+  try {
+    await SupabaseClientHelper.initialize();
+    supabaseReady = true;
+  } catch (e, st) {
+    // Keep app alive and show a friendly error UI below. Also log for debugging.
+    // In most cases you should run the app with the --dart-define flags
+    // shown in the file header comment.
+    // Example:
+    // flutter run \
+    //   --dart-define=SUPABASE_URL=https://your.supabase.co \
+    //   --dart-define=SUPABASE_ANON_KEY=your_anon_key
+    //
+    // We intentionally do not rethrow so the developer sees a clear message
+    // in the emulator instead of a blank/white screen.
+    // ignore: avoid_print
+    print('Supabase initialization failed: $e');
+  }
 
   // Initialize Dio client for network requests
   DioClient.instance.initialize();
 
+  if (!supabaseReady) {
+    runApp(
+      ProviderScope(
+        child: MaterialApp(
+          debugShowCheckedModeBanner: false,
+          home: Scaffold(
+            appBar: AppBar(title: const Text('Baratito - Error')),
+            body: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: const [
+                    Text(
+                      'No se pudo inicializar Supabase.',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 12),
+                    Text(
+                      'Ejecuta la app con las variables de entorno necesarias:\n--dart-define=SUPABASE_URL=... --dart-define=SUPABASE_ANON_KEY=...',
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    return;
+  }
+
   runApp(
-    const ProviderScope(
+    ProviderScope(
       child: BaratitoApp(),
     ),
   );
