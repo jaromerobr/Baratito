@@ -11,12 +11,12 @@ class ApiInterceptor extends Interceptor {
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     if (kDebugMode) {
       debugPrint('┌──────────────────────────────────────────');
-      debugPrint('│ 🌐 REQUEST: ${options.method} ${options.uri}');
+      debugPrint('│  REQUEST: ${options.method} ${options.uri}');
       if (options.data != null) {
-        debugPrint('│ 📦 Body: ${options.data}');
+        debugPrint('│  Body: ${options.data}');
       }
       if (options.queryParameters.isNotEmpty) {
-        debugPrint('│ 🔍 Query: ${options.queryParameters}');
+        debugPrint('│  Query: ${options.queryParameters}');
       }
       debugPrint('└──────────────────────────────────────────');
     }
@@ -30,7 +30,7 @@ class ApiInterceptor extends Interceptor {
     if (kDebugMode) {
       debugPrint('┌──────────────────────────────────────────');
       debugPrint(
-        '│ ✅ RESPONSE [${response.statusCode}]: '
+        '│  RESPONSE [${response.statusCode}]: '
         '${response.requestOptions.method} ${response.requestOptions.uri}',
       );
       debugPrint('└──────────────────────────────────────────');
@@ -44,11 +44,11 @@ class ApiInterceptor extends Interceptor {
   void onError(DioException err, ErrorInterceptorHandler handler) {
     if (kDebugMode) {
       debugPrint('┌──────────────────────────────────────────');
-      debugPrint('│ ❌ ERROR [${err.type}]: ${err.message}');
-      debugPrint('│ 📍 URL: ${err.requestOptions.uri}');
+      debugPrint('│ ERROR [${err.type}]: ${err.message}');
+      debugPrint('│  URL: ${err.requestOptions.uri}');
       if (err.response != null) {
-        debugPrint('│ 📄 Status: ${err.response?.statusCode}');
-        debugPrint('│ 📄 Data: ${err.response?.data}');
+        debugPrint('│  Status: ${err.response?.statusCode}');
+        debugPrint('│  Data: ${err.response?.data}');
       }
       debugPrint('└──────────────────────────────────────────');
     }
