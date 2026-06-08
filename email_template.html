@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirma tu correo en Baratito</title>
+    <style>
+        body {
+            font-family: 'Poppins', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #F7F5F0;
+            margin: 0;
+            padding: 0;
+            color: #2D2D3A;
+        }
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: #ffffff;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+        .header {
+            background: linear-gradient(135deg, #2D6A4F, #1B4332);
+            padding: 40px 30px;
+            text-align: center;
+        }
+        .logo-box {
+            display: inline-block;
+            background-color: #ffffff;
+            width: 70px;
+            height: 70px;
+            border-radius: 18px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .logo-box span {
+            display: block;
+            line-height: 70px;
+            font-size: 40px;
+            font-weight: 900;
+            color: #2D6A4F;
+        }
+        .header h1 {
+            color: #ffffff;
+            margin: 0;
+            font-size: 28px;
+            letter-spacing: 2px;
+            font-weight: 800;
+        }
+        .content {
+            padding: 40px 40px;
+            text-align: center;
+        }
+        .content h2 {
+            font-size: 22px;
+            color: #1B4332;
+            margin-top: 0;
+            font-weight: 700;
+        }
+        .content p {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #6B6B7B;
+            margin-bottom: 30px;
+        }
+        .btn-container {
+            margin: 40px 0;
+        }
+        .btn {
+            background-color: #D4A017;
+            color: #ffffff !important;
+            text-decoration: none;
+            padding: 16px 36px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            display: inline-block;
+            box-shadow: 0 4px 15px rgba(212, 160, 23, 0.3);
+        }
+        .footer {
+            background-color: #F2F0EC;
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #9E9EAE;
+        }
+        .fallback {
+            font-size: 12px;
+            color: #9E9EAE;
+            word-break: break-all;
+            margin-top: 30px;
+            text-align: left;
+            background: #F9F9FB;
+            padding: 15px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo-box">
+                <span>B</span>
+            </div>
+            <h1>BARATITO</h1>
+        </div>
+        <div class="content">
+            <h2>¡Hola! Te damos la bienvenida 👋</h2>
+            <p>Estás a un solo paso de unirte a nuestra comunidad. Por favor, confirma tu dirección de correo electrónico para activar tu cuenta y empezar a comprar o vender cosas increíbles.</p>
+            
+            <div class="btn-container">
+                <!-- VARIABLE DINÁMICA DE SUPABASE -->
+                <a href="{{ .ConfirmationURL }}" class="btn">Confirmar mi correo</a>
+            </div>
+
+            <div class="fallback">
+                Si el botón no funciona, copia y pega este enlace en tu navegador:<br><br>
+                <a href="{{ .ConfirmationURL }}" style="color: #2D6A4F;">{{ .ConfirmationURL }}</a>
+            </div>
+        </div>
+        <div class="footer">
+            © 2026 Baratito. Segunda mano, nueva oportunidad.<br>
+            Este es un correo automático, por favor no respondas a este mensaje.
+        </div>
+    </div>
+</body>
+</html>
