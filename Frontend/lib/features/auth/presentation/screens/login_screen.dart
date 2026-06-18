@@ -1,32 +1,31 @@
-// Login screen — Matches the Baratito brand mockup.
-//
-// Yellow/green gradient header with floating icons, big "B" logo,
-// white card with email/password fields, remember me, and guest mode.
+// Login screen — Baratito brand.
+// Usa Provider + mock AuthProvider (Semana 7).
+// El redirect de GoRouter maneja la navegación automáticamente tras login.
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:gap/gap.dart';
+import 'package:provider/provider.dart';
 import 'dart:math' as math;
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/router.dart';
-import '../providers/auth_provider.dart';
+import '../../../../providers/auth_provider.dart';
 
-class LoginScreen extends ConsumerStatefulWidget {
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  ConsumerState<LoginScreen> createState() => _LoginScreenState();
+  State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends ConsumerState<LoginScreen>
+class _LoginScreenState extends State<LoginScreen>
     with TickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
-  bool _rememberMe = true;
+  bool _isLoading = false;
+  String? _errorMessage;
 
   late AnimationController _floatController;
   late AnimationController _fadeController;
@@ -35,14 +34,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
   @override
   void initState() {
     super.initState();
-
-    // Floating icons animation
     _floatController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 3),
     )..repeat(reverse: true);
 
-    // Fade-in for the card
     _fadeController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 900),
@@ -66,36 +62,42 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
   Future<void> _handleLogin() async {
     if (!_formKey.currentState!.validate()) return;
 
-    ref.read(authControllerProvider.notifier).clearMessages();
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
 
-    final success = await ref.read(authControllerProvider.notifier).signIn(
-          _emailController.text,
-          _passwordController.text,
-        );
+    final auth = Provider.of<AuthProvider>(context, listen: false);
+    final success = await auth.login(
+      _emailController.text.trim(),
+      _passwordController.text,
+    );
 
-    if (success && mounted) {
-      context.go(AppRoutes.home);
+    if (!mounted) return;
+
+    if (!success) {
+      setState(() {
+        _isLoading = false;
+        _errorMessage = 'Correo o contraseña incorrectos.';
+      });
     }
+    // Si success == true, GoRouter (refreshListenable) redirige automáticamente
   }
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authControllerProvider);
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // ── Header with gradient + logo ────────────
             _buildHeader(size),
-
-            // ── White card form ────────────────────────
             Transform.translate(
               offset: const Offset(0, -40),
               child: FadeTransition(
                 opacity: _fadeAnimation,
-                child: _buildFormCard(authState),
+                child: _buildFormCard(),
               ),
             ),
           ],
@@ -112,14 +114,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          // Yellow background
           Positioned.fill(
-            child: Container(
-              color: AppColors.accent,
-            ),
+            child: Container(color: AppColors.accent),
           ),
-
-          // Green diagonal shape (top-right)
           Positioned(
             top: -30,
             right: -60,
@@ -135,8 +132,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
               ),
             ),
           ),
-
-          // Green diagonal shape (bottom-left)
           Positioned(
             bottom: 20,
             left: -80,
@@ -152,8 +147,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
               ),
             ),
           ),
-
-          // Floating icons
           _buildFloatingIcon(
             icon: Icons.checkroom_outlined,
             top: size.height * 0.10,
@@ -178,14 +171,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
             left: 16,
             delay: 0.9,
           ),
-
-          // Logo "B" + Title centered
           Positioned.fill(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Gap(20),
-                // "B" logo container
                 Container(
                   width: 90,
                   height: 90,
@@ -213,7 +203,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                   ),
                 ),
                 const Gap(12),
-                // "BARATITO" text
                 Text(
                   'BARATITO',
                   style: GoogleFonts.poppins(
@@ -223,7 +212,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                     letterSpacing: 2,
                   ),
                 ),
-                // Tagline
                 Text(
                   'Segunda mano, nueva oportunidad.',
                   style: GoogleFonts.poppins(
@@ -241,7 +229,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     );
   }
 
-  // ── Floating icon with animation ───────────────────────
   Widget _buildFloatingIcon({
     required IconData icon,
     double? top,
@@ -271,18 +258,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
             color: Colors.white.withAlpha(60),
             shape: BoxShape.circle,
           ),
-          child: Icon(
-            icon,
-            color: Colors.white.withAlpha(200),
-            size: 22,
-          ),
+          child: Icon(icon, color: Colors.white.withAlpha(200), size: 22),
         ),
       ),
     );
   }
 
   // ── FORM CARD ──────────────────────────────────────────
-  Widget _buildFormCard(AuthControllerState authState) {
+  Widget _buildFormCard() {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
@@ -302,7 +285,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Title
             Text(
               'Iniciar sesión',
               style: GoogleFonts.poppins(
@@ -323,21 +305,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
             ),
             const Gap(24),
 
-            // Error banner
-            if (authState.errorMessage != null) ...[
-              _buildErrorBanner(authState.errorMessage!),
+            // Error inline
+            if (_errorMessage != null) ...[
+              _buildErrorBanner(_errorMessage!),
               const Gap(16),
             ],
 
-            // Email field
-            _buildFieldLabel('Correo electrónico o usuario'),
+            // Email
+            _buildFieldLabel('Correo electrónico'),
             const Gap(8),
             TextFormField(
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,
               textInputAction: TextInputAction.next,
               decoration: const InputDecoration(
-                hintText: 'Ingresa tu correo o usuario',
+                hintText: 'Ingresa tu correo',
                 prefixIcon: Icon(
                   Icons.person_outline_rounded,
                   color: AppColors.textHint,
@@ -356,7 +338,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
             ),
             const Gap(20),
 
-            // Password field
+            // Password
             _buildFieldLabel('Contraseña'),
             const Gap(8),
             TextFormField(
@@ -392,52 +374,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
             ),
             const Gap(14),
 
-            // Remember me + Forgot password
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // Remember me checkbox
-                GestureDetector(
-                  onTap: () => setState(() => _rememberMe = !_rememberMe),
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: 22,
-                        height: 22,
-                        child: Checkbox(
-                          value: _rememberMe,
-                          onChanged: (v) =>
-                              setState(() => _rememberMe = v ?? false),
-                          materialTapTargetSize:
-                              MaterialTapTargetSize.shrinkWrap,
-                          visualDensity: VisualDensity.compact,
-                        ),
-                      ),
-                      const Gap(8),
-                      Text(
-                        'Recordarme',
-                        style: GoogleFonts.poppins(
-                          fontSize: 13,
-                          color: AppColors.textSecondary,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
+            // Forgot password
+            Align(
+              alignment: Alignment.centerRight,
+              child: GestureDetector(
+                onTap: () => context.push('/forgot-password'),
+                child: Text(
+                  '¿Olvidaste tu contraseña?',
+                  style: GoogleFonts.poppins(
+                    fontSize: 12,
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
-                // Forgot password
-                GestureDetector(
-                  onTap: () => context.push(AppRoutes.forgotPassword),
-                  child: Text(
-                    '¿Olvidaste tu contraseña?',
-                    style: GoogleFonts.poppins(
-                      fontSize: 12,
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
             const Gap(24),
 
@@ -446,7 +396,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
               width: double.infinity,
               height: 54,
               child: ElevatedButton(
-                onPressed: authState.isLoading ? null : _handleLogin,
+                onPressed: _isLoading ? null : _handleLogin,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
@@ -455,7 +405,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                   ),
                   elevation: 0,
                 ),
-                child: authState.isLoading
+                child: _isLoading
                     ? const SizedBox(
                         width: 24,
                         height: 24,
@@ -480,16 +430,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
               width: double.infinity,
               height: 54,
               child: OutlinedButton(
-                onPressed: () => context.push(AppRoutes.register),
+                onPressed: () => context.push('/register'),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppColors.primary,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  side: const BorderSide(
-                    color: AppColors.primary,
-                    width: 2,
-                  ),
+                  side: const BorderSide(color: AppColors.primary, width: 2),
                 ),
                 child: Text(
                   'Crear cuenta',
@@ -500,48 +447,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                 ),
               ),
             ),
-            const Gap(20),
-
-            // Divider
-            Text(
-              'o',
-              style: GoogleFonts.poppins(
-                fontSize: 13,
-                color: AppColors.textHint,
-              ),
-            ),
-            const Gap(12),
-
-            // Guest mode
-            GestureDetector(
-              onTap: () => context.go(AppRoutes.home),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.person_outline_rounded,
-                    color: AppColors.primary,
-                    size: 20,
-                  ),
-                  const Gap(6),
-                  Text(
-                    'Continuar como invitado',
-                    style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
           ],
         ),
       ),
     );
   }
 
-  // ── Field label ────────────────────────────────────────
   Widget _buildFieldLabel(String text) {
     return Align(
       alignment: Alignment.centerLeft,
@@ -556,7 +467,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     );
   }
 
-  // ── Error banner ───────────────────────────────────────
   Widget _buildErrorBanner(String message) {
     return Container(
       width: double.infinity,
