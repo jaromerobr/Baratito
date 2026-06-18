@@ -2,22 +2,22 @@
 ///
 /// Shows a branded greeting, user info, quick action cards,
 /// and a "Dio + FutureBuilder" demo button.
-/// Adapts the greeting based on the user's role (buyer/seller/both).
+/// Logout usa AuthProvider.logout() — GoRouter redirige automáticamente.
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gap/gap.dart';
+import 'package:provider/provider.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/router.dart';
-import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../../providers/auth_provider.dart';
 
-class DashboardScreen extends ConsumerWidget {
+class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final userProfile = ref.watch(currentUserProfileProvider);
+  Widget build(BuildContext context) {
+    final authProvider = Provider.of<AuthProvider>(context);
+    final userName = authProvider.currentUser?.name ?? 'Usuario';
 
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
@@ -26,10 +26,10 @@ class DashboardScreen extends ConsumerWidget {
           // ── Branded header ────────────────────────────
           SliverToBoxAdapter(
             child: _DashboardHeader(
-              userProfile: userProfile,
-              onLogout: () async {
-                await ref.read(authControllerProvider.notifier).signOut();
-                if (context.mounted) context.go(AppRoutes.login);
+              userName: userName,
+              onLogout: () {
+                Provider.of<AuthProvider>(context, listen: false).logout();
+                // GoRouter redirige a /login vía refreshListenable
               },
             ),
           ),
@@ -246,7 +246,7 @@ class DashboardScreen extends ConsumerWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () => context.push(AppRoutes.posts),
+          onTap: () => context.push('/posts'),
           borderRadius: BorderRadius.circular(16),
           child: Padding(
             padding: const EdgeInsets.all(18),
@@ -304,17 +304,18 @@ class DashboardScreen extends ConsumerWidget {
 
 // ── Dashboard Header ────────────────────────────────────
 class _DashboardHeader extends StatelessWidget {
-  final AsyncValue userProfile;
+  final String userName;
   final VoidCallback onLogout;
 
   const _DashboardHeader({
-    required this.userProfile,
+    required this.userName,
     required this.onLogout,
   });
 
   @override
   Widget build(BuildContext context) {
     final topPad = MediaQuery.of(context).padding.top;
+    final firstName = userName.split(' ').first;
 
     return Container(
       width: double.infinity,
@@ -377,7 +378,7 @@ class _DashboardHeader extends StatelessWidget {
                   ),
                 ],
               ),
-              // Logout button
+              // Logout button — no context.go(), GoRouter redirige solo
               Material(
                 color: Colors.white.withAlpha(80),
                 borderRadius: BorderRadius.circular(10),
@@ -399,49 +400,27 @@ class _DashboardHeader extends StatelessWidget {
           const Gap(24),
 
           // Greeting
-          userProfile.when(
-            data: (profile) {
-              final name = profile?.fullName ?? 'Usuario';
-              final firstName = name.split(' ').first;
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '¡Hola, $firstName! 👋',
-                    style: GoogleFonts.poppins(
-                      fontSize: 26,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.primaryDark,
-                    ),
-                  ),
-                  const Gap(4),
-                  Text(
-                    '¿Qué quieres hacer hoy?',
-                    style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.primaryDark.withAlpha(180),
-                    ),
-                  ),
-                ],
-              );
-            },
-            loading: () => Text(
-              '¡Bienvenido! 👋',
-              style: GoogleFonts.poppins(
-                fontSize: 26,
-                fontWeight: FontWeight.w800,
-                color: AppColors.primaryDark,
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '¡Hola, $firstName! 👋',
+                style: GoogleFonts.poppins(
+                  fontSize: 26,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.primaryDark,
+                ),
               ),
-            ),
-            error: (_, __) => Text(
-              '¡Bienvenido! 👋',
-              style: GoogleFonts.poppins(
-                fontSize: 26,
-                fontWeight: FontWeight.w800,
-                color: AppColors.primaryDark,
+              const Gap(4),
+              Text(
+                '¿Qué quieres hacer hoy?',
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.primaryDark.withAlpha(180),
+                ),
               ),
-            ),
+            ],
           ),
         ],
       ),
