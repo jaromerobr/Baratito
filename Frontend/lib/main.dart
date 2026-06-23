@@ -11,66 +11,39 @@
 ///   --dart-define=SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRkeWdwcWt1eGdmcmpkaXBkdmVrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzMjUwNjEsImV4cCI6MjA5NDkwMTA2MX0.63PViWP91iqrC2r4r6WX-SMcVehwRE-2IbZvwkNOVzY
 /// ```
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart' hide ChangeNotifierProvider;
 import 'package:provider/provider.dart';
-import 'core/supabase_client.dart';
-import 'core/router.dart';
-import 'core/theme/app_theme.dart';
-import 'core/theme/theme_provider.dart';
-import 'core/network/dio_client.dart';
+import 'core/supabase_client.dart'; // We use the existing supabase config initialized via SupabaseClientHelper
+import 'config/app_theme.dart';
+import 'providers/auth_provider.dart';
+import 'router/app_router.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Lock to portrait mode
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-    DeviceOrientation.portraitDown,
-  ]);
+  await SupabaseClientHelper.initialize(); // Using the existing helper which has the fallbacks
 
-  // Set status bar style
-  SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
-      statusBarColor: const Color.fromRGBO(0, 0, 0, 0), // Transparent, without using Colors.transparent
-      statusBarIconBrightness: Brightness.dark,
-    ),
-  );
-
-  // Initialize Supabase
-  await SupabaseClientHelper.initialize();
-
-  // Initialize Dio client for network requests
-  DioClient.instance.initialize();
-
-  runApp(
-    // ChangeNotifierProvider at the root — above ProviderScope and MaterialApp
-    ChangeNotifierProvider(
-      create: (_) => ThemeModel(),
-      child: const ProviderScope(
-        child: BaratitoApp(),
-      ),
-    ),
-  );
+  runApp(const BaratitoApp());
 }
 
-class BaratitoApp extends ConsumerWidget {
+class BaratitoApp extends StatelessWidget {
   const BaratitoApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final router = ref.watch(routerProvider);
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider(
+      create: (_) => AuthProvider(),
+      child: Consumer<AuthProvider>(
+        builder: (context, authProvider, _) {
+          final router = buildRouter(authProvider);
 
-    // context.watch to rebuild when theme changes
-    final themeModel = context.watch<ThemeModel>();
-
-    return MaterialApp.router(
-      title: 'Baratito',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.light,
-      darkTheme: AppTheme.dark,
-      themeMode: themeModel.themeMode,
-      routerConfig: router,
+          return MaterialApp.router(
+            title: 'Baratito',
+            theme: AppTheme.light,
+            routerConfig: router,
+            debugShowCheckedModeBanner: false,
+          );
+        },
+      ),
     );
   }
 }
