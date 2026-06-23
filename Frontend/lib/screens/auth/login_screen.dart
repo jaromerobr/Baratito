@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../config/app_colors.dart';
 import '../../providers/auth_provider.dart';
+import '../../core/theme/theme_provider.dart';
 import '../../utils/validators.dart';
 import '../../widgets/auth/baratito_logo.dart';
 import '../../widgets/auth/auth_text_field.dart';
@@ -47,16 +48,29 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.watch<ThemeModel>().isDarkMode;
+
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        actions: [
+          IconButton(
+            icon: Icon(isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded),
+            color: AppColors.neutral,
+            onPressed: () => context.read<ThemeModel>().toggleTheme(),
+          ),
+        ],
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+          padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: 24),
+                const SizedBox(height: 8),
                 const Center(child: BaratitoLogo(size: 96)),
                 const SizedBox(height: 16),
                 Text(

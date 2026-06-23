@@ -12,17 +12,22 @@
 /// ```
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'core/supabase_client.dart'; // We use the existing supabase config initialized via SupabaseClientHelper
-import 'config/app_theme.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart' hide ChangeNotifierProvider;
+import 'core/supabase_client.dart';
+import 'core/theme/theme_provider.dart';
+import 'core/theme/app_theme.dart';
 import 'providers/auth_provider.dart';
 import 'router/app_router.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await SupabaseClientHelper.initialize();
 
-  await SupabaseClientHelper.initialize(); // Using the existing helper which has the fallbacks
-
-  runApp(const BaratitoApp());
+  runApp(
+    const ProviderScope(
+      child: BaratitoApp(),
+    ),
+  );
 }
 
 class BaratitoApp extends StatelessWidget {
@@ -30,15 +35,20 @@ class BaratitoApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => AuthProvider(),
-      child: Consumer<AuthProvider>(
-        builder: (context, authProvider, _) {
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeModel()),
+      ],
+      child: Consumer2<AuthProvider, ThemeModel>(
+        builder: (context, authProvider, themeModel, _) {
           final router = buildRouter(authProvider);
 
           return MaterialApp.router(
             title: 'Baratito',
             theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            themeMode: themeModel.themeMode,
             routerConfig: router,
             debugShowCheckedModeBanner: false,
           );

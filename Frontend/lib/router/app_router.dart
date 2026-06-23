@@ -6,6 +6,7 @@ import '../screens/auth/register_screen.dart';
 import '../screens/auth/email_confirmation_screen.dart';
 import '../screens/auth/forgot_password_screen.dart';
 import '../screens/auth/reset_password_screen.dart';
+import '../features/dashboard/presentation/screens/dashboard_screen.dart';
 
 const _authRoutes = [
   '/login',
@@ -23,8 +24,12 @@ GoRouter buildRouter(AuthProvider authProvider) {
       final loggedIn = authProvider.status == AuthStatus.authenticated;
       final goingToAuth = _authRoutes.contains(state.matchedLocation);
 
-      if (!loggedIn && !goingToAuth) return '/login';
+      // If not logged in and trying to access a protected route (not auth, not home)
+      if (!loggedIn && !goingToAuth && state.matchedLocation != '/home') return '/login';
+      
+      // If logged in and trying to go to login/register, redirect to home
       if (loggedIn && goingToAuth) return '/home';
+      
       return null;
     },
     routes: [
@@ -41,20 +46,7 @@ GoRouter buildRouter(AuthProvider authProvider) {
       ),
       GoRoute(
         path: '/home', 
-        builder: (c, s) => Scaffold(
-          appBar: AppBar(
-            title: const Text('Home'),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.logout),
-                onPressed: () {
-                  authProvider.signOut();
-                },
-              )
-            ]
-          ),
-          body: const Center(child: Text('Bienvenido a Baratito!')),
-        )
+        builder: (c, s) => const DashboardScreen(),
       ),
     ],
   );
