@@ -406,43 +406,53 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 // Remember me checkbox
-                GestureDetector(
-                  onTap: () => setState(() => _rememberMe = !_rememberMe),
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: 22,
-                        height: 22,
-                        child: Checkbox(
-                          value: _rememberMe,
-                          onChanged: (v) =>
-                              setState(() => _rememberMe = v ?? false),
-                          materialTapTargetSize:
-                              MaterialTapTargetSize.shrinkWrap,
-                          visualDensity: VisualDensity.compact,
+                Flexible(
+                  child: GestureDetector(
+                    onTap: () => setState(() => _rememberMe = !_rememberMe),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: Checkbox(
+                            value: _rememberMe,
+                            onChanged: (v) =>
+                                setState(() => _rememberMe = v ?? false),
+                            materialTapTargetSize:
+                                MaterialTapTargetSize.shrinkWrap,
+                            visualDensity: VisualDensity.compact,
+                          ),
                         ),
-                      ),
-                      const Gap(8),
-                      Text(
-                        'Recordarme',
-                        style: GoogleFonts.poppins(
-                          fontSize: 13,
-                          color: cs.onSurfaceVariant,
-                          fontWeight: FontWeight.w500,
+                        const Gap(6),
+                        Flexible(
+                          child: Text(
+                            'Recordarme',
+                            style: GoogleFonts.poppins(
+                              fontSize: 13,
+                              color: cs.onSurfaceVariant,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
+                const Gap(8),
                 // Forgot password
-                GestureDetector(
-                  onTap: () => context.push(AppRoutes.forgotPassword),
-                  child: Text(
-                    '¿Olvidaste tu contraseña?',
-                    style: GoogleFonts.poppins(
-                      fontSize: 12,
-                      color: cs.primary,
-                      fontWeight: FontWeight.w600,
+                Flexible(
+                  child: GestureDetector(
+                    onTap: () => context.push(AppRoutes.forgotPassword),
+                    child: Text(
+                      '¿Olvidaste tu contraseña?',
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        color: cs.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      textAlign: TextAlign.right,
                     ),
                   ),
                 ),
