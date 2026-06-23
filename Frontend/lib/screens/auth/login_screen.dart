@@ -104,6 +104,17 @@ class _LoginScreenState extends State<LoginScreen> {
                   loading: _loading,
                   onPressed: _submit,
                 ),
+                const SizedBox(height: 12),
+                OutlinedButton(
+                  onPressed: () => context.go('/home'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.neutral,
+                    side: const BorderSide(color: AppColors.border),
+                    minimumSize: const Size.fromHeight(52),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  ),
+                  child: const Text('Ver como invitado'),
+                ),
                 const SizedBox(height: 24),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
