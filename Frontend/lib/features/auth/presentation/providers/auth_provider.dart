@@ -4,6 +4,8 @@
 /// - [authStateProvider]: StreamProvider that mirrors Supabase auth changes.
 /// - [currentUserProfileProvider]: FutureProvider for the public.users profile.
 /// - [authControllerProvider]: StateNotifier for login/register/signOut actions.
+library;
+
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -43,7 +45,7 @@ final currentUserProfileProvider = FutureProvider<UserProfile?>((ref) async {
       };
     },
     loading: () => null,
-    error: (_, __) => null,
+    error: (_, _) => null,
   );
 });
 
@@ -90,13 +92,13 @@ class AuthController extends StateNotifier<AuthControllerState> {
 
     return switch (result) {
       Success() => () {
-          state = state.copyWith(isLoading: false);
-          return true;
-        }(),
+        state = state.copyWith(isLoading: false);
+        return true;
+      }(),
       Failure(message: final msg) => () {
-          state = state.copyWith(isLoading: false, errorMessage: msg);
-          return false;
-        }(),
+        state = state.copyWith(isLoading: false, errorMessage: msg);
+        return false;
+      }(),
     };
   }
 
@@ -122,13 +124,13 @@ class AuthController extends StateNotifier<AuthControllerState> {
 
     return switch (result) {
       Success() => () {
-          state = state.copyWith(isLoading: false);
-          return true;
-        }(),
+        state = state.copyWith(isLoading: false);
+        return true;
+      }(),
       Failure(message: final msg) => () {
-          state = state.copyWith(isLoading: false, errorMessage: msg);
-          return false;
-        }(),
+        state = state.copyWith(isLoading: false, errorMessage: msg);
+        return false;
+      }(),
     };
   }
 
@@ -144,16 +146,16 @@ class AuthController extends StateNotifier<AuthControllerState> {
 
     return switch (result) {
       Success() => () {
-          state = state.copyWith(
-            isLoading: false,
-            successMessage: AuthFailureMessages.resetEmailSent,
-          );
-          return true;
-        }(),
+        state = state.copyWith(
+          isLoading: false,
+          successMessage: AuthFailureMessages.resetEmailSent,
+        );
+        return true;
+      }(),
       Failure(message: final msg) => () {
-          state = state.copyWith(isLoading: false, errorMessage: msg);
-          return false;
-        }(),
+        state = state.copyWith(isLoading: false, errorMessage: msg);
+        return false;
+      }(),
     };
   }
 
@@ -176,16 +178,16 @@ class AuthController extends StateNotifier<AuthControllerState> {
 
     return switch (result) {
       Success() => () {
-          state = state.copyWith(
-            isLoading: false,
-            successMessage: 'Correo de verificación reenviado.',
-          );
-          return true;
-        }(),
+        state = state.copyWith(
+          isLoading: false,
+          successMessage: 'Correo de verificación reenviado.',
+        );
+        return true;
+      }(),
       Failure(message: final msg) => () {
-          state = state.copyWith(isLoading: false, errorMessage: msg);
-          return false;
-        }(),
+        state = state.copyWith(isLoading: false, errorMessage: msg);
+        return false;
+      }(),
     };
   }
 
@@ -197,21 +199,21 @@ class AuthController extends StateNotifier<AuthControllerState> {
 
     return switch (result) {
       Success(data: final user) => () {
-          final verified = user.emailConfirmedAt != null;
-          if (!verified) {
-            state = state.copyWith(
-              isLoading: false,
-              errorMessage: 'Tu correo aún no ha sido verificado.',
-            );
-          } else {
-            state = state.copyWith(isLoading: false);
-          }
-          return verified;
-        }(),
+        final verified = user.emailConfirmedAt != null;
+        if (!verified) {
+          state = state.copyWith(
+            isLoading: false,
+            errorMessage: 'Tu correo aún no ha sido verificado.',
+          );
+        } else {
+          state = state.copyWith(isLoading: false);
+        }
+        return verified;
+      }(),
       Failure(message: final msg) => () {
-          state = state.copyWith(isLoading: false, errorMessage: msg);
-          return false;
-        }(),
+        state = state.copyWith(isLoading: false, errorMessage: msg);
+        return false;
+      }(),
     };
   }
 
@@ -224,6 +226,6 @@ class AuthController extends StateNotifier<AuthControllerState> {
 // ── Controller provider ─────────────────────────────────
 final authControllerProvider =
     StateNotifierProvider<AuthController, AuthControllerState>((ref) {
-  final repo = ref.watch(authRepositoryProvider);
-  return AuthController(repo);
-});
+      final repo = ref.watch(authRepositoryProvider);
+      return AuthController(repo);
+    });

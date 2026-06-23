@@ -14,6 +14,8 @@
 /// 5. `Transformers` para transformar request/response antes de procesarlos.
 /// 6. `FormData` nativo para subir archivos (multipart).
 /// 7. Manejo de errores tipado con `DioException` (timeout, connection, response).
+library;
+
 import 'package:dio/dio.dart';
 import 'api_interceptor.dart';
 
@@ -77,11 +79,7 @@ class DioClient {
     dynamic data,
     CancelToken? cancelToken,
   }) {
-    return _dio.post<T>(
-      path,
-      data: data,
-      cancelToken: cancelToken,
-    );
+    return _dio.post<T>(path, data: data, cancelToken: cancelToken);
   }
 
   /// Shorthand PUT request.
@@ -90,21 +88,11 @@ class DioClient {
     dynamic data,
     CancelToken? cancelToken,
   }) {
-    return _dio.put<T>(
-      path,
-      data: data,
-      cancelToken: cancelToken,
-    );
+    return _dio.put<T>(path, data: data, cancelToken: cancelToken);
   }
 
   /// Shorthand DELETE request.
-  Future<Response<T>> delete<T>(
-    String path, {
-    CancelToken? cancelToken,
-  }) {
-    return _dio.delete<T>(
-      path,
-      cancelToken: cancelToken,
-    );
+  Future<Response<T>> delete<T>(String path, {CancelToken? cancelToken}) {
+    return _dio.delete<T>(path, cancelToken: cancelToken);
   }
 }

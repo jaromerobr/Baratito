@@ -69,10 +69,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
 
     ref.read(authControllerProvider.notifier).clearMessages();
 
-    final success = await ref.read(authControllerProvider.notifier).signIn(
-          _emailController.text,
-          _passwordController.text,
-        );
+    final success = await ref
+        .read(authControllerProvider.notifier)
+        .signIn(_emailController.text, _passwordController.text);
 
     if (success && mounted) {
       context.go(AppRoutes.home);
@@ -117,9 +116,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
         clipBehavior: Clip.none,
         children: [
           // Secondary background
-          Positioned.fill(
-            child: Container(color: cs.secondary),
-          ),
+          Positioned.fill(child: Container(color: cs.secondary)),
 
           // Primary diagonal shape (top-right)
           Positioned(
@@ -287,11 +284,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
             color: cs.onPrimary.withAlpha(60),
             shape: BoxShape.circle,
           ),
-          child: Icon(
-            icon,
-            color: cs.onPrimary.withAlpha(200),
-            size: 22,
-          ),
+          child: Icon(icon, color: cs.onPrimary.withAlpha(200), size: 22),
         ),
       ),
     );
@@ -503,10 +496,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
             // Divider
             Text(
               'o',
-              style: GoogleFonts.poppins(
-                fontSize: 13,
-                color: cs.outline,
-              ),
+              style: GoogleFonts.poppins(fontSize: 13, color: cs.outline),
             ),
             const Gap(12),
 

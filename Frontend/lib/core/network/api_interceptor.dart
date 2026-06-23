@@ -2,6 +2,8 @@
 ///
 /// In debug mode, logs every request, response, and error with details.
 /// On errors, maps [DioException] types to user-friendly Spanish messages.
+library;
+
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 

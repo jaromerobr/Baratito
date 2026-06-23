@@ -2,6 +2,8 @@
 ///
 /// Fetches posts from JSONPlaceholder using the global [DioClient].
 /// Returns `Future<List<Post>>` for use with `FutureBuilder`.
+library;
+
 import 'package:dio/dio.dart';
 import '../../../core/network/dio_client.dart';
 import '../../../core/network/api_interceptor.dart';
@@ -48,11 +50,7 @@ class PostRepository {
     try {
       final response = await _client.post<Map<String, dynamic>>(
         '/posts',
-        data: {
-          'title': title,
-          'body': body,
-          'userId': userId,
-        },
+        data: {'title': title, 'body': body, 'userId': userId},
       );
 
       final data = response.data;

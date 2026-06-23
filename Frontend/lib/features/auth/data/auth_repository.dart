@@ -2,6 +2,8 @@
 ///
 /// Wraps Supabase Auth calls with a [Result] pattern for consistent
 /// error handling across the app. Also reads/writes to `public.users`.
+library;
+
 import 'dart:async';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../domain/user_model.dart';
@@ -86,10 +88,7 @@ class AuthRepository {
       final response = await _auth.signUp(
         email: email.trim(),
         password: password,
-        data: {
-          'full_name': fullName.trim(),
-          'role': role.value,
-        },
+        data: {'full_name': fullName.trim(), 'role': role.value},
       );
 
       final user = response.user;
@@ -140,14 +139,14 @@ class AuthRepository {
   /// Fetch the extended profile from `public.users`.
   Future<Result<UserProfile>> getUserProfile(String userId) async {
     try {
-      final data =
-          await _client.from('users').select().eq('id', userId).single();
+      final data = await _client
+          .from('users')
+          .select()
+          .eq('id', userId)
+          .single();
       return Success(UserProfile.fromJson(data));
     } catch (e) {
-      return Failure(
-        'No se pudo cargar el perfil.',
-        code: e.toString(),
-      );
+      return Failure('No se pudo cargar el perfil.', code: e.toString());
     }
   }
 
@@ -186,8 +185,11 @@ class AuthRepository {
   /// Fetch a profile to check `is_active`. Returns null on error.
   Future<UserProfile?> _getProfileById(String userId) async {
     try {
-      final data =
-          await _client.from('users').select().eq('id', userId).single();
+      final data = await _client
+          .from('users')
+          .select()
+          .eq('id', userId)
+          .single();
       return UserProfile.fromJson(data);
     } catch (_) {
       return null;
@@ -214,7 +216,9 @@ class AuthRepository {
         message.contains('weak_password')) {
       return AuthFailureMessages.weakPassword;
     }
-    if (message.contains('password should contain at least one character of each')) {
+    if (message.contains(
+      'password should contain at least one character of each',
+    )) {
       return AuthFailureMessages.strictPasswordPolicy;
     }
     if (message.contains('network') || message.contains('socket')) {

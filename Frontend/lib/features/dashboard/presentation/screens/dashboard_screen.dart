@@ -3,14 +3,15 @@
 /// Shows a branded greeting, user info, quick action cards,
 /// and a "Dio + FutureBuilder" demo button.
 /// Adapts the greeting based on the user's role (buyer/seller/both).
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'package:gap/gap.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/router.dart';
-import '../../../../core/theme/theme_provider.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 
 class DashboardScreen extends ConsumerWidget {
@@ -19,9 +20,9 @@ class DashboardScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userProfile = ref.watch(currentUserProfileProvider);
-    final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
+      backgroundColor: AppColors.backgroundLight,
       body: CustomScrollView(
         slivers: [
           // ── Branded header ────────────────────────────
@@ -41,7 +42,7 @@ class DashboardScreen extends ConsumerWidget {
             sliver: SliverList(
               delegate: SliverChildListDelegate([
                 // Quick stats row
-                _buildQuickStats(cs),
+                _buildQuickStats(),
                 const Gap(24),
 
                 // Section title
@@ -50,21 +51,21 @@ class DashboardScreen extends ConsumerWidget {
                   style: GoogleFonts.poppins(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
-                    color: cs.onSurface,
+                    color: AppColors.textPrimary,
                   ),
                 ),
                 const Gap(14),
 
                 // Action cards grid
-                _buildActionCards(context, cs),
+                _buildActionCards(context),
                 const Gap(24),
 
                 // Maintenance banner
-                _buildMaintenanceBanner(cs),
+                _buildMaintenanceBanner(),
                 const Gap(24),
 
                 // Dio demo button
-                _buildDioDemo(context, cs),
+                _buildDioDemo(context),
               ]),
             ),
           ),
@@ -74,35 +75,35 @@ class DashboardScreen extends ConsumerWidget {
   }
 
   // ── Quick stats ───────────────────────────────────────
-  Widget _buildQuickStats(ColorScheme cs) {
+  Widget _buildQuickStats() {
     return Row(
       children: [
         _StatCard(
           icon: Icons.shopping_bag_rounded,
           label: 'Compras',
           value: '0',
-          color: cs.primary,
+          color: AppColors.primary,
         ),
         const Gap(12),
         _StatCard(
           icon: Icons.sell_rounded,
           label: 'Ventas',
           value: '0',
-          color: cs.secondary,
+          color: AppColors.accent,
         ),
         const Gap(12),
         _StatCard(
           icon: Icons.star_rounded,
           label: 'Rating',
           value: '—',
-          color: cs.tertiary,
+          color: const Color(0xFFE67E22),
         ),
       ],
     );
   }
 
   // ── Action cards ──────────────────────────────────────
-  Widget _buildActionCards(BuildContext context, ColorScheme cs) {
+  Widget _buildActionCards(BuildContext context) {
     return Column(
       children: [
         Row(
@@ -112,7 +113,7 @@ class DashboardScreen extends ConsumerWidget {
                 icon: Icons.search_rounded,
                 title: 'Explorar',
                 subtitle: 'Buscar productos',
-                gradient: [cs.primary, cs.primaryContainer],
+                gradient: const [Color(0xFF2ECC71), Color(0xFF27AE60)],
                 onTap: () {},
                 comingSoon: true,
               ),
@@ -123,7 +124,7 @@ class DashboardScreen extends ConsumerWidget {
                 icon: Icons.add_circle_outline_rounded,
                 title: 'Publicar',
                 subtitle: 'Vender algo',
-                gradient: [cs.secondary, cs.secondaryContainer],
+                gradient: const [Color(0xFFF39C12), Color(0xFFE67E22)],
                 onTap: () {},
                 comingSoon: true,
               ),
@@ -138,7 +139,7 @@ class DashboardScreen extends ConsumerWidget {
                 icon: Icons.chat_bubble_outline_rounded,
                 title: 'Mensajes',
                 subtitle: '0 nuevos',
-                gradient: [cs.tertiary, cs.tertiaryContainer],
+                gradient: const [Color(0xFF3498DB), Color(0xFF2980B9)],
                 onTap: () {},
                 comingSoon: true,
               ),
@@ -149,7 +150,7 @@ class DashboardScreen extends ConsumerWidget {
                 icon: Icons.person_outline_rounded,
                 title: 'Mi Perfil',
                 subtitle: 'Editar datos',
-                gradient: [cs.inversePrimary, cs.primaryContainer],
+                gradient: const [Color(0xFF9B59B6), Color(0xFF8E44AD)],
                 onTap: () {},
                 comingSoon: true,
               ),
@@ -161,24 +162,21 @@ class DashboardScreen extends ConsumerWidget {
   }
 
   // ── Maintenance banner ────────────────────────────────
-  Widget _buildMaintenanceBanner(ColorScheme cs) {
+  Widget _buildMaintenanceBanner() {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            cs.secondary.withAlpha(30),
-            cs.primary.withAlpha(20),
+            AppColors.accent.withAlpha(30),
+            AppColors.primary.withAlpha(20),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: cs.secondary.withAlpha(80),
-          width: 1,
-        ),
+        border: Border.all(color: AppColors.accent.withAlpha(80), width: 1),
       ),
       child: Row(
         children: [
@@ -186,12 +184,12 @@ class DashboardScreen extends ConsumerWidget {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: cs.secondary.withAlpha(50),
+              color: AppColors.accent.withAlpha(50),
               borderRadius: BorderRadius.circular(14),
             ),
-            child: Icon(
+            child: const Icon(
               Icons.construction_rounded,
-              color: cs.secondary,
+              color: AppColors.accentDark,
               size: 26,
             ),
           ),
@@ -205,7 +203,7 @@ class DashboardScreen extends ConsumerWidget {
                   style: GoogleFonts.poppins(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    color: cs.onSurface,
+                    color: AppColors.textPrimary,
                   ),
                 ),
                 const Gap(2),
@@ -213,7 +211,7 @@ class DashboardScreen extends ConsumerWidget {
                   'Los módulos de compra, venta y chat estarán disponibles en las próximas semanas.',
                   style: GoogleFonts.poppins(
                     fontSize: 12,
-                    color: cs.onSurfaceVariant,
+                    color: AppColors.textSecondary,
                     height: 1.4,
                   ),
                 ),
@@ -226,26 +224,26 @@ class DashboardScreen extends ConsumerWidget {
   }
 
   // ── Dio demo button ───────────────────────────────────
-  Widget _buildDioDemo(BuildContext context, ColorScheme cs) {
+  Widget _buildDioDemo(BuildContext context) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [cs.primary, cs.primaryContainer],
+        gradient: const LinearGradient(
+          colors: [AppColors.primary, AppColors.primaryDark],
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
         ),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: cs.primary.withAlpha(60),
+            color: AppColors.primary.withAlpha(60),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Material(
-        color: cs.surface.withAlpha(0),
+        color: Colors.transparent,
         child: InkWell(
           onTap: () => context.push(AppRoutes.posts),
           borderRadius: BorderRadius.circular(16),
@@ -257,12 +255,12 @@ class DashboardScreen extends ConsumerWidget {
                   width: 46,
                   height: 46,
                   decoration: BoxDecoration(
-                    color: cs.onPrimary.withAlpha(40),
+                    color: Colors.white.withAlpha(40),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Icon(
+                  child: const Icon(
                     Icons.cloud_download_rounded,
-                    color: cs.onPrimary,
+                    color: Colors.white,
                     size: 24,
                   ),
                 ),
@@ -276,22 +274,22 @@ class DashboardScreen extends ConsumerWidget {
                         style: GoogleFonts.poppins(
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
-                          color: cs.onPrimary,
+                          color: Colors.white,
                         ),
                       ),
                       Text(
                         'Petición async con 3 estados reactivos',
                         style: GoogleFonts.poppins(
                           fontSize: 12,
-                          color: cs.onPrimary.withAlpha(200),
+                          color: Colors.white.withAlpha(200),
                         ),
                       ),
                     ],
                   ),
                 ),
-                Icon(
+                const Icon(
                   Icons.arrow_forward_ios_rounded,
-                  color: cs.onPrimary,
+                  color: Colors.white,
                   size: 18,
                 ),
               ],
@@ -308,27 +306,22 @@ class _DashboardHeader extends StatelessWidget {
   final AsyncValue userProfile;
   final VoidCallback onLogout;
 
-  const _DashboardHeader({
-    required this.userProfile,
-    required this.onLogout,
-  });
+  const _DashboardHeader({required this.userProfile, required this.onLogout});
 
   @override
   Widget build(BuildContext context) {
     final topPad = MediaQuery.of(context).padding.top;
-    final cs = Theme.of(context).colorScheme;
-    final themeModel = context.watch<ThemeModel>();
 
     return Container(
       width: double.infinity,
       padding: EdgeInsets.fromLTRB(20, topPad + 16, 20, 28),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [cs.secondary, cs.secondaryContainer],
+          colors: [AppColors.accent, AppColors.headerYellow],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
         ),
-        borderRadius: const BorderRadius.only(
+        borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(32),
           bottomRight: Radius.circular(32),
         ),
@@ -336,7 +329,7 @@ class _DashboardHeader extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Top row: logo + theme toggle + logout
+          // Top row: logo + logout
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -346,11 +339,11 @@ class _DashboardHeader extends StatelessWidget {
                     width: 38,
                     height: 38,
                     decoration: BoxDecoration(
-                      color: cs.surface,
+                      color: Colors.white,
                       borderRadius: BorderRadius.circular(10),
                       boxShadow: [
                         BoxShadow(
-                          color: cs.shadow.withAlpha(15),
+                          color: Colors.black.withAlpha(15),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),
@@ -362,7 +355,7 @@ class _DashboardHeader extends StatelessWidget {
                         style: GoogleFonts.poppins(
                           fontSize: 22,
                           fontWeight: FontWeight.w900,
-                          color: cs.primary,
+                          color: AppColors.primary,
                           height: 1.1,
                         ),
                       ),
@@ -374,52 +367,28 @@ class _DashboardHeader extends StatelessWidget {
                     style: GoogleFonts.poppins(
                       fontSize: 16,
                       fontWeight: FontWeight.w800,
-                      color: cs.onSecondary,
+                      color: AppColors.primaryDark,
                       letterSpacing: 1.5,
                     ),
                   ),
                 ],
               ),
-              Row(
-                children: [
-                  // Theme toggle button
-                  Material(
-                    color: cs.onSecondary.withAlpha(80),
-                    borderRadius: BorderRadius.circular(10),
-                    child: InkWell(
-                      onTap: () => context.read<ThemeModel>().toggleTheme(),
-                      borderRadius: BorderRadius.circular(10),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: Icon(
-                          themeModel.isDarkMode
-                              ? Icons.wb_sunny
-                              : Icons.nights_stay,
-                          color: cs.onSecondary,
-                          size: 22,
-                        ),
-                      ),
+              // Logout button
+              Material(
+                color: Colors.white.withAlpha(80),
+                borderRadius: BorderRadius.circular(10),
+                child: InkWell(
+                  onTap: onLogout,
+                  borderRadius: BorderRadius.circular(10),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: Icon(
+                      Icons.logout_rounded,
+                      color: AppColors.primaryDark,
+                      size: 22,
                     ),
                   ),
-                  const Gap(8),
-                  // Logout button
-                  Material(
-                    color: cs.onSecondary.withAlpha(80),
-                    borderRadius: BorderRadius.circular(10),
-                    child: InkWell(
-                      onTap: onLogout,
-                      borderRadius: BorderRadius.circular(10),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: Icon(
-                          Icons.logout_rounded,
-                          color: cs.onSecondary,
-                          size: 22,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
             ],
           ),
@@ -438,7 +407,7 @@ class _DashboardHeader extends StatelessWidget {
                     style: GoogleFonts.poppins(
                       fontSize: 26,
                       fontWeight: FontWeight.w800,
-                      color: cs.onSecondary,
+                      color: AppColors.primaryDark,
                     ),
                   ),
                   const Gap(4),
@@ -447,7 +416,7 @@ class _DashboardHeader extends StatelessWidget {
                     style: GoogleFonts.poppins(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
-                      color: cs.onSecondary.withAlpha(180),
+                      color: AppColors.primaryDark.withAlpha(180),
                     ),
                   ),
                 ],
@@ -458,15 +427,15 @@ class _DashboardHeader extends StatelessWidget {
               style: GoogleFonts.poppins(
                 fontSize: 26,
                 fontWeight: FontWeight.w800,
-                color: cs.onSecondary,
+                color: AppColors.primaryDark,
               ),
             ),
-            error: (_, __) => Text(
+            error: (_, _) => Text(
               '¡Bienvenido! 👋',
               style: GoogleFonts.poppins(
                 fontSize: 26,
                 fontWeight: FontWeight.w800,
-                color: cs.onSecondary,
+                color: AppColors.primaryDark,
               ),
             ),
           ),
@@ -492,17 +461,15 @@ class _StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-
     return Expanded(
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
         decoration: BoxDecoration(
-          color: cs.surface,
+          color: Colors.white,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: cs.shadow.withAlpha(8),
+              color: Colors.black.withAlpha(8),
               blurRadius: 10,
               offset: const Offset(0, 2),
             ),
@@ -525,14 +492,14 @@ class _StatCard extends StatelessWidget {
               style: GoogleFonts.poppins(
                 fontSize: 20,
                 fontWeight: FontWeight.w800,
-                color: cs.onSurface,
+                color: AppColors.textPrimary,
               ),
             ),
             Text(
               label,
               style: GoogleFonts.poppins(
                 fontSize: 11,
-                color: cs.onSurfaceVariant,
+                color: AppColors.textSecondary,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -563,8 +530,6 @@ class _ActionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -582,7 +547,7 @@ class _ActionCard extends StatelessWidget {
         ],
       ),
       child: Material(
-        color: cs.surface.withAlpha(0),
+        color: Colors.transparent,
         child: InkWell(
           onTap: comingSoon ? null : onTap,
           borderRadius: BorderRadius.circular(18),
@@ -594,7 +559,7 @@ class _ActionCard extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Icon(icon, color: cs.onPrimary, size: 28),
+                    Icon(icon, color: Colors.white, size: 28),
                     if (comingSoon)
                       Container(
                         padding: const EdgeInsets.symmetric(
@@ -602,7 +567,7 @@ class _ActionCard extends StatelessWidget {
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
-                          color: cs.onPrimary.withAlpha(40),
+                          color: Colors.white.withAlpha(40),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
@@ -610,7 +575,7 @@ class _ActionCard extends StatelessWidget {
                           style: GoogleFonts.poppins(
                             fontSize: 9,
                             fontWeight: FontWeight.w600,
-                            color: cs.onPrimary,
+                            color: Colors.white,
                           ),
                         ),
                       ),
@@ -622,14 +587,14 @@ class _ActionCard extends StatelessWidget {
                   style: GoogleFonts.poppins(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
-                    color: cs.onPrimary,
+                    color: Colors.white,
                   ),
                 ),
                 Text(
                   subtitle,
                   style: GoogleFonts.poppins(
                     fontSize: 11,
-                    color: cs.onPrimary.withAlpha(200),
+                    color: Colors.white.withAlpha(200),
                   ),
                 ),
               ],

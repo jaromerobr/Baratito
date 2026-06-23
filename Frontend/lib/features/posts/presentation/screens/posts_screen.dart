@@ -6,10 +6,11 @@
 ///   1. **Loading**: Animated [CircularProgressIndicator] with label.
 ///   2. **Success**: Optimized [ListView.builder] rendering JSON posts.
 ///   3. **Error**: Clean error screen with icon, message, and retry button.
+library;
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
-import '../../../../core/theme/theme_provider.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../data/post_model.dart';
 import '../../data/post_repository.dart';
 
@@ -59,54 +60,44 @@ class _PostsScreenState extends State<PostsScreen>
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final themeModel = context.watch<ThemeModel>();
-
     return Scaffold(
+      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         title: Text(
           'Posts — Demo Dio',
-          style: GoogleFonts.poppins(
-            fontWeight: FontWeight.w700,
-            fontSize: 18,
-          ),
+          style: GoogleFonts.poppins(fontWeight: FontWeight.w700, fontSize: 18),
         ),
-        actions: [
-          IconButton(
-            icon: Icon(
-              themeModel.isDarkMode ? Icons.wb_sunny : Icons.nights_stay,
-            ),
-            onPressed: () => context.read<ThemeModel>().toggleTheme(),
-          ),
-        ],
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+        elevation: 0,
       ),
       body: FutureBuilder<List<Post>>(
         future: _postsFuture,
         builder: (context, snapshot) {
           // ── STATE 1: Loading ──────────────────────────
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return _buildLoadingState(cs);
+            return _buildLoadingState();
           }
 
           // ── STATE 3: Error ───────────────────────────
           if (snapshot.hasError) {
-            return _buildErrorState(snapshot.error.toString(), cs);
+            return _buildErrorState(snapshot.error.toString());
           }
 
           // ── STATE 2: Success ─────────────────────────
           final posts = snapshot.data;
           if (posts == null || posts.isEmpty) {
-            return _buildEmptyState(cs);
+            return _buildEmptyState();
           }
 
-          return _buildSuccessState(posts, cs);
+          return _buildSuccessState(posts);
         },
       ),
     );
   }
 
   // ── STATE 1: LOADING ──────────────────────────────────
-  Widget _buildLoadingState(ColorScheme cs) {
+  Widget _buildLoadingState() {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -118,16 +109,16 @@ class _PostsScreenState extends State<PostsScreen>
               width: 100,
               height: 100,
               decoration: BoxDecoration(
-                color: cs.primary.withAlpha(25),
+                color: AppColors.primary.withAlpha(25),
                 shape: BoxShape.circle,
               ),
-              child: Center(
+              child: const Center(
                 child: SizedBox(
                   width: 48,
                   height: 48,
                   child: CircularProgressIndicator(
                     strokeWidth: 3.5,
-                    color: cs.primary,
+                    color: AppColors.primary,
                   ),
                 ),
               ),
@@ -139,16 +130,13 @@ class _PostsScreenState extends State<PostsScreen>
             style: GoogleFonts.poppins(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: cs.onSurfaceVariant,
+              color: AppColors.textSecondary,
             ),
           ),
           const SizedBox(height: 8),
           Text(
             'Conectando con el servidor vía Dio',
-            style: GoogleFonts.poppins(
-              fontSize: 13,
-              color: cs.outline,
-            ),
+            style: GoogleFonts.poppins(fontSize: 13, color: AppColors.textHint),
           ),
         ],
       ),
@@ -156,7 +144,7 @@ class _PostsScreenState extends State<PostsScreen>
   }
 
   // ── STATE 2: SUCCESS — ListView.builder ───────────────
-  Widget _buildSuccessState(List<Post> posts, ColorScheme cs) {
+  Widget _buildSuccessState(List<Post> posts) {
     return Column(
       children: [
         // Header card with stats
@@ -165,15 +153,15 @@ class _PostsScreenState extends State<PostsScreen>
           margin: const EdgeInsets.all(16),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [cs.primary, cs.primaryContainer],
+            gradient: const LinearGradient(
+              colors: [AppColors.primary, AppColors.primaryDark],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: cs.primary.withAlpha(60),
+                color: AppColors.primary.withAlpha(60),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
               ),
@@ -185,12 +173,12 @@ class _PostsScreenState extends State<PostsScreen>
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: cs.onPrimary.withAlpha(40),
+                  color: Colors.white.withAlpha(40),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(
+                child: const Icon(
                   Icons.cloud_done_rounded,
-                  color: cs.onPrimary,
+                  color: Colors.white,
                   size: 26,
                 ),
               ),
@@ -204,14 +192,14 @@ class _PostsScreenState extends State<PostsScreen>
                       style: GoogleFonts.poppins(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
-                        color: cs.onPrimary,
+                        color: Colors.white,
                       ),
                     ),
                     Text(
                       'Petición exitosa vía Dio + FutureBuilder',
                       style: GoogleFonts.poppins(
                         fontSize: 12,
-                        color: cs.onPrimary.withAlpha(200),
+                        color: Colors.white.withAlpha(200),
                       ),
                     ),
                   ],
@@ -237,7 +225,7 @@ class _PostsScreenState extends State<PostsScreen>
   }
 
   // ── STATE 3: ERROR ────────────────────────────────────
-  Widget _buildErrorState(String errorMessage, ColorScheme cs) {
+  Widget _buildErrorState(String errorMessage) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -249,13 +237,13 @@ class _PostsScreenState extends State<PostsScreen>
               width: 100,
               height: 100,
               decoration: BoxDecoration(
-                color: cs.error.withAlpha(20),
+                color: AppColors.error.withAlpha(20),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
+              child: const Icon(
                 Icons.wifi_off_rounded,
                 size: 48,
-                color: cs.error,
+                color: AppColors.error,
               ),
             ),
             const SizedBox(height: 24),
@@ -264,7 +252,7 @@ class _PostsScreenState extends State<PostsScreen>
               style: GoogleFonts.poppins(
                 fontSize: 20,
                 fontWeight: FontWeight.w800,
-                color: cs.onSurface,
+                color: AppColors.textPrimary,
               ),
             ),
             const SizedBox(height: 8),
@@ -273,7 +261,7 @@ class _PostsScreenState extends State<PostsScreen>
               textAlign: TextAlign.center,
               style: GoogleFonts.poppins(
                 fontSize: 14,
-                color: cs.onSurfaceVariant,
+                color: AppColors.textSecondary,
                 height: 1.5,
               ),
             ),
@@ -292,6 +280,14 @@ class _PostsScreenState extends State<PostsScreen>
                     fontWeight: FontWeight.w700,
                   ),
                 ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  elevation: 0,
+                ),
               ),
             ),
           ],
@@ -301,7 +297,7 @@ class _PostsScreenState extends State<PostsScreen>
   }
 
   // ── EMPTY STATE ───────────────────────────────────────
-  Widget _buildEmptyState(ColorScheme cs) {
+  Widget _buildEmptyState() {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -310,13 +306,13 @@ class _PostsScreenState extends State<PostsScreen>
             width: 100,
             height: 100,
             decoration: BoxDecoration(
-              color: cs.secondary.withAlpha(40),
+              color: AppColors.accent.withAlpha(40),
               shape: BoxShape.circle,
             ),
-            child: Icon(
+            child: const Icon(
               Icons.inbox_rounded,
               size: 48,
-              color: cs.secondary,
+              color: AppColors.accentDark,
             ),
           ),
           const SizedBox(height: 24),
@@ -325,7 +321,7 @@ class _PostsScreenState extends State<PostsScreen>
             style: GoogleFonts.poppins(
               fontSize: 18,
               fontWeight: FontWeight.w700,
-              color: cs.onSurface,
+              color: AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 8),
@@ -333,7 +329,7 @@ class _PostsScreenState extends State<PostsScreen>
             'El servidor no retornó ningún dato.',
             style: GoogleFonts.poppins(
               fontSize: 14,
-              color: cs.onSurfaceVariant,
+              color: AppColors.textSecondary,
             ),
           ),
         ],
@@ -351,17 +347,15 @@ class _PostCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: cs.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: cs.shadow.withAlpha(8),
+            color: Colors.black.withAlpha(8),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -377,8 +371,8 @@ class _PostCard extends StatelessWidget {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  cs.primary.withAlpha(200),
-                  cs.primaryContainer,
+                  AppColors.primary.withAlpha(200),
+                  AppColors.primaryDark,
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -391,7 +385,7 @@ class _PostCard extends StatelessWidget {
                 style: GoogleFonts.poppins(
                   fontSize: 14,
                   fontWeight: FontWeight.w800,
-                  color: cs.onPrimary,
+                  color: Colors.white,
                 ),
               ),
             ),
@@ -407,7 +401,7 @@ class _PostCard extends StatelessWidget {
                   style: GoogleFonts.poppins(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    color: cs.onSurface,
+                    color: AppColors.textPrimary,
                     height: 1.3,
                   ),
                   maxLines: 2,
@@ -418,7 +412,7 @@ class _PostCard extends StatelessWidget {
                   post.body,
                   style: GoogleFonts.poppins(
                     fontSize: 12,
-                    color: cs.onSurfaceVariant,
+                    color: AppColors.textSecondary,
                     height: 1.5,
                   ),
                   maxLines: 2,
@@ -432,7 +426,7 @@ class _PostCard extends StatelessWidget {
                     vertical: 3,
                   ),
                   decoration: BoxDecoration(
-                    color: cs.surfaceContainerHighest,
+                    color: AppColors.inputFill,
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
@@ -440,7 +434,7 @@ class _PostCard extends StatelessWidget {
                     style: GoogleFonts.poppins(
                       fontSize: 11,
                       fontWeight: FontWeight.w500,
-                      color: cs.outline,
+                      color: AppColors.textHint,
                     ),
                   ),
                 ),
