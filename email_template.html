@@ -109,14 +109,13 @@
             <h2>¡Hola! Te damos la bienvenida 👋</h2>
             <p>Estás a un solo paso de unirte a nuestra comunidad. Por favor, confirma tu dirección de correo electrónico para activar tu cuenta y empezar a comprar o vender cosas increíbles.</p>
             
-            <div class="btn-container">
-                <!-- VARIABLE DINÁMICA DE SUPABASE -->
-                <a href="{{ .ConfirmationURL }}" class="btn">Confirmar mi correo</a>
+            <div class="btn-container" style="background: #F9F9FB; padding: 20px; border-radius: 12px; letter-spacing: 5px; font-size: 32px; font-weight: bold; color: #1B4332;">
+                <!-- VARIABLE DINÁMICA DE SUPABASE PARA OTP -->
+                {{ .Token }}
             </div>
 
             <div class="fallback">
-                Si el botón no funciona, copia y pega este enlace en tu navegador:<br><br>
-                <a href="{{ .ConfirmationURL }}" style="color: #2D6A4F;">{{ .ConfirmationURL }}</a>
+                Ingresa este código de 6 dígitos en la aplicación de Baratito para continuar.
             </div>
         </div>
         <div class="footer">
