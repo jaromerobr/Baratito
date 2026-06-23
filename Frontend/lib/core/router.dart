@@ -57,9 +57,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       ];
       final isOnAuthPage = authPages.contains(currentPath);
 
-      // Not authenticated → go to login (unless already on an auth page or home as guest)
+      // Not authenticated → go to login (unless already on an auth page, home as guest, or posts as guest)
       if (!isAuthenticated) {
-        if (!isOnAuthPage && currentPath != AppRoutes.home) {
+        if (!isOnAuthPage && currentPath != AppRoutes.home && currentPath != AppRoutes.posts) {
           return AppRoutes.login;
         }
         return null;

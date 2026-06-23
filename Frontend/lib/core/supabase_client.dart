@@ -9,22 +9,13 @@ class SupabaseClientHelper {
 
   /// Initialize Supabase. Call once in `main()`.
   static Future<void> initialize() async {
-    const supabaseUrl = String.fromEnvironment(
+    final supabaseUrl = const String.fromEnvironment(
       'SUPABASE_URL',
-      defaultValue: '',
+      defaultValue: 'https://ddygpqkuxgfrjdipdvek.supabase.co',
     );
-    const supabaseAnonKey = String.fromEnvironment(
+    final supabaseAnonKey = const String.fromEnvironment(
       'SUPABASE_ANON_KEY',
-      defaultValue: '',
-    );
-
-    assert(
-      supabaseUrl.isNotEmpty,
-      'SUPABASE_URL must be provided via --dart-define',
-    );
-    assert(
-      supabaseAnonKey.isNotEmpty,
-      'SUPABASE_ANON_KEY must be provided via --dart-define',
+      defaultValue: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRkeWdwcWt1eGdmcmpkaXBkdmVrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzMjUwNjEsImV4cCI6MjA5NDkwMTA2MX0.63PViWP91iqrC2r4r6WX-SMcVehwRE-2IbZvwkNOVzY',
     );
 
     await Supabase.initialize(

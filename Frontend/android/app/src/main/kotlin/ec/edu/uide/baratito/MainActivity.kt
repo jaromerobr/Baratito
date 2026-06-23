@@ -1,4 +1,4 @@
-package com.baratito.baratito
+package ec.edu.uide.baratito
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -1,16 +1,17 @@
 // Login screen — Matches the Baratito brand mockup.
 //
-// Yellow/green gradient header with floating icons, big "B" logo,
-// white card with email/password fields, remember me, and guest mode.
+// Gradient header with floating icons, big "B" logo,
+// card with email/password fields, remember me, and guest mode.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:email_validator/email_validator.dart';
+import 'package:provider/provider.dart';
 import 'package:gap/gap.dart';
 import 'dart:math' as math;
-import '../../../../core/theme/app_colors.dart';
 import '../../../../core/router.dart';
+import '../../../../core/theme/theme_provider.dart';
 import '../providers/auth_provider.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -82,20 +83,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
   Widget build(BuildContext context) {
     final authState = ref.watch(authControllerProvider);
     final size = MediaQuery.of(context).size;
+    final cs = Theme.of(context).colorScheme;
+    // context.watch for theme icon reactivity
+    final themeModel = context.watch<ThemeModel>();
 
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
           children: [
             // ── Header with gradient + logo ────────────
-            _buildHeader(size),
+            _buildHeader(size, cs, themeModel),
 
-            // ── White card form ────────────────────────
+            // ── Card form ──────────────────────────────
             Transform.translate(
               offset: const Offset(0, -40),
               child: FadeTransition(
                 opacity: _fadeAnimation,
-                child: _buildFormCard(authState),
+                child: _buildFormCard(authState, cs),
               ),
             ),
           ],
@@ -105,21 +109,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
   }
 
   // ── HEADER ─────────────────────────────────────────────
-  Widget _buildHeader(Size size) {
+  Widget _buildHeader(Size size, ColorScheme cs, ThemeModel themeModel) {
     return SizedBox(
       height: size.height * 0.42,
       width: double.infinity,
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          // Yellow background
+          // Secondary background
           Positioned.fill(
-            child: Container(
-              color: AppColors.accent,
-            ),
+            child: Container(color: cs.secondary),
           ),
 
-          // Green diagonal shape (top-right)
+          // Primary diagonal shape (top-right)
           Positioned(
             top: -30,
             right: -60,
@@ -129,14 +131,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                 width: 250,
                 height: 350,
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withAlpha(180),
+                  color: cs.primary.withAlpha(180),
                   borderRadius: BorderRadius.circular(60),
                 ),
               ),
             ),
           ),
 
-          // Green diagonal shape (bottom-left)
+          // Primary diagonal shape (bottom-left)
           Positioned(
             bottom: 20,
             left: -80,
@@ -146,10 +148,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                 width: 200,
                 height: 300,
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withAlpha(140),
+                  color: cs.primary.withAlpha(140),
                   borderRadius: BorderRadius.circular(60),
                 ),
               ),
+            ),
+          ),
+
+          // Theme toggle button (top right)
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 8,
+            right: 16,
+            child: IconButton(
+              icon: Icon(
+                themeModel.isDarkMode ? Icons.wb_sunny : Icons.nights_stay,
+                color: cs.onPrimary,
+              ),
+              onPressed: () => context.read<ThemeModel>().toggleTheme(),
             ),
           ),
 
@@ -190,11 +205,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                   width: 90,
                   height: 90,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: cs.surface,
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withAlpha(30),
+                        color: cs.shadow.withAlpha(30),
                         blurRadius: 20,
                         offset: const Offset(0, 8),
                       ),
@@ -206,7 +221,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                       style: GoogleFonts.poppins(
                         fontSize: 52,
                         fontWeight: FontWeight.w900,
-                        color: AppColors.primary,
+                        color: cs.primary,
                         height: 1.1,
                       ),
                     ),
@@ -219,7 +234,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                   style: GoogleFonts.poppins(
                     fontSize: 28,
                     fontWeight: FontWeight.w900,
-                    color: AppColors.primaryDark,
+                    color: cs.onSecondary,
                     letterSpacing: 2,
                   ),
                 ),
@@ -230,7 +245,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
                     fontStyle: FontStyle.italic,
-                    color: AppColors.primaryDark,
+                    color: cs.onSecondary,
                   ),
                 ),
               ],
@@ -249,6 +264,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     double? right,
     required double delay,
   }) {
+    final cs = Theme.of(context).colorScheme;
     return Positioned(
       top: top,
       left: left,
@@ -268,12 +284,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
           width: 42,
           height: 42,
           decoration: BoxDecoration(
-            color: Colors.white.withAlpha(60),
+            color: cs.onPrimary.withAlpha(60),
             shape: BoxShape.circle,
           ),
           child: Icon(
             icon,
-            color: Colors.white.withAlpha(200),
+            color: cs.onPrimary.withAlpha(200),
             size: 22,
           ),
         ),
@@ -282,16 +298,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
   }
 
   // ── FORM CARD ──────────────────────────────────────────
-  Widget _buildFormCard(AuthControllerState authState) {
+  Widget _buildFormCard(AuthControllerState authState, ColorScheme cs) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cs.surface,
         borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withAlpha(18),
+            color: cs.shadow.withAlpha(18),
             blurRadius: 30,
             offset: const Offset(0, 10),
           ),
@@ -308,7 +324,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
               style: GoogleFonts.poppins(
                 fontSize: 24,
                 fontWeight: FontWeight.w800,
-                color: AppColors.textPrimary,
+                color: cs.onSurface,
               ),
             ),
             const Gap(4),
@@ -317,7 +333,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
               textAlign: TextAlign.center,
               style: GoogleFonts.poppins(
                 fontSize: 12,
-                color: AppColors.textSecondary,
+                color: cs.onSurfaceVariant,
                 height: 1.5,
               ),
             ),
@@ -325,22 +341,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
 
             // Error banner
             if (authState.errorMessage != null) ...[
-              _buildErrorBanner(authState.errorMessage!),
+              _buildErrorBanner(authState.errorMessage!, cs),
               const Gap(16),
             ],
 
             // Email field
-            _buildFieldLabel('Correo electrónico o usuario'),
+            _buildFieldLabel('Correo electrónico o usuario', cs),
             const Gap(8),
             TextFormField(
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,
               textInputAction: TextInputAction.next,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 hintText: 'Ingresa tu correo o usuario',
                 prefixIcon: Icon(
                   Icons.person_outline_rounded,
-                  color: AppColors.textHint,
+                  color: cs.outline,
                   size: 22,
                 ),
               ),
@@ -357,7 +373,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
             const Gap(20),
 
             // Password field
-            _buildFieldLabel('Contraseña'),
+            _buildFieldLabel('Contraseña', cs),
             const Gap(8),
             TextFormField(
               controller: _passwordController,
@@ -366,9 +382,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
               onFieldSubmitted: (_) => _handleLogin(),
               decoration: InputDecoration(
                 hintText: 'Ingresa tu contraseña',
-                prefixIcon: const Icon(
+                prefixIcon: Icon(
                   Icons.lock_outline_rounded,
-                  color: AppColors.textHint,
+                  color: cs.outline,
                   size: 22,
                 ),
                 suffixIcon: IconButton(
@@ -376,7 +392,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                     _obscurePassword
                         ? Icons.visibility_outlined
                         : Icons.visibility_off_outlined,
-                    color: AppColors.textHint,
+                    color: cs.outline,
                     size: 22,
                   ),
                   onPressed: () =>
@@ -418,7 +434,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                         'Recordarme',
                         style: GoogleFonts.poppins(
                           fontSize: 13,
-                          color: AppColors.textSecondary,
+                          color: cs.onSurfaceVariant,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -432,7 +448,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                     '¿Olvidaste tu contraseña?',
                     style: GoogleFonts.poppins(
                       fontSize: 12,
-                      color: AppColors.primary,
+                      color: cs.primary,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -447,21 +463,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
               height: 54,
               child: ElevatedButton(
                 onPressed: authState.isLoading ? null : _handleLogin,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  elevation: 0,
-                ),
                 child: authState.isLoading
-                    ? const SizedBox(
+                    ? SizedBox(
                         width: 24,
                         height: 24,
                         child: CircularProgressIndicator(
                           strokeWidth: 2.5,
-                          color: Colors.white,
+                          color: cs.onPrimary,
                         ),
                       )
                     : Text(
@@ -481,16 +489,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
               height: 54,
               child: OutlinedButton(
                 onPressed: () => context.push(AppRoutes.register),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.primary,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  side: const BorderSide(
-                    color: AppColors.primary,
-                    width: 2,
-                  ),
-                ),
                 child: Text(
                   'Crear cuenta',
                   style: GoogleFonts.poppins(
@@ -507,7 +505,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
               'o',
               style: GoogleFonts.poppins(
                 fontSize: 13,
-                color: AppColors.textHint,
+                color: cs.outline,
               ),
             ),
             const Gap(12),
@@ -520,7 +518,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                 children: [
                   Icon(
                     Icons.person_outline_rounded,
-                    color: AppColors.primary,
+                    color: cs.primary,
                     size: 20,
                   ),
                   const Gap(6),
@@ -528,7 +526,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                     'Continuar como invitado',
                     style: GoogleFonts.poppins(
                       fontSize: 14,
-                      color: AppColors.primary,
+                      color: cs.primary,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -542,7 +540,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
   }
 
   // ── Field label ────────────────────────────────────────
-  Widget _buildFieldLabel(String text) {
+  Widget _buildFieldLabel(String text, ColorScheme cs) {
     return Align(
       alignment: Alignment.centerLeft,
       child: Text(
@@ -550,32 +548,31 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
         style: GoogleFonts.poppins(
           fontSize: 13,
           fontWeight: FontWeight.w600,
-          color: AppColors.textPrimary,
+          color: cs.onSurface,
         ),
       ),
     );
   }
 
   // ── Error banner ───────────────────────────────────────
-  Widget _buildErrorBanner(String message) {
+  Widget _buildErrorBanner(String message, ColorScheme cs) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: AppColors.error.withAlpha(20),
+        color: cs.error.withAlpha(20),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.error.withAlpha(60)),
+        border: Border.all(color: cs.error.withAlpha(60)),
       ),
       child: Row(
         children: [
-          const Icon(Icons.error_outline_rounded,
-              color: AppColors.error, size: 20),
+          Icon(Icons.error_outline_rounded, color: cs.error, size: 20),
           const Gap(10),
           Expanded(
             child: Text(
               message,
               style: GoogleFonts.poppins(
-                color: AppColors.error,
+                color: cs.error,
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
               ),

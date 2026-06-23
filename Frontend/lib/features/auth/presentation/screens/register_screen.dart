@@ -1,14 +1,15 @@
-// Register screen — Baratito green/yellow style.
+// Register screen — Baratito branded style.
 //
-// Green header strip + white card with registration fields + role selector.
+// Green header strip + card with registration fields + role selector.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:email_validator/email_validator.dart';
+import 'package:provider/provider.dart';
 import 'package:gap/gap.dart';
-import '../../../../core/theme/app_colors.dart';
 import '../../../../core/router.dart';
+import '../../../../core/theme/theme_provider.dart';
 import '../../domain/user_model.dart';
 import '../providers/auth_provider.dart';
 
@@ -78,12 +79,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authControllerProvider);
+    final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
       body: Column(
         children: [
-          // Green header bar
-          _buildHeaderBar(),
+          // Header bar
+          _buildHeaderBar(cs),
 
           // Scrollable form
           Expanded(
@@ -105,7 +107,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                               style: GoogleFonts.poppins(
                                 fontSize: 26,
                                 fontWeight: FontWeight.w800,
-                                color: AppColors.textPrimary,
+                                color: cs.onSurface,
                               ),
                             ),
                             const Gap(4),
@@ -113,7 +115,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                               'Únete a la comunidad Baratito',
                               style: GoogleFonts.poppins(
                                 fontSize: 13,
-                                color: AppColors.textSecondary,
+                                color: cs.onSurfaceVariant,
                               ),
                             ),
                           ],
@@ -123,21 +125,21 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
 
                       // Error
                       if (authState.errorMessage != null) ...[
-                        _buildErrorBanner(authState.errorMessage!),
+                        _buildErrorBanner(authState.errorMessage!, cs),
                         const Gap(16),
                       ],
 
                       // Full name
-                      _buildLabel('Nombre completo'),
+                      _buildLabel('Nombre completo', cs),
                       const Gap(8),
                       TextFormField(
                         controller: _fullNameController,
                         textInputAction: TextInputAction.next,
                         textCapitalization: TextCapitalization.words,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           hintText: 'Ingresa tu nombre completo',
                           prefixIcon: Icon(Icons.person_outline_rounded,
-                              color: AppColors.textHint, size: 22),
+                              color: cs.outline, size: 22),
                         ),
                         validator: (v) {
                           if (v == null || v.trim().isEmpty) {
@@ -152,16 +154,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                       const Gap(18),
 
                       // Email
-                      _buildLabel('Correo electrónico'),
+                      _buildLabel('Correo electrónico', cs),
                       const Gap(8),
                       TextFormField(
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
                         textInputAction: TextInputAction.next,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           hintText: 'tucorreo@ejemplo.com',
                           prefixIcon: Icon(Icons.email_outlined,
-                              color: AppColors.textHint, size: 22),
+                              color: cs.outline, size: 22),
                         ),
                         validator: (v) {
                           if (v == null || v.trim().isEmpty) {
@@ -176,7 +178,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                       const Gap(18),
 
                       // Password
-                      _buildLabel('Contraseña'),
+                      _buildLabel('Contraseña', cs),
                       const Gap(8),
                       TextFormField(
                         controller: _passwordController,
@@ -184,14 +186,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                         textInputAction: TextInputAction.next,
                         decoration: InputDecoration(
                           hintText: 'Mínimo 8 caracteres',
-                          prefixIcon: const Icon(Icons.lock_outline_rounded,
-                              color: AppColors.textHint, size: 22),
+                          prefixIcon: Icon(Icons.lock_outline_rounded,
+                              color: cs.outline, size: 22),
                           suffixIcon: IconButton(
                             icon: Icon(
                               _obscurePassword
                                   ? Icons.visibility_outlined
                                   : Icons.visibility_off_outlined,
-                              color: AppColors.textHint, size: 22,
+                              color: cs.outline, size: 22,
                             ),
                             onPressed: () => setState(
                                 () => _obscurePassword = !_obscurePassword),
@@ -222,7 +224,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                       const Gap(18),
 
                       // Confirm password
-                      _buildLabel('Confirmar contraseña'),
+                      _buildLabel('Confirmar contraseña', cs),
                       const Gap(8),
                       TextFormField(
                         controller: _confirmPasswordController,
@@ -230,14 +232,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                         textInputAction: TextInputAction.done,
                         decoration: InputDecoration(
                           hintText: 'Repite tu contraseña',
-                          prefixIcon: const Icon(Icons.lock_outline_rounded,
-                              color: AppColors.textHint, size: 22),
+                          prefixIcon: Icon(Icons.lock_outline_rounded,
+                              color: cs.outline, size: 22),
                           suffixIcon: IconButton(
                             icon: Icon(
                               _obscureConfirmPassword
                                   ? Icons.visibility_outlined
                                   : Icons.visibility_off_outlined,
-                              color: AppColors.textHint, size: 22,
+                              color: cs.outline, size: 22,
                             ),
                             onPressed: () => setState(() =>
                                 _obscureConfirmPassword =
@@ -257,9 +259,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                       const Gap(24),
 
                       // Role selector
-                      _buildLabel('¿Qué quieres hacer en Baratito?'),
+                      _buildLabel('¿Qué quieres hacer en Baratito?', cs),
                       const Gap(12),
-                      _buildRoleSelector(),
+                      _buildRoleSelector(cs),
                       const Gap(32),
 
                       // Register button
@@ -269,21 +271,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                         child: ElevatedButton(
                           onPressed:
                               authState.isLoading ? null : _handleRegister,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            elevation: 0,
-                          ),
                           child: authState.isLoading
-                              ? const SizedBox(
+                              ? SizedBox(
                                   width: 24,
                                   height: 24,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2.5,
-                                    color: Colors.white,
+                                    color: cs.onPrimary,
                                   ),
                                 )
                               : Text(
@@ -305,7 +299,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                             Text(
                               '¿Ya tienes cuenta? ',
                               style: GoogleFonts.poppins(
-                                color: AppColors.textSecondary,
+                                color: cs.onSurfaceVariant,
                                 fontSize: 14,
                               ),
                             ),
@@ -314,7 +308,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                               child: Text(
                                 'Inicia sesión',
                                 style: GoogleFonts.poppins(
-                                  color: AppColors.primary,
+                                  color: cs.primary,
                                   fontWeight: FontWeight.w700,
                                   fontSize: 14,
                                 ),
@@ -334,8 +328,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
     );
   }
 
-  // ── Green header bar ───────────────────────────────────
-  Widget _buildHeaderBar() {
+  // ── Header bar ─────────────────────────────────────────
+  Widget _buildHeaderBar(ColorScheme cs) {
+    final themeModel = context.watch<ThemeModel>();
     return Container(
       width: double.infinity,
       padding: EdgeInsets.only(
@@ -343,9 +338,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
         bottom: 16,
         left: 8,
       ),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [AppColors.primary, AppColors.primaryLight],
+          colors: [cs.primary, cs.primaryContainer],
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
         ),
@@ -353,8 +348,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
       child: Row(
         children: [
           IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                color: Colors.white, size: 20),
+            icon: Icon(Icons.arrow_back_ios_new_rounded,
+                color: cs.onPrimary, size: 20),
             onPressed: () => context.pop(),
           ),
           const Spacer(),
@@ -363,31 +358,39 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
             style: GoogleFonts.poppins(
               fontSize: 18,
               fontWeight: FontWeight.w800,
-              color: Colors.white,
+              color: cs.onPrimary,
               letterSpacing: 1.5,
             ),
           ),
           const Spacer(),
-          const SizedBox(width: 48), // Balance the back button
+          // Theme toggle
+          IconButton(
+            icon: Icon(
+              themeModel.isDarkMode ? Icons.wb_sunny : Icons.nights_stay,
+              color: cs.onPrimary,
+              size: 22,
+            ),
+            onPressed: () => context.read<ThemeModel>().toggleTheme(),
+          ),
         ],
       ),
     );
   }
 
   // ── Label ──────────────────────────────────────────────
-  Widget _buildLabel(String text) {
+  Widget _buildLabel(String text, ColorScheme cs) {
     return Text(
       text,
       style: GoogleFonts.poppins(
         fontSize: 13,
         fontWeight: FontWeight.w600,
-        color: AppColors.textPrimary,
+        color: cs.onSurface,
       ),
     );
   }
 
   // ── Role selector chips ────────────────────────────────
-  Widget _buildRoleSelector() {
+  Widget _buildRoleSelector(ColorScheme cs) {
     return Row(
       children: UserRole.values.map((role) {
         final isSelected = _selectedRole == role;
@@ -403,16 +406,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                 duration: const Duration(milliseconds: 250),
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 decoration: BoxDecoration(
-                  color: isSelected ? AppColors.primary : AppColors.inputFill,
+                  color: isSelected ? cs.primary : cs.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: isSelected ? AppColors.primary : AppColors.inputBorder,
+                    color: isSelected ? cs.primary : cs.outline,
                     width: 1.5,
                   ),
                   boxShadow: isSelected
                       ? [
                           BoxShadow(
-                            color: AppColors.primary.withAlpha(40),
+                            color: cs.primary.withAlpha(40),
                             blurRadius: 10,
                             offset: const Offset(0, 4),
                           ),
@@ -425,8 +428,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                       _roleIcon(role),
                       size: 22,
                       color: isSelected
-                          ? Colors.white
-                          : AppColors.textSecondary,
+                          ? cs.onPrimary
+                          : cs.onSurfaceVariant,
                     ),
                     const Gap(6),
                     Text(
@@ -437,8 +440,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                         fontWeight:
                             isSelected ? FontWeight.w700 : FontWeight.w500,
                         color: isSelected
-                            ? Colors.white
-                            : AppColors.textSecondary,
+                            ? cs.onPrimary
+                            : cs.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -460,25 +463,24 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
   }
 
   // ── Error banner ───────────────────────────────────────
-  Widget _buildErrorBanner(String message) {
+  Widget _buildErrorBanner(String message, ColorScheme cs) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: AppColors.error.withAlpha(20),
+        color: cs.error.withAlpha(20),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.error.withAlpha(60)),
+        border: Border.all(color: cs.error.withAlpha(60)),
       ),
       child: Row(
         children: [
-          const Icon(Icons.error_outline_rounded,
-              color: AppColors.error, size: 20),
+          Icon(Icons.error_outline_rounded, color: cs.error, size: 20),
           const Gap(10),
           Expanded(
             child: Text(
               message,
               style: GoogleFonts.poppins(
-                color: AppColors.error,
+                color: cs.error,
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
               ),

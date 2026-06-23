@@ -1,4 +1,4 @@
-// Splash screen — Baratito green/yellow branded entry.
+// Splash screen — Baratito branded entry.
 //
 // Shows the Baratito "B" logo with brand colors,
 // then redirects based on auth state.
@@ -7,7 +7,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:math' as math;
-import '../../../../core/theme/app_colors.dart';
 import '../../../../core/router.dart';
 import '../../../../core/supabase_client.dart';
 
@@ -80,14 +79,15 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
       body: Stack(
         children: [
-          // Yellow background
-          Container(color: AppColors.accent),
+          // Secondary background
+          Container(color: cs.secondary),
 
-          // Green diagonal shapes
+          // Primary diagonal shapes
           Positioned(
             top: -60,
             right: -80,
@@ -103,7 +103,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                 width: 300,
                 height: 400,
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withAlpha(160),
+                  color: cs.primary.withAlpha(160),
                   borderRadius: BorderRadius.circular(60),
                 ),
               ),
@@ -124,7 +124,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                 width: 280,
                 height: 380,
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withAlpha(130),
+                  color: cs.primary.withAlpha(130),
                   borderRadius: BorderRadius.circular(60),
                 ),
               ),
@@ -155,11 +155,11 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                       width: 110,
                       height: 110,
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: cs.surface,
                         borderRadius: BorderRadius.circular(24),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withAlpha(30),
+                            color: cs.shadow.withAlpha(30),
                             blurRadius: 30,
                             offset: const Offset(0, 10),
                           ),
@@ -171,7 +171,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                           style: GoogleFonts.poppins(
                             fontSize: 64,
                             fontWeight: FontWeight.w900,
-                            color: AppColors.primary,
+                            color: cs.primary,
                             height: 1.1,
                           ),
                         ),
@@ -183,7 +183,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                       style: GoogleFonts.poppins(
                         fontSize: 32,
                         fontWeight: FontWeight.w900,
-                        color: AppColors.primaryDark,
+                        color: cs.onSecondary,
                         letterSpacing: 3,
                       ),
                     ),
@@ -194,7 +194,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                         fontSize: 13,
                         fontStyle: FontStyle.italic,
                         fontWeight: FontWeight.w500,
-                        color: AppColors.primaryDark,
+                        color: cs.onSecondary,
                       ),
                     ),
                     const SizedBox(height: 48),
@@ -203,7 +203,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                       height: 36,
                       child: CircularProgressIndicator(
                         strokeWidth: 3,
-                        color: AppColors.primary.withAlpha(160),
+                        color: cs.primary.withAlpha(160),
                       ),
                     ),
                   ],
@@ -218,6 +218,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
   Widget _buildSplashIcon(IconData icon,
       {double? top, double? bottom, double? left, double? right}) {
+    final cs = Theme.of(context).colorScheme;
     return Positioned(
       top: top,
       bottom: bottom,
@@ -227,10 +228,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
         width: 44,
         height: 44,
         decoration: BoxDecoration(
-          color: Colors.white.withAlpha(50),
+          color: cs.onPrimary.withAlpha(50),
           shape: BoxShape.circle,
         ),
-        child: Icon(icon, color: Colors.white.withAlpha(180), size: 22),
+        child: Icon(icon, color: cs.onPrimary.withAlpha(180), size: 22),
       ),
     );
   }

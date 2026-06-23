@@ -1,6 +1,7 @@
 /// Baratito — App entry point.
 ///
 /// Initializes Supabase, sets up Riverpod and GoRouter,
+/// wraps with ChangeNotifierProvider for ThemeModel,
 /// applies the Baratito theme.
 ///
 /// Run with:
@@ -11,10 +12,12 @@
 /// ```
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart' hide ChangeNotifierProvider;
+import 'package:provider/provider.dart';
 import 'core/supabase_client.dart';
 import 'core/router.dart';
 import 'core/theme/app_theme.dart';
+import 'core/theme/theme_provider.dart';
 import 'core/network/dio_client.dart';
 
 void main() async {
@@ -29,7 +32,7 @@ void main() async {
   // Set status bar style
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
+      statusBarColor: const Color.fromRGBO(0, 0, 0, 0), // Transparent, without using Colors.transparent
       statusBarIconBrightness: Brightness.dark,
     ),
   );
@@ -41,8 +44,12 @@ void main() async {
   DioClient.instance.initialize();
 
   runApp(
-    const ProviderScope(
-      child: BaratitoApp(),
+    // ChangeNotifierProvider at the root — above ProviderScope and MaterialApp
+    ChangeNotifierProvider(
+      create: (_) => ThemeModel(),
+      child: const ProviderScope(
+        child: BaratitoApp(),
+      ),
     ),
   );
 }
@@ -54,12 +61,15 @@ class BaratitoApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
 
+    // context.watch to rebuild when theme changes
+    final themeModel = context.watch<ThemeModel>();
+
     return MaterialApp.router(
       title: 'Baratito',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
-      themeMode: ThemeMode.light,
+      themeMode: themeModel.themeMode,
       routerConfig: router,
     );
   }

@@ -1,11 +1,12 @@
-// Forgot password screen — Baratito green/yellow branding.
+// Forgot password screen — Baratito branded.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:email_validator/email_validator.dart';
+import 'package:provider/provider.dart';
 import 'package:gap/gap.dart';
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/theme_provider.dart';
 import '../providers/auth_provider.dart';
 
 class ForgotPasswordScreen extends ConsumerStatefulWidget {
@@ -44,20 +45,21 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authControllerProvider);
+    final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
       body: Column(
         children: [
-          // Green header
-          _buildHeaderBar(),
+          // Header
+          _buildHeaderBar(cs),
 
           // Content
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: _emailSent
-                  ? _buildSuccessView()
-                  : _buildFormView(authState),
+                  ? _buildSuccessView(cs)
+                  : _buildFormView(authState, cs),
             ),
           ),
         ],
@@ -65,8 +67,9 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     );
   }
 
-  // ── Green header ───────────────────────────────────────
-  Widget _buildHeaderBar() {
+  // ── Header ─────────────────────────────────────────────
+  Widget _buildHeaderBar(ColorScheme cs) {
+    final themeModel = context.watch<ThemeModel>();
     return Container(
       width: double.infinity,
       padding: EdgeInsets.only(
@@ -74,9 +77,9 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
         bottom: 16,
         left: 8,
       ),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [AppColors.primary, AppColors.primaryLight],
+          colors: [cs.primary, cs.primaryContainer],
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
         ),
@@ -84,8 +87,8 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
       child: Row(
         children: [
           IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                color: Colors.white, size: 20),
+            icon: Icon(Icons.arrow_back_ios_new_rounded,
+                color: cs.onPrimary, size: 20),
             onPressed: () => context.pop(),
           ),
           const Spacer(),
@@ -94,19 +97,27 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
             style: GoogleFonts.poppins(
               fontSize: 18,
               fontWeight: FontWeight.w800,
-              color: Colors.white,
+              color: cs.onPrimary,
               letterSpacing: 1.5,
             ),
           ),
           const Spacer(),
-          const SizedBox(width: 48),
+          // Theme toggle
+          IconButton(
+            icon: Icon(
+              themeModel.isDarkMode ? Icons.wb_sunny : Icons.nights_stay,
+              color: cs.onPrimary,
+              size: 22,
+            ),
+            onPressed: () => context.read<ThemeModel>().toggleTheme(),
+          ),
         ],
       ),
     );
   }
 
   // ── Success view ───────────────────────────────────────
-  Widget _buildSuccessView() {
+  Widget _buildSuccessView(ColorScheme cs) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -115,12 +126,12 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
           width: 80,
           height: 80,
           decoration: BoxDecoration(
-            color: AppColors.primary.withAlpha(25),
+            color: cs.primary.withAlpha(25),
             shape: BoxShape.circle,
           ),
-          child: const Icon(
+          child: Icon(
             Icons.mark_email_read_outlined,
-            color: AppColors.primary,
+            color: cs.primary,
             size: 40,
           ),
         ),
@@ -130,7 +141,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
           style: GoogleFonts.poppins(
             fontSize: 24,
             fontWeight: FontWeight.w800,
-            color: AppColors.textPrimary,
+            color: cs.onSurface,
           ),
         ),
         const Gap(12),
@@ -139,7 +150,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
           textAlign: TextAlign.center,
           style: GoogleFonts.poppins(
             fontSize: 14,
-            color: AppColors.textSecondary,
+            color: cs.onSurfaceVariant,
             height: 1.5,
           ),
         ),
@@ -149,14 +160,6 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
           height: 54,
           child: ElevatedButton(
             onPressed: () => context.pop(),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-              elevation: 0,
-            ),
             child: Text(
               'Volver al inicio de sesión',
               style: GoogleFonts.poppins(
@@ -171,7 +174,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   }
 
   // ── Form view ──────────────────────────────────────────
-  Widget _buildFormView(AuthControllerState authState) {
+  Widget _buildFormView(AuthControllerState authState, ColorScheme cs) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -181,12 +184,12 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
             width: 70,
             height: 70,
             decoration: BoxDecoration(
-              color: AppColors.accent.withAlpha(50),
+              color: cs.secondary.withAlpha(50),
               shape: BoxShape.circle,
             ),
-            child: const Icon(
+            child: Icon(
               Icons.lock_reset_rounded,
-              color: AppColors.primary,
+              color: cs.primary,
               size: 36,
             ),
           ),
@@ -198,7 +201,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
             style: GoogleFonts.poppins(
               fontSize: 24,
               fontWeight: FontWeight.w800,
-              color: AppColors.textPrimary,
+              color: cs.onSurface,
             ),
           ),
         ),
@@ -209,7 +212,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
             textAlign: TextAlign.center,
             style: GoogleFonts.poppins(
               fontSize: 13,
-              color: AppColors.textSecondary,
+              color: cs.onSurfaceVariant,
               height: 1.5,
             ),
           ),
@@ -221,20 +224,20 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             decoration: BoxDecoration(
-              color: AppColors.error.withAlpha(20),
+              color: cs.error.withAlpha(20),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.error.withAlpha(60)),
+              border: Border.all(color: cs.error.withAlpha(60)),
             ),
             child: Row(
               children: [
-                const Icon(Icons.error_outline_rounded,
-                    color: AppColors.error, size: 20),
+                Icon(Icons.error_outline_rounded,
+                    color: cs.error, size: 20),
                 const Gap(10),
                 Expanded(
                   child: Text(
                     authState.errorMessage!,
                     style: GoogleFonts.poppins(
-                      color: AppColors.error, fontSize: 12,
+                      color: cs.error, fontSize: 12,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -250,7 +253,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
           style: GoogleFonts.poppins(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
+            color: cs.onSurface,
           ),
         ),
         const Gap(8),
@@ -261,10 +264,10 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
             keyboardType: TextInputType.emailAddress,
             textInputAction: TextInputAction.done,
             onFieldSubmitted: (_) => _handleReset(),
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               hintText: 'tucorreo@ejemplo.com',
               prefixIcon: Icon(Icons.email_outlined,
-                  color: AppColors.textHint, size: 22),
+                  color: cs.outline, size: 22),
             ),
             validator: (v) {
               if (v == null || v.trim().isEmpty) {
@@ -284,20 +287,12 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
           height: 54,
           child: ElevatedButton(
             onPressed: authState.isLoading ? null : _handleReset,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-              elevation: 0,
-            ),
             child: authState.isLoading
-                ? const SizedBox(
+                ? SizedBox(
                     width: 24,
                     height: 24,
                     child: CircularProgressIndicator(
-                      strokeWidth: 2.5, color: Colors.white,
+                      strokeWidth: 2.5, color: cs.onPrimary,
                     ),
                   )
                 : Text(

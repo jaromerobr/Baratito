@@ -1,0 +1,5 @@
+# Ignore Frontend build directories globally
+Frontend/build/
+Frontend/.dart_tool/
+Frontend/android/local.properties
+.DS_Store

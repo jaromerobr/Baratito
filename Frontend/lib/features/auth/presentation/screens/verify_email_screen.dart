@@ -1,11 +1,12 @@
-// Email verification screen — Baratito green/yellow branding.
+// Email verification screen — Baratito branded.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'package:gap/gap.dart';
-import '../../../../core/theme/app_colors.dart';
 import '../../../../core/router.dart';
+import '../../../../core/theme/theme_provider.dart';
 import '../providers/auth_provider.dart';
 
 class VerifyEmailScreen extends ConsumerStatefulWidget {
@@ -59,37 +60,13 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen>
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authControllerProvider);
+    final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
       body: Column(
         children: [
-          // Green header
-          Container(
-            width: double.infinity,
-            padding: EdgeInsets.only(
-              top: MediaQuery.of(context).padding.top + 8,
-              bottom: 16,
-              left: 8,
-            ),
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [AppColors.primary, AppColors.primaryLight],
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-              ),
-            ),
-            child: Center(
-              child: Text(
-                'BARATITO',
-                style: GoogleFonts.poppins(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w800,
-                  color: Colors.white,
-                  letterSpacing: 1.5,
-                ),
-              ),
-            ),
-          ),
+          // Header
+          _buildHeader(cs),
 
           // Content
           Expanded(
@@ -107,23 +84,23 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen>
                       width: 100,
                       height: 100,
                       decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [AppColors.primary, AppColors.primaryLight],
+                        gradient: LinearGradient(
+                          colors: [cs.primary, cs.primaryContainer],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
                         borderRadius: BorderRadius.circular(28),
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.primary.withAlpha(50),
+                            color: cs.primary.withAlpha(50),
                             blurRadius: 30,
                             offset: const Offset(0, 10),
                           ),
                         ],
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.mark_email_unread_rounded,
-                        color: Colors.white,
+                        color: cs.onPrimary,
                         size: 48,
                       ),
                     ),
@@ -135,7 +112,7 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen>
                     style: GoogleFonts.poppins(
                       fontSize: 26,
                       fontWeight: FontWeight.w800,
-                      color: AppColors.textPrimary,
+                      color: cs.onSurface,
                     ),
                   ),
                   const Gap(12),
@@ -144,7 +121,7 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen>
                     textAlign: TextAlign.center,
                     style: GoogleFonts.poppins(
                       fontSize: 13,
-                      color: AppColors.textSecondary,
+                      color: cs.onSurfaceVariant,
                       height: 1.6,
                     ),
                   ),
@@ -152,9 +129,9 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen>
 
                   // Messages
                   if (authState.errorMessage != null)
-                    _buildMessage(authState.errorMessage!, isError: true),
+                    _buildMessage(authState.errorMessage!, isError: true, cs: cs),
                   if (authState.successMessage != null)
-                    _buildMessage(authState.successMessage!, isError: false),
+                    _buildMessage(authState.successMessage!, isError: false, cs: cs),
 
                   const Gap(32),
 
@@ -165,20 +142,12 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen>
                     child: ElevatedButton(
                       onPressed:
                           authState.isLoading ? null : _checkVerification,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        elevation: 0,
-                      ),
                       child: authState.isLoading
-                          ? const SizedBox(
+                          ? SizedBox(
                               width: 24,
                               height: 24,
                               child: CircularProgressIndicator(
-                                strokeWidth: 2.5, color: Colors.white,
+                                strokeWidth: 2.5, color: cs.onPrimary,
                               ),
                             )
                           : Text(
@@ -198,14 +167,6 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen>
                     height: 54,
                     child: OutlinedButton(
                       onPressed: authState.isLoading ? null : _resendEmail,
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.primary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        side: const BorderSide(
-                            color: AppColors.primary, width: 2),
-                      ),
                       child: Text(
                         'Reenviar correo de verificación',
                         style: GoogleFonts.poppins(
@@ -226,7 +187,7 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen>
                       style: GoogleFonts.poppins(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
-                        color: AppColors.textSecondary,
+                        color: cs.onSurfaceVariant,
                       ),
                     ),
                   ),
@@ -240,8 +201,52 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen>
     );
   }
 
-  Widget _buildMessage(String message, {required bool isError}) {
-    final color = isError ? AppColors.error : AppColors.primary;
+  // ── Header ─────────────────────────────────────────────
+  Widget _buildHeader(ColorScheme cs) {
+    final themeModel = context.watch<ThemeModel>();
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.only(
+        top: MediaQuery.of(context).padding.top + 8,
+        bottom: 16,
+        left: 8,
+      ),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [cs.primary, cs.primaryContainer],
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+        ),
+      ),
+      child: Row(
+        children: [
+          const Spacer(),
+          Text(
+            'BARATITO',
+            style: GoogleFonts.poppins(
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+              color: cs.onPrimary,
+              letterSpacing: 1.5,
+            ),
+          ),
+          const Spacer(),
+          // Theme toggle
+          IconButton(
+            icon: Icon(
+              themeModel.isDarkMode ? Icons.wb_sunny : Icons.nights_stay,
+              color: cs.onPrimary,
+              size: 22,
+            ),
+            onPressed: () => context.read<ThemeModel>().toggleTheme(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMessage(String message, {required bool isError, required ColorScheme cs}) {
+    final color = isError ? cs.error : cs.primary;
     final icon = isError
         ? Icons.error_outline_rounded
         : Icons.check_circle_outline_rounded;
