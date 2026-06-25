@@ -15,6 +15,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/router.dart';
 import '../../../auth/domain/user_model.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../products/domain/mock_products.dart';
 import '../../../products/domain/product_model.dart';
 import '../../../products/presentation/providers/product_provider.dart';
 import '../../../products/presentation/screens/home_feed_screen.dart'
@@ -186,14 +187,28 @@ class _FeedTabState extends ConsumerState<_FeedTab> {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final topPad = MediaQuery.of(context).padding.top;
-    final categories = ref.watch(categoriesProvider);
     final filters = ref.watch(feedFiltersProvider);
-    final feed = ref.watch(productFeedProvider);
     final userProfile = ref.watch(currentUserProfileProvider);
 
     final firstName = userProfile.whenOrNull(
       data: (p) => (p?.fullName ?? 'tú').split(' ').first,
     ) ?? 'tú';
+
+    // ── Mock feed: filter client-side for demo ─────────────
+    final search = filters.search?.toLowerCase();
+    final filtered = mockProducts.where((p) {
+      if (search != null && !p.title.toLowerCase().contains(search)) {
+        return false;
+      }
+      if (filters.condition != null && p.condition.value != filters.condition) {
+        return false;
+      }
+      if (filters.categoryId != null && p.categoryId != filters.categoryId) {
+        return false;
+      }
+      return true;
+    }).toList();
+    final feed = AsyncValue.data(filtered);
 
     return CustomScrollView(
       slivers: [
@@ -273,17 +288,12 @@ class _FeedTabState extends ConsumerState<_FeedTab> {
         // ── Spacer to compensate for the -24 translate ──
         const SliverToBoxAdapter(child: SizedBox(height: 0)),
 
-        // ── Category pills ──────────────────────────────
+        // ── Category pills (mock) ───────────────────────
         SliverToBoxAdapter(
-          child: categories.when(
-            data: (cats) => _CategoryPills(
-              categories: cats,
-              selectedId: filters.categoryId,
-              onSelected: (id) =>
-                  ref.read(feedFiltersProvider.notifier).setCategory(id),
-            ),
-            loading: () => const _ShimmerPills(),
-            error: (_, _) => const SizedBox.shrink(),
+          child: _MockCategoryPills(
+            selected: filters.categoryId,
+            onSelected: (id) =>
+                ref.read(feedFiltersProvider.notifier).setCategory(id),
           ),
         ),
 
@@ -610,6 +620,66 @@ class _ShimmerPills extends StatelessWidget {
             borderRadius: BorderRadius.circular(20),
           ),
         ),
+      ),
+    );
+  }
+}
+
+// ── Mock category pills ───────────────────────────────────
+
+class _MockCategoryPills extends StatelessWidget {
+  final String? selected;
+  final void Function(String?) onSelected;
+
+  static const _cats = [
+    ('cat-electro', '📱 Electrónica'),
+    ('cat-ropa',    '👕 Ropa'),
+    ('cat-dep',     '⚽ Deportes'),
+    ('cat-hogar',   '🛋️ Hogar'),
+    ('cat-libros',  '📚 Libros'),
+  ];
+
+  const _MockCategoryPills({
+    required this.selected,
+    required this.onSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return SizedBox(
+      height: 50,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+        itemCount: _cats.length,
+        separatorBuilder: (_, __) => const Gap(8),
+        itemBuilder: (context, index) {
+          final (id, name) = _cats[index];
+          final isSelected = selected == id;
+          return GestureDetector(
+            onTap: () => onSelected(isSelected ? null : id),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              decoration: BoxDecoration(
+                color: isSelected ? cs.primary : cs.surface,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: isSelected ? cs.primary : AppColors.divider,
+                ),
+              ),
+              child: Text(
+                name,
+                style: GoogleFonts.poppins(
+                  fontSize: 12,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                  color: isSelected ? Colors.white : AppColors.textSecondary,
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }

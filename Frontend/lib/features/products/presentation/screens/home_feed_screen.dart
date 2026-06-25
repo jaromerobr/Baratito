@@ -535,12 +535,16 @@ class ProductCard extends StatelessWidget {
 
   const ProductCard({super.key, required this.product, required this.onTap});
 
+  /// Handles both Supabase storage paths and direct URLs (mock data).
+  static String? resolveImageUrl(String? imagePath) {
+    if (imagePath == null) return null;
+    if (imagePath.startsWith('http')) return imagePath; // direct URL
+    return ProductRepository().getImageUrl(imagePath);  // Supabase storage
+  }
+
   @override
   Widget build(BuildContext context) {
-    final repo = ProductRepository();
-    final imageUrl = product.primaryImagePath != null
-        ? repo.getImageUrl(product.primaryImagePath!)
-        : null;
+    final imageUrl = resolveImageUrl(product.primaryImagePath);
 
     return GestureDetector(
       onTap: onTap,
