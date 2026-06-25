@@ -3,6 +3,8 @@
 /// Shows a branded greeting, user info, quick action cards,
 /// and a "Dio + FutureBuilder" demo button.
 /// Adapts the greeting based on the user's role (buyer/seller/both).
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -112,8 +114,7 @@ class DashboardScreen extends ConsumerWidget {
                 title: 'Explorar',
                 subtitle: 'Buscar productos',
                 gradient: const [Color(0xFF2ECC71), Color(0xFF27AE60)],
-                onTap: () {},
-                comingSoon: true,
+                onTap: () => context.push(AppRoutes.feed),
               ),
             ),
             const Gap(12),
@@ -123,8 +124,7 @@ class DashboardScreen extends ConsumerWidget {
                 title: 'Publicar',
                 subtitle: 'Vender algo',
                 gradient: const [Color(0xFFF39C12), Color(0xFFE67E22)],
-                onTap: () {},
-                comingSoon: true,
+                onTap: () => context.push(AppRoutes.productForm),
               ),
             ),
           ],
@@ -134,23 +134,21 @@ class DashboardScreen extends ConsumerWidget {
           children: [
             Expanded(
               child: _ActionCard(
-                icon: Icons.chat_bubble_outline_rounded,
-                title: 'Mensajes',
-                subtitle: '0 nuevos',
-                gradient: const [Color(0xFF3498DB), Color(0xFF2980B9)],
-                onTap: () {},
-                comingSoon: true,
+                icon: Icons.favorite_outline_rounded,
+                title: 'Favoritos',
+                subtitle: 'Guardados',
+                gradient: const [Color(0xFFE74C3C), Color(0xFFC0392B)],
+                onTap: () => context.push(AppRoutes.favorites),
               ),
             ),
             const Gap(12),
             Expanded(
               child: _ActionCard(
-                icon: Icons.person_outline_rounded,
-                title: 'Mi Perfil',
-                subtitle: 'Editar datos',
+                icon: Icons.sell_outlined,
+                title: 'Mis ventas',
+                subtitle: 'Publicaciones',
                 gradient: const [Color(0xFF9B59B6), Color(0xFF8E44AD)],
-                onTap: () {},
-                comingSoon: true,
+                onTap: () => context.push(AppRoutes.myListings),
               ),
             ),
           ],
@@ -174,10 +172,7 @@ class DashboardScreen extends ConsumerWidget {
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: AppColors.accent.withAlpha(80),
-          width: 1,
-        ),
+        border: Border.all(color: AppColors.accent.withAlpha(80), width: 1),
       ),
       child: Row(
         children: [
@@ -200,7 +195,7 @@ class DashboardScreen extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Módulos en construcción',
+                  '¡Módulo de productos activo!',
                   style: GoogleFonts.poppins(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
@@ -209,7 +204,7 @@ class DashboardScreen extends ConsumerWidget {
                 ),
                 const Gap(2),
                 Text(
-                  'Los módulos de compra, venta y chat estarán disponibles en las próximas semanas.',
+                  'Ya puedes explorar, publicar y guardar artículos. Chat y pagos próximamente.',
                   style: GoogleFonts.poppins(
                     fontSize: 12,
                     color: AppColors.textSecondary,
@@ -307,10 +302,7 @@ class _DashboardHeader extends StatelessWidget {
   final AsyncValue userProfile;
   final VoidCallback onLogout;
 
-  const _DashboardHeader({
-    required this.userProfile,
-    required this.onLogout,
-  });
+  const _DashboardHeader({required this.userProfile, required this.onLogout});
 
   @override
   Widget build(BuildContext context) {
@@ -434,7 +426,7 @@ class _DashboardHeader extends StatelessWidget {
                 color: AppColors.primaryDark,
               ),
             ),
-            error: (_, __) => Text(
+            error: (_, _) => Text(
               '¡Bienvenido! 👋',
               style: GoogleFonts.poppins(
                 fontSize: 26,

@@ -1,7 +1,8 @@
 /// GoRouter configuration with auth-based redirection.
 ///
 /// Routes: /splash, /login, /register, /verify-email, /posts,
-/// /forgot-password, /home (dashboard).
+/// /forgot-password, /home (dashboard), /feed, /products/:id,
+/// /product/new, /favorites, /my-listings.
 ///
 /// Guards:
 /// - No session → /login
@@ -16,6 +17,11 @@ import '../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../features/auth/presentation/screens/verify_email_screen.dart';
 import '../features/posts/presentation/screens/posts_screen.dart';
 import '../features/dashboard/presentation/screens/dashboard_screen.dart';
+import '../features/products/presentation/screens/home_feed_screen.dart';
+import '../features/products/presentation/screens/product_detail_screen.dart';
+import '../features/products/presentation/screens/product_form_screen.dart';
+import '../features/products/presentation/screens/favorites_screen.dart';
+import '../features/products/presentation/screens/my_listings_screen.dart';
 
 // ── Route paths ─────────────────────────────────────────
 class AppRoutes {
@@ -27,6 +33,13 @@ class AppRoutes {
   static const forgotPassword = '/forgot-password';
   static const home = '/home';
   static const posts = '/posts';
+
+  // ── Products ──────────────────────────────────────────
+  static const feed = '/feed';
+  static const productForm = '/product/new';
+  static const favorites = '/favorites';
+  static const myListings = '/my-listings';
+  static String productDetail(String id) => '/products/$id';
 }
 
 // ── Router provider ─────────────────────────────────────
@@ -57,9 +70,15 @@ final routerProvider = Provider<GoRouter>((ref) {
       ];
       final isOnAuthPage = authPages.contains(currentPath);
 
-      // Not authenticated → go to login (unless already on an auth page or home as guest)
+      final publicPages = [
+        AppRoutes.home,
+        AppRoutes.posts,
+        AppRoutes.feed,
+      ];
+
+      // Not authenticated → go to login (unless already on an auth page or public page)
       if (!isAuthenticated) {
-        if (!isOnAuthPage && currentPath != AppRoutes.home) {
+        if (!isOnAuthPage && !publicPages.contains(currentPath)) {
           return AppRoutes.login;
         }
         return null;
@@ -100,6 +119,30 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.posts,
         builder: (context, state) => const PostsScreen(),
+      ),
+
+      // ── Products ────────────────────────────────────
+      GoRoute(
+        path: AppRoutes.feed,
+        builder: (context, state) => const HomeFeedScreen(),
+      ),
+      GoRoute(
+        path: '/products/:id',
+        builder: (context, state) => ProductDetailScreen(
+          productId: state.pathParameters['id']!,
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.productForm,
+        builder: (context, state) => const ProductFormScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.favorites,
+        builder: (context, state) => const FavoritesScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.myListings,
+        builder: (context, state) => const MyListingsScreen(),
       ),
     ],
   );
