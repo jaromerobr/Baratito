@@ -36,9 +36,7 @@ class ProductRepository {
       var query = _client
           .from('products')
           .select(_productSelect)
-          .eq('status', 'active')
-          .order('created_at', ascending: false)
-          .range(offset, offset + limit - 1);
+          .eq('status', 'active');
 
       if (categoryId != null) query = query.eq('category_id', categoryId);
       if (condition != null) query = query.eq('condition', condition);
@@ -46,7 +44,9 @@ class ProductRepository {
         query = query.ilike('title', '%$search%');
       }
 
-      final data = await query;
+      final data = await query
+          .order('created_at', ascending: false)
+          .range(offset, offset + limit - 1);
       return Success(
         (data as List).map((e) => Product.fromJson(e)).toList(),
       );
