@@ -3,9 +3,10 @@ library;
 
 import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../auth/data/auth_repository.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../data/product_repository.dart';
 import '../../domain/product_model.dart';
-import '../../../auth/presentation/providers/auth_provider.dart';
 
 // ── Repository ────────────────────────────────────────────
 
