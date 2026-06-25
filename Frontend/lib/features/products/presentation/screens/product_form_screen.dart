@@ -4,6 +4,7 @@
 library;
 
 import 'dart:io';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -125,33 +126,121 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
   @override
   Widget build(BuildContext context) {
     final formState = ref.watch(productFormControllerProvider);
-    final categories = ref.watch(categoriesProvider);
 
     ref.listen(productFormControllerProvider, (_, next) {
       if (next.errorMessage != null) _showSnack(next.errorMessage!);
     });
 
+    final cs = Theme.of(context).colorScheme;
+    final topPad = MediaQuery.of(context).padding.top;
+
+    // Mock categories for demo (no DB needed)
+    final mockCats = [
+      ProductCategory(id: 'cat-electro',  name: 'Electrónica',       iconName: null),
+      ProductCategory(id: 'cat-ropa',     name: 'Ropa y Accesorios', iconName: null),
+      ProductCategory(id: 'cat-dep',      name: 'Deportes',          iconName: null),
+      ProductCategory(id: 'cat-hogar',    name: 'Hogar y Muebles',   iconName: null),
+      ProductCategory(id: 'cat-libros',   name: 'Libros y Juegos',   iconName: null),
+      ProductCategory(id: 'cat-juguetes', name: 'Juguetes',          iconName: null),
+    ];
+
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
-      appBar: AppBar(
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        title: Text(
-          'Publicar artículo',
-          style: GoogleFonts.poppins(
-            fontWeight: FontWeight.w700,
-            fontSize: 17,
-            color: Colors.white,
-          ),
-        ),
-        centerTitle: true,
-      ),
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
+          padding: EdgeInsets.zero,
           children: [
+            // ── Login-style header ────────────────────────
+            SizedBox(
+              height: topPad + 140,
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Positioned.fill(child: Container(color: cs.secondary)),
+                  Positioned(
+                    top: -30, right: -60,
+                    child: Transform.rotate(
+                      angle: -math.pi / 6,
+                      child: Container(
+                        width: 200, height: 300,
+                        decoration: BoxDecoration(
+                          color: cs.primary.withAlpha(180),
+                          borderRadius: BorderRadius.circular(50),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 20, left: -70,
+                    child: Transform.rotate(
+                      angle: math.pi / 5,
+                      child: Container(
+                        width: 160, height: 220,
+                        decoration: BoxDecoration(
+                          color: cs.primary.withAlpha(140),
+                          borderRadius: BorderRadius.circular(50),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: topPad + 12,
+                    left: 16,
+                    right: 16,
+                    child: Row(
+                      children: [
+                        Material(
+                          color: Colors.white.withAlpha(50),
+                          borderRadius: BorderRadius.circular(12),
+                          child: InkWell(
+                            onTap: () => Navigator.of(context).pop(),
+                            borderRadius: BorderRadius.circular(12),
+                            child: const Padding(
+                              padding: EdgeInsets.all(10),
+                              child: Icon(
+                                Icons.arrow_back_ios_new_rounded,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const Gap(14),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Publicar artículo',
+                              style: GoogleFonts.poppins(
+                                fontSize: 22,
+                                fontWeight: FontWeight.w800,
+                                color: cs.primary,
+                              ),
+                            ),
+                            Text(
+                              'Cuéntanos qué quieres vender',
+                              style: GoogleFonts.poppins(
+                                fontSize: 13,
+                                color: cs.primary.withAlpha(200),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // ── Form body ─────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 24, 20, 40),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+
             // ── Photos section ────────────────────────────
             _SectionTitle(title: 'Fotos', required: true),
             const Gap(12),
@@ -173,7 +262,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
               maxLength: 100,
               validator: (v) {
                 if (v == null || v.trim().length < 5) {
-                  return 'El título debe tener al menos 5 caracteres.';
+                  return 'Mínimo 5 caracteres.';
                 }
                 return null;
               },
@@ -194,14 +283,10 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
             // ── Category ──────────────────────────────────
             _SectionTitle(title: 'Categoría', required: true),
             const Gap(8),
-            categories.when(
-              data: (cats) => _CategorySelector(
-                categories: cats,
-                selectedId: _selectedCategoryId,
-                onSelected: (id) => setState(() => _selectedCategoryId = id),
-              ),
-              loading: () => const _LoadingChips(),
-              error: (_, _) => const SizedBox.shrink(),
+            _CategorySelector(
+              categories: mockCats,
+              selectedId: _selectedCategoryId,
+              onSelected: (id) => setState(() => _selectedCategoryId = id),
             ),
             const Gap(20),
 
@@ -275,6 +360,9 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
             _SubmitButton(
               isLoading: formState.isLoading,
               onPressed: _submit,
+            ),
+                ],
+              ),
             ),
           ],
         ),

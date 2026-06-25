@@ -13,6 +13,7 @@ import '../../data/product_repository.dart';
 import '../../domain/product_model.dart';
 import '../providers/product_provider.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import 'home_feed_screen.dart' show ProductCard;
 
 class ProductDetailScreen extends ConsumerStatefulWidget {
   final String productId;
@@ -81,10 +82,13 @@ class _ProductDetailBody extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final repo = ProductRepository();
+    final cs = Theme.of(context).colorScheme;
     final isFavAsync = ref.watch(isFavoriteProvider(product.id));
     final isFav = isFavAsync.whenOrNull(data: (v) => v) ?? false;
 
-    return CustomScrollView(
+    return Stack(
+      children: [
+        CustomScrollView(
       slivers: [
         // ── Photo gallery ──────────────────────────────
         SliverToBoxAdapter(
@@ -254,6 +258,98 @@ class _ProductDetailBody extends ConsumerWidget {
           ),
         ),
       ],
+        ),
+
+        // ── Sticky bottom action bar ────────────────────
+        Positioned(
+          bottom: 0,
+          left: 0,
+          right: 0,
+          child: Container(
+            padding: EdgeInsets.fromLTRB(
+              20,
+              12,
+              20,
+              MediaQuery.of(context).padding.bottom + 12,
+            ),
+            decoration: BoxDecoration(
+              color: cs.surface,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withAlpha(20),
+                  blurRadius: 16,
+                  offset: const Offset(0, -4),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                // Price summary
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '\$${product.price.toStringAsFixed(2)}',
+                      style: GoogleFonts.poppins(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w900,
+                        color: cs.primary,
+                      ),
+                    ),
+                    if (product.isNegotiable)
+                      Text(
+                        'Precio negociable',
+                        style: GoogleFonts.poppins(
+                          fontSize: 11,
+                          color: AppColors.accentDark,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                  ],
+                ),
+                const Gap(16),
+                // Contact button
+                Expanded(
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: cs.primary,
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size(double.infinity, 52),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    icon: const Icon(Icons.chat_bubble_outline_rounded, size: 18),
+                    label: Text(
+                      'Contactar vendedor',
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                      ),
+                    ),
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'Chat próximamente 🚀',
+                            style: GoogleFonts.poppins(fontSize: 13),
+                          ),
+                          behavior: SnackBarBehavior.floating,
+                          backgroundColor: cs.primary,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -305,7 +401,7 @@ class _PhotoGallery extends StatelessWidget {
                   onPageChanged: onPageChanged,
                   itemCount: images.length,
                   itemBuilder: (context, index) {
-                    final url = repo.getImageUrl(images[index].imagePath);
+                    final url = ProductCard.resolveImageUrl(images[index].imagePath) ?? '';
                     return CachedNetworkImage(
                       imageUrl: url,
                       fit: BoxFit.cover,

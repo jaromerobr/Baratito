@@ -74,11 +74,17 @@ final routerProvider = Provider<GoRouter>((ref) {
         AppRoutes.home,
         AppRoutes.posts,
         AppRoutes.feed,
+        AppRoutes.productForm,
+        AppRoutes.favorites,
+        AppRoutes.myListings,
       ];
 
-      // Not authenticated → go to login (unless already on an auth page or public page)
+      // Not authenticated → go to login unless on auth/public page or product detail
       if (!isAuthenticated) {
-        if (!isOnAuthPage && !publicPages.contains(currentPath)) {
+        final isProductDetail = currentPath.startsWith('/products/');
+        if (!isOnAuthPage &&
+            !publicPages.contains(currentPath) &&
+            !isProductDetail) {
           return AppRoutes.login;
         }
         return null;

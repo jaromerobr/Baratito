@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../auth/data/auth_repository.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../data/product_repository.dart';
+import '../../domain/mock_products.dart';
 import '../../domain/product_model.dart';
 
 // ── Repository ────────────────────────────────────────────
@@ -106,6 +107,11 @@ final productFeedProvider = FutureProvider<List<Product>>((ref) async {
 
 final productDetailProvider =
     FutureProvider.family<Product?, String>((ref, productId) async {
+  // Check mock data first (demo mode — no DB required)
+  final mock = mockProducts.where((p) => p.id == productId).firstOrNull;
+  if (mock != null) return mock;
+
+  // Fall back to Supabase
   final repo = ref.watch(productRepositoryProvider);
   final result = await repo.fetchProduct(productId);
   return switch (result) {
