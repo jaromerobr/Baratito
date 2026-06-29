@@ -2,6 +2,8 @@
 ///
 /// Uses `--dart-define` environment variables for URL and anon key,
 /// ensuring secrets are never hard-coded.
+library;
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SupabaseClientHelper {
