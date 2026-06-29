@@ -3,7 +3,11 @@
     <application
         android:label="baratito"
         android:name="${applicationName}"
+        android:usesCleartextTraffic="true"
         android:icon="@mipmap/launcher_icon">
+        <!-- usesCleartextTraffic=true permite llamar al servicio de verificación
+             local (http://10.0.2.2:8000) en desarrollo. En producción usa HTTPS. -->
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
