@@ -1,7 +1,7 @@
 /// Authentication repository.
 ///
 /// Wraps Supabase Auth calls with a [Result] pattern for consistent
-/// error handling across the app. Also reads/writes to `public.users`.
+/// error handling across the app. Also reads/writes to `public.profiles`.
 library;
 
 import 'dart:async';
@@ -136,11 +136,11 @@ class AuthRepository {
     return _auth.onAuthStateChange;
   }
 
-  /// Fetch the extended profile from `public.users`.
+  /// Fetch the extended profile from `public.profiles`.
   Future<Result<UserProfile>> getUserProfile(String userId) async {
     try {
       final data = await _client
-          .from('users')
+          .from('profiles')
           .select()
           .eq('id', userId)
           .single();
@@ -186,7 +186,7 @@ class AuthRepository {
   Future<UserProfile?> _getProfileById(String userId) async {
     try {
       final data = await _client
-          .from('users')
+          .from('profiles')
           .select()
           .eq('id', userId)
           .single();

@@ -1,15 +1,16 @@
-/// UserProfile model matching the `public.users` table in Supabase.
+/// UserProfile model matching the `public.profiles` table in Supabase.
 class UserProfile {
   final String id;
   final String email;
   final String? fullName;
   final String? username;
   final String? phone;
-  final String? avatarUrl;
+  final String? avatarPath;
+  final String? bio;
   final UserRole role;
   final bool isActive;
   final bool isVerified;
-  final DateTime? emailVerifiedAt;
+  final int trustScore;
   final DateTime createdAt;
 
   const UserProfile({
@@ -18,11 +19,12 @@ class UserProfile {
     this.fullName,
     this.username,
     this.phone,
-    this.avatarUrl,
-    this.role = UserRole.buyer,
+    this.avatarPath,
+    this.bio,
+    this.role = UserRole.both,
     this.isActive = true,
     this.isVerified = false,
-    this.emailVerifiedAt,
+    this.trustScore = 50,
     required this.createdAt,
   });
 
@@ -34,13 +36,12 @@ class UserProfile {
       fullName: json['full_name'] as String?,
       username: json['username'] as String?,
       phone: json['phone'] as String?,
-      avatarUrl: json['avatar_url'] as String?,
-      role: UserRole.fromString(json['role'] as String? ?? 'buyer'),
+      avatarPath: json['avatar_path'] as String?,
+      bio: json['bio'] as String?,
+      role: UserRole.fromString(json['role'] as String? ?? 'both'),
       isActive: json['is_active'] as bool? ?? true,
       isVerified: json['is_verified'] as bool? ?? false,
-      emailVerifiedAt: json['email_verified_at'] != null
-          ? DateTime.parse(json['email_verified_at'] as String)
-          : null,
+      trustScore: (json['trust_score'] as num?)?.toInt() ?? 50,
       createdAt: DateTime.parse(json['created_at'] as String),
     );
   }
@@ -53,11 +54,12 @@ class UserProfile {
       'full_name': fullName,
       'username': username,
       'phone': phone,
-      'avatar_url': avatarUrl,
+      'avatar_path': avatarPath,
+      'bio': bio,
       'role': role.value,
       'is_active': isActive,
       'is_verified': isVerified,
-      'email_verified_at': emailVerifiedAt?.toIso8601String(),
+      'trust_score': trustScore,
       'created_at': createdAt.toIso8601String(),
     };
   }
@@ -67,11 +69,12 @@ class UserProfile {
     String? fullName,
     String? username,
     String? phone,
-    String? avatarUrl,
+    String? avatarPath,
+    String? bio,
     UserRole? role,
     bool? isActive,
     bool? isVerified,
-    DateTime? emailVerifiedAt,
+    int? trustScore,
   }) {
     return UserProfile(
       id: id,
@@ -79,11 +82,12 @@ class UserProfile {
       fullName: fullName ?? this.fullName,
       username: username ?? this.username,
       phone: phone ?? this.phone,
-      avatarUrl: avatarUrl ?? this.avatarUrl,
+      avatarPath: avatarPath ?? this.avatarPath,
+      bio: bio ?? this.bio,
       role: role ?? this.role,
       isActive: isActive ?? this.isActive,
       isVerified: isVerified ?? this.isVerified,
-      emailVerifiedAt: emailVerifiedAt ?? this.emailVerifiedAt,
+      trustScore: trustScore ?? this.trustScore,
       createdAt: createdAt,
     );
   }
