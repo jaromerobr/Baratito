@@ -1,0 +1,90 @@
+/// Payment repository — platform settings, checkout payment + proof upload.
+library;
+
+import 'dart:typed_data';
+import 'package:supabase_flutter/supabase_flutter.dart' show FileOptions;
+import '../../../core/supabase_client.dart';
+
+/// Where the buyer pays (Baratito's collection info) + commission %.
+class PlatformSettings {
+  final double commissionPercent;
+  final String bank;
+  final String accountName;
+  final String? accountNumber;
+  final String? qrPath;
+
+  const PlatformSettings({
+    required this.commissionPercent,
+    required this.bank,
+    required this.accountName,
+    this.accountNumber,
+    this.qrPath,
+  });
+
+  factory PlatformSettings.fromJson(Map<String, dynamic> j) => PlatformSettings(
+        commissionPercent: (j['commission_percent'] as num?)?.toDouble() ?? 10,
+        bank: (j['payout_bank'] as String?) ?? 'Banco de Loja',
+        accountName: (j['payout_account_name'] as String?) ?? 'Baratito',
+        accountNumber: j['payout_account_number'] as String?,
+        qrPath: j['payout_qr_path'] as String?,
+      );
+}
+
+class CheckoutInfo {
+  final String id;
+  final double totalAmount;
+  final double platformFeeTotal;
+  final String status;
+  final String? proofPath;
+
+  const CheckoutInfo({
+    required this.id,
+    required this.totalAmount,
+    required this.platformFeeTotal,
+    required this.status,
+    this.proofPath,
+  });
+
+  factory CheckoutInfo.fromJson(Map<String, dynamic> j) => CheckoutInfo(
+        id: j['id'] as String,
+        totalAmount: (j['total_amount'] as num?)?.toDouble() ?? 0,
+        platformFeeTotal: (j['platform_fee_total'] as num?)?.toDouble() ?? 0,
+        status: (j['status'] as String?) ?? 'pending_payment',
+        proofPath: j['proof_path'] as String?,
+      );
+}
+
+class PaymentRepository {
+  final _client = SupabaseClientHelper.client;
+  static const _bucket = 'payment-proofs';
+
+  Future<PlatformSettings> getSettings() async {
+    final data =
+        await _client.from('platform_settings').select().eq('id', 1).single();
+    return PlatformSettings.fromJson(data);
+  }
+
+  Future<CheckoutInfo> getCheckout(String id) async {
+    final data =
+        await _client.from('checkouts').select().eq('id', id).single();
+    return CheckoutInfo.fromJson(data);
+  }
+
+  /// Upload the buyer's transfer proof and mark the checkout awaiting review.
+  Future<void> submitProof(String checkoutId, Uint8List bytes) async {
+    final uid = _client.auth.currentUser?.id;
+    if (uid == null) throw Exception('Sin sesión.');
+
+    final path = '$uid/$checkoutId.jpg';
+    await _client.storage.from(_bucket).uploadBinary(
+          path,
+          bytes,
+          fileOptions: const FileOptions(
+              contentType: 'image/jpeg', upsert: true),
+        );
+    await _client.from('checkouts').update({
+      'proof_path': path,
+      'status': 'awaiting_confirmation',
+    }).eq('id', checkoutId);
+  }
+}
