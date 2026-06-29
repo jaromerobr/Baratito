@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'app_colors.dart';
+import 'app_palette.dart';
 
 class AppTheme {
   AppTheme._();
@@ -17,6 +18,8 @@ class AppTheme {
       brightness: Brightness.light,
     );
     return base.copyWith(
+      scaffoldBackgroundColor: AppPalette.light.background,
+      extensions: const [AppPalette.light],
       textTheme: GoogleFonts.poppinsTextTheme(base.textTheme),
       appBarTheme: AppBarTheme(
         backgroundColor: Colors.transparent,
@@ -107,8 +110,11 @@ class AppTheme {
       brightness: Brightness.dark,
     );
     return base.copyWith(
+      scaffoldBackgroundColor: AppPalette.dark.background,
+      extensions: const [AppPalette.dark],
       textTheme: GoogleFonts.poppinsTextTheme(base.textTheme),
       appBarTheme: AppBarTheme(
+        backgroundColor: AppPalette.dark.surface,
         elevation: 0,
         centerTitle: true,
         titleTextStyle: GoogleFonts.poppins(

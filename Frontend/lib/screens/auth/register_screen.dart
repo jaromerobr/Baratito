@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:baratito/core/theme/app_palette.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import '../../config/app_colors.dart';
 import '../../providers/auth_provider.dart';
 import '../../utils/validators.dart';
 import '../../widgets/auth/baratito_logo.dart';
@@ -123,7 +123,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     Expanded(
                       child: Text(
                         'Acepto los términos y condiciones',
-                        style: TextStyle(color: AppColors.neutral),
+                        style: TextStyle(color: context.palette.textPrimary),
                       ),
                     ),
                   ],

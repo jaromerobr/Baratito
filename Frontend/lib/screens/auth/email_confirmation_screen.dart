@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:baratito/core/theme/app_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../config/app_colors.dart';
@@ -107,7 +108,7 @@ class _EmailConfirmationScreenState extends State<EmailConfirmationScreen> {
               Text(
                 'Enviamos un código de 6 dígitos a ${widget.email}. Ingrésalo aquí para activar tu cuenta.',
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: AppColors.textMuted),
+                style: TextStyle(color: context.palette.textSecondary),
               ),
               const SizedBox(height: 32),
               AuthTextField(

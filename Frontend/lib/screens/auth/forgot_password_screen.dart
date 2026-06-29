@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:baratito/core/theme/app_palette.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import '../../config/app_colors.dart';
 import '../../providers/auth_provider.dart';
 import '../../utils/validators.dart';
 import '../../widgets/auth/auth_text_field.dart';
@@ -64,9 +64,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       ),
                 ),
                 const SizedBox(height: 8),
-                const Text(
+                Text(
                   'Te enviaremos un código de 6 dígitos a tu correo',
-                  style: TextStyle(color: AppColors.textMuted),
+                  style: TextStyle(color: context.palette.textSecondary),
                 ),
                 const SizedBox(height: 32),
                 AuthTextField(

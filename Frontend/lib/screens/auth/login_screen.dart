@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:baratito/core/theme/app_palette.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import '../../config/app_colors.dart';
 import '../../providers/auth_provider.dart';
 import '../../core/theme/theme_provider.dart';
 import '../../utils/validators.dart';
@@ -57,7 +57,7 @@ class _LoginScreenState extends State<LoginScreen> {
         actions: [
           IconButton(
             icon: Icon(isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded),
-            color: AppColors.neutral,
+            color: context.palette.textPrimary,
             onPressed: () => context.read<ThemeModel>().toggleTheme(),
           ),
         ],
@@ -77,15 +77,15 @@ class _LoginScreenState extends State<LoginScreen> {
                   'Bienvenido de nuevo',
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        color: AppColors.neutral,
+                        color: context.palette.textPrimary,
                         fontWeight: FontWeight.bold,
                       ),
                 ),
                 const SizedBox(height: 4),
-                const Text(
+                Text(
                   'Inicia sesión para comprar y vender en Loja',
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: AppColors.textMuted),
+                  style: TextStyle(color: context.palette.textSecondary),
                 ),
                 const SizedBox(height: 32),
                 AuthTextField(
@@ -122,8 +122,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 OutlinedButton(
                   onPressed: () => context.go('/home'),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.neutral,
-                    side: const BorderSide(color: AppColors.border),
+                    foregroundColor: context.palette.textPrimary,
+                    side: BorderSide(color: context.palette.divider),
                     minimumSize: const Size.fromHeight(52),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                   ),
