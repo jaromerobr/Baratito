@@ -1,4 +1,4 @@
-# 🏷️ Baratito — Estado del Proyecto
+# Baratito — Estado del Proyecto
 
 Marketplace de compra-venta de segunda mano para **Loja, Ecuador** (estilo Depop/Wallapop).
 Documento de estado: **qué está hecho, qué funciona, y qué falta por hacer/mejorar**, explicado desde el login hasta lo último implementado.
