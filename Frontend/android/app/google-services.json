@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "758813187933",
+    "project_id": "baratito-543ac",
+    "storage_bucket": "baratito-543ac.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:758813187933:android:b2552ed64b79ab0a1d12b4",
+        "android_client_info": {
+          "package_name": "ec.edu.uide.baratito"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBMWuLAT7ngibAW2UiyhzzfJSPIqctJUZY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
