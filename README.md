@@ -79,6 +79,12 @@ Este proyecto está bajo la licencia MIT. Consulta el archivo `LICENSE` para má
 
 # 🔔 Semana 9 — Notificaciones push (FCM)
 
+## 🎥 Videos de prueba (evidencia)
+
+Videos que demuestran el funcionamiento (notificación en foreground con visualización, en background/sistema, y el tap navegando a la pantalla correcta según el tipo):
+
+👉 **[Ver videos de prueba (Google Drive)](https://drive.google.com/drive/folders/1NpvgWdtlT_Sd4CfwJfe2JQ1YIxGZG6Ak?usp=sharing)**
+
 ## Configuración de Firebase (paso a paso)
 
 > El `applicationId` de la app es **`ec.edu.uide.baratito`** — úsalo tal cual al registrar la app en Firebase.
