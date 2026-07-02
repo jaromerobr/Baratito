@@ -26,7 +26,7 @@ android {
     defaultConfig {
         applicationId = "ec.edu.uide.baratito"
         // FCM + flutter_local_notifications requieren minSdk 23+.
-        minSdk = 23
+        minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName

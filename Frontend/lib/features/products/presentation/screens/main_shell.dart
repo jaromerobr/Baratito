@@ -62,12 +62,15 @@ class _MainShellState extends ConsumerState<MainShell> {
   void _onPublishTap(BuildContext context) {
     final loggedIn = SupabaseClientHelper.auth.currentUser != null;
     if (!loggedIn) {
+      // Capturamos el router AHORA (contexto válido); la acción del SnackBar
+      // se dispara después, cuando este contexto podría estar desactivado.
+      final router = GoRouter.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text('Inicia sesión para publicar'),
           action: SnackBarAction(
             label: 'Entrar',
-            onPressed: () => context.go(AppRoutes.login),
+            onPressed: () => router.go(AppRoutes.login),
           ),
         ),
       );

@@ -67,10 +67,11 @@ class PushNotificationService {
         }
       },
     );
-    await _local
-        .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
-        ?.createNotificationChannel(_channel);
+    final androidImpl = _local.resolvePlatformSpecificImplementation<
+        AndroidFlutterLocalNotificationsPlugin>();
+    await androidImpl?.createNotificationChannel(_channel);
+    // Android 13+: dispara el diálogo de permiso de notificaciones (POST_NOTIFICATIONS).
+    await androidImpl?.requestNotificationsPermission();
 
     // 3. Foreground: mostrar la notificación visualmente (no solo en consola).
     FirebaseMessaging.onMessage.listen(_showForeground);
@@ -86,7 +87,12 @@ class PushNotificationService {
           () => _handleNavigation(initial.data));
     }
 
-    // 6. Token: guardar ahora (si hay sesión) y ante cambios de sesión/refresh.
+    // 6. Token: imprimirlo (para pruebas desde consola), guardar (si hay sesión)
+    //    y reaccionar a refresh/cambios de sesión.
+    final token = await _fcm.getToken();
+    debugPrint('════════════ FCM TOKEN ════════════');
+    debugPrint('$token');
+    debugPrint('═══════════════════════════════════');
     await _syncToken();
     _fcm.onTokenRefresh.listen((_) => _syncToken());
     SupabaseClientHelper.auth.onAuthStateChange.listen((data) {
