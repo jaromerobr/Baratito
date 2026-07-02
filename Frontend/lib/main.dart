@@ -15,15 +15,29 @@ library;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' hide ChangeNotifierProvider;
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'core/supabase_client.dart';
 import 'core/theme/theme_provider.dart';
 import 'core/theme/app_theme.dart';
+import 'core/notifications/push_notification_service.dart';
 import 'providers/auth_provider.dart';
 import 'router/app_router.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SupabaseClientHelper.initialize();
+
+  // Notificaciones push (FCM). El try/catch da robustez en runtime.
+  // OJO: el build de Android requiere Frontend/android/app/google-services.json
+  // (el plugin google-services falla la compilación si no está). Ver README S9.
+  try {
+    await Firebase.initializeApp();
+    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+    await PushNotificationService.instance.init();
+  } catch (e) {
+    debugPrint('Firebase/FCM no inicializado (¿falta google-services.json?): $e');
+  }
 
   runApp(
     const ProviderScope(

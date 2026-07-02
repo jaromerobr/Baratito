@@ -26,8 +26,12 @@ const _authRoutes = [
   '/reset-password',
 ];
 
+/// Referencia global al router activo, para navegar desde eventos externos
+/// (ej. al tocar una notificación push). Se asigna en [buildRouter].
+GoRouter? rootRouter;
+
 GoRouter buildRouter(AuthProvider authProvider) {
-  return GoRouter(
+  final router = GoRouter(
     initialLocation: '/login',
     refreshListenable: authProvider,
     redirect: (context, state) {
@@ -112,4 +116,6 @@ GoRouter buildRouter(AuthProvider authProvider) {
       ),
     ],
   );
+  rootRouter = router;
+  return router;
 }
