@@ -1,5 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Android 13+ requiere permiso en runtime para mostrar notificaciones -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <application
         android:label="baratito"
         android:name="${applicationName}"
@@ -43,6 +45,10 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        <!-- Canal por defecto para notificaciones FCM en background/cerrado -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="baratito_general" />
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and
