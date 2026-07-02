@@ -121,3 +121,24 @@ Flujo propuesto (descrito, no implementado aún):
 6. Si FCM devuelve token inválido, la función marca ese token `is_active = false`.
 
 Así la notificación se genera **automáticamente al ocurrir el evento**, sin que nadie use la consola de Firebase.
+
+---
+
+# 🗺️ Mapas — decisión y uso
+
+**Decisión: OpenStreetMap con `flutter_map`** (no Google Maps).
+
+Discutimos ambas opciones para Baratito y elegimos OpenStreetMap por:
+
+| Criterio | Google Maps | **OpenStreetMap (flutter_map)** ✅ |
+|---|---|---|
+| **Costo** | Necesita API key + **cuenta de facturación** (tarjeta), aunque tenga capa gratis | **Gratis**, sin tarjeta ni cuota |
+| **Configuración** | API key, habilitar SDK, restricciones de clave | **Sin API key**, funciona de inmediato |
+| **Privacidad** | Uso y ubicaciones se comparten con Google | Más neutral; los tiles vienen de OSM, sin perfilado |
+| **Licencia** | Términos comerciales de Google | Abierta — **ODbL** (datos libres) |
+
+Para un proyecto local de segunda mano, sin presupuesto y donde no queremos exigir cuentas de facturación, **flutter_map/OSM es lo más apropiado**: cero costo, cero configuración de credenciales, y cubre nuestra necesidad (mostrar la ubicación de un producto).
+
+**Dónde se usa:** en la **pantalla de detalle del producto**, sección *"Ubicación"*, se muestra un `FlutterMap` con un **marcador real** en la ciudad del producto (`products.location_city`, ej. *Loja*). Las coordenadas de las ciudades de Ecuador están en `product_location_map.dart`. Los tiles se cargan desde `tile.openstreetmap.org` con un `User-Agent` propio (`ec.edu.uide.baratito`), conforme a la política de uso de OSM.
+
+> Mejora futura: guardar `latitude`/`longitude` exactos por producto (o punto de entrega usando la tabla `addresses`, que ya tiene esas columnas) para un marcador preciso en vez de aproximar por ciudad.

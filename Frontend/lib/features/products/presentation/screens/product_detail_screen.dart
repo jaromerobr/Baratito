@@ -18,6 +18,7 @@ import '../../../cart/presentation/providers/cart_provider.dart';
 import '../../../favorites/presentation/widgets/favorite_button.dart';
 import '../../domain/product_model.dart';
 import '../providers/products_provider.dart';
+import '../widgets/product_location_map.dart';
 
 class ProductDetailScreen extends ConsumerWidget {
   final String productId;
@@ -124,6 +125,9 @@ class _DetailBody extends StatelessWidget {
                     ],
                     // Seller card
                     _SellerCard(product: product),
+                    const Gap(20),
+                    // Mapa de ubicación (OpenStreetMap)
+                    ProductLocationMap(city: product.locationCity),
                   ],
                 ),
               ),
@@ -348,11 +352,12 @@ class _BottomCtaState extends ConsumerState<_BottomCta> {
     }
     await ref.read(cartControllerProvider).add(product.id);
     if (!mounted) return;
+    final router = GoRouter.of(context);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: const Text('Agregado al carrito'),
         action: SnackBarAction(
-            label: 'Ver carrito', onPressed: () => context.push('/cart')),
+            label: 'Ver carrito', onPressed: () => router.push('/cart')),
       ),
     );
   }
