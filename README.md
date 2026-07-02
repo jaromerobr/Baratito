@@ -74,3 +74,50 @@ Para ver el estado detallado de las tareas y el roadmap técnico, consulta el ar
 
 ## 📄 Licencia
 Este proyecto está bajo la licencia MIT. Consulta el archivo `LICENSE` para más detalles.
+
+---
+
+# 🔔 Semana 9 — Notificaciones push (FCM)
+
+## Configuración de Firebase (paso a paso)
+
+> El `applicationId` de la app es **`ec.edu.uide.baratito`** — úsalo tal cual al registrar la app en Firebase.
+
+1. **Crear proyecto:** https://console.firebase.google.com → *Agregar proyecto* → nombre `Baratito` → crear (Analytics opcional).
+2. **Registrar app Android:** en el proyecto → ícono Android → **Nombre del paquete:** `ec.edu.uide.baratito` → *Registrar app*.
+3. **Descargar `google-services.json`** y colocarlo en **`Frontend/android/app/google-services.json`**.
+4. **Gradle:** ya está configurado en el repo (plugin `com.google.gms.google-services` en `settings.gradle.kts` y `app/build.gradle.kts`, desugaring y `minSdk 23`). No hay que tocar nada.
+5. **Cloud Messaging** viene habilitado por defecto (API HTTP v1).
+6. **Correr la app:** `flutter run`. En el primer arranque se pide el permiso de notificaciones (Android 13+) y el **token FCM** se guarda en `push_tokens` de Supabase. El token también se imprime en consola para pruebas.
+7. **Enviar prueba:** Firebase Console → *Messaging* → *Enviar mensaje de prueba* → pega el token del dispositivo. Para navegación, en *Opciones adicionales → Datos personalizados* agrega:
+   - `tipo` = `nuevo_mensaje` y `conversation_id` = `<id de una conversación>` → abre el chat.
+   - `tipo` = `pago_confirmado` → abre "Mis compras".
+
+> **Requisito Supabase:** ejecutar `Backend/09_push_tokens_setup.sql` (RLS de `push_tokens`).
+
+## Decisiones técnicas S9
+
+**1. ¿Qué eventos generarán notificaciones push? ¿Notification o Data messages?**
+Definimos al menos dos, propios del negocio de Baratito:
+- **`nuevo_mensaje`** — cuando un usuario recibe un mensaje de chat de otro (comprador ↔ vendedor). Navega a `/chat/:id`.
+- **`pago_confirmado`** — cuando el admin confirma el pago de un pedido del comprador. Navega a `/purchases`.
+
+Usamos mensajes **híbridos: `notification` + `data`**. El bloque `notification` (título/cuerpo) permite que **Android muestre la notificación solo** cuando la app está en background o cerrada; el bloque `data` (`tipo`, `conversation_id`) es el que usamos para la **navegación inteligente** al tocarla y para pintarla nosotros en foreground con `flutter_local_notifications`. Elegimos el híbrido y no *data-only* porque los mensajes solo-data no se muestran automáticamente y el SO puede retrasarlos/agruparlos en background; y no *notification-only* porque no garantiza los datos de ruteo.
+
+**2. ¿Qué pasa si el usuario desinstala la app? ¿El token queda activo para siempre?**
+El token **no** se borra solo al desinstalar (FCM no avisa a nuestra BD). Queda en `push_tokens` hasta que:
+- Al **cerrar sesión** lo marcamos `is_active = false` (lo hace la app).
+- Al **intentar enviar**, FCM responde `UNREGISTERED` / `NotRegistered` para tokens muertos; el backend debe entonces marcar ese token `is_active = false` (o borrarlo).
+
+Si no se limpian: se acumulan **tokens fantasma**, se desperdicia cuota de envío, las métricas de alcance quedan infladas y se intenta notificar a dispositivos que ya no existen. Por eso el modelo es **multi-dispositivo** (una fila por token, no un `fcm_token` único en `profiles`) y con estado `is_active`.
+
+**3. ¿Cómo enviaría el backend una notificación automáticamente (sin humano)?**
+Flujo propuesto (descrito, no implementado aún):
+1. Ocurre un evento en Postgres (ej. `INSERT` en `messages`, o `checkouts.status = 'paid'`).
+2. Un **trigger** o un **webhook de base de datos** de Supabase dispara una **Edge Function**.
+3. La función busca los `push_tokens` **activos** del usuario destinatario.
+4. Con las credenciales de la **cuenta de servicio de Firebase**, llama a la **API HTTP v1 de FCM** enviando `notification` + `data` (`tipo`, ids).
+5. FCM entrega la notificación a cada dispositivo del usuario.
+6. Si FCM devuelve token inválido, la función marca ese token `is_active = false`.
+
+Así la notificación se genera **automáticamente al ocurrir el evento**, sin que nadie use la consola de Firebase.
