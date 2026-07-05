@@ -25,8 +25,9 @@ class AdminVerificationsScreen extends ConsumerWidget {
 
     return Column(
       children: [
-        // ── Status filter ───────────────────────────────
-        Padding(
+        // ── Status filter (desplazable para evitar overflow) ──
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
           child: Row(
             children: [

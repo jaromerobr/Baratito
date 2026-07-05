@@ -38,6 +38,15 @@ APPROVE_THRESHOLD = float(os.getenv("APPROVE_THRESHOLD", "0.80"))
 MODEL_NAME = os.getenv("DEEPFACE_MODEL", "Facenet512")
 DISTANCE_METRIC = os.getenv("DEEPFACE_METRIC", "cosine")
 
+# Detectores de rostro, en orden de intento. RetinaFace es mucho más robusto
+# que el haarcascade de OpenCV para rostros pequeños (ej. la foto de la cédula),
+# con brillo o levemente rotados. Si uno no detecta, se prueba el siguiente.
+DETECTOR_BACKENDS = [
+    d.strip()
+    for d in os.getenv("DEEPFACE_DETECTORS", "retinaface,opencv").split(",")
+    if d.strip()
+]
+
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
 app = FastAPI(title="Baratito Verification Service")
@@ -58,7 +67,25 @@ def _download_to_temp(path: str, suffix: str = ".jpg") -> str:
     tmp = tempfile.NamedTemporaryFile(delete=False, suffix=suffix)
     tmp.write(data)
     tmp.close()
+    _normalize_orientation(tmp.name)
     return tmp.name
+
+
+def _normalize_orientation(path: str) -> None:
+    """Aplica la rotación EXIF y re-guarda la imagen.
+
+    Las fotos de celular traen la rotación en metadatos EXIF; OpenCV (que usa
+    DeepFace para cargar) los ignora, así que el rostro puede quedar "acostado"
+    y el detector no lo encuentra. Esto lo corrige antes de procesar.
+    """
+    try:
+        from PIL import Image, ImageOps
+
+        img = Image.open(path)
+        img = ImageOps.exif_transpose(img)
+        img.convert("RGB").save(path, "JPEG", quality=95)
+    except Exception:
+        pass  # si no se puede normalizar, se procesa tal cual
 
 
 def _update(verification_id: str, fields: dict):
@@ -99,14 +126,26 @@ def verify(req: VerifyRequest):
     selfie_file = _download_to_temp(selfie_path)
 
     try:
-        # 3. Comparar rostros
-        result = DeepFace.verify(
-            img1_path=selfie_file,
-            img2_path=cedula_file,
-            model_name=MODEL_NAME,
-            distance_metric=DISTANCE_METRIC,
-            enforce_detection=True,
-        )
+        # 3. Comparar rostros, probando los detectores en orden hasta que
+        #    uno encuentre rostro en AMBAS imágenes.
+        result = None
+        last_error: Exception | None = None
+        for backend in DETECTOR_BACKENDS:
+            try:
+                result = DeepFace.verify(
+                    img1_path=selfie_file,
+                    img2_path=cedula_file,
+                    model_name=MODEL_NAME,
+                    distance_metric=DISTANCE_METRIC,
+                    detector_backend=backend,
+                    enforce_detection=True,
+                )
+                break
+            except ValueError as e:
+                last_error = e  # este detector no encontró rostro; probar el siguiente
+        if result is None:
+            raise last_error or ValueError("No se detectó rostro")
+
         distance = float(result["distance"])
         # Para métrica cosine: similitud = 1 - distancia, acotada a [0, 1].
         similarity = max(0.0, min(1.0, 1.0 - distance))

@@ -7,3 +7,7 @@ Frontend/android/local.properties
 # Node — el proyecto no usa Node; evitar re-commitear basura
 node_modules/
 package-lock.json
+
+# Secretos del servicio de verificación (service_role key) — NUNCA subir
+Backend/verification_service/.env
+__pycache__/
