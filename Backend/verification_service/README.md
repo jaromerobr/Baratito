@@ -49,7 +49,7 @@ La app Flutter, al enviar una verificación, hace:
   (averigua tu IP con `ip addr` / `ifconfig`; PC y teléfono en la misma red).
 
 ## Decisión (flujo híbrido — configuración interna, no visible al usuario)
-- `similarity > 0.80` (más de 80%) → **approved** automático
+- `similarity > 0.70` (más de 70%) → **approved** automático
   (el trigger marca `profiles.is_verified = true`).
 - Cualquier otro caso → **pending**: lo revisa manualmente una persona del
   equipo Baratito (no hay rechazo automático).
