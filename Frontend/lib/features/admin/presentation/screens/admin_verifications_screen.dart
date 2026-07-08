@@ -193,7 +193,8 @@ class _ScoreBadge extends StatelessWidget {
               fontSize: 11, color: context.palette.textHint));
     }
     final pct = (score! * 100).toStringAsFixed(0);
-    final color = score! > 0.80
+    // Verde: se aprueba solo (>70%). Ámbar/rojo: revisión manual.
+    final color = score! > 0.70
         ? AppColors.success
         : (score! >= 0.5 ? AppColors.warning : AppColors.error);
     return Text('Match $pct%',

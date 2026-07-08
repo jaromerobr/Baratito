@@ -27,6 +27,9 @@ class AdminCheckoutItem {
   final String buyerEmail;
   final double total;
   final double platformFee;
+  final double shippingFee;
+  final double? ocrAmount;
+  final bool autoConfirmed;
   final String status;
   final String? proofPath;
   final DateTime createdAt;
@@ -37,6 +40,9 @@ class AdminCheckoutItem {
     required this.buyerEmail,
     required this.total,
     required this.platformFee,
+    required this.shippingFee,
+    required this.ocrAmount,
+    required this.autoConfirmed,
     required this.status,
     required this.proofPath,
     required this.createdAt,
@@ -135,6 +141,9 @@ class AdminRepository {
         buyerEmail: (buyer?['email'] as String?) ?? '',
         total: (row['total_amount'] as num?)?.toDouble() ?? 0,
         platformFee: (row['platform_fee_total'] as num?)?.toDouble() ?? 0,
+        shippingFee: (row['shipping_fee'] as num?)?.toDouble() ?? 0,
+        ocrAmount: (row['ocr_amount'] as num?)?.toDouble(),
+        autoConfirmed: row['auto_confirmed'] as bool? ?? false,
         status: (row['status'] as String?) ?? 'pending_payment',
         proofPath: row['proof_path'] as String?,
         createdAt: DateTime.parse(row['created_at'] as String),
@@ -152,6 +161,17 @@ class AdminRepository {
   Future<void> confirmCheckout(String checkoutId) async {
     await _client.rpc('confirm_checkout_payment',
         params: {'p_checkout': checkoutId});
+  }
+
+  /// Reject a proof: the checkout goes back to 'pending_payment' so the
+  /// buyer can upload a valid receipt again.
+  Future<void> rejectCheckoutProof(String checkoutId) async {
+    await _client.from('checkouts').update({
+      'status': 'pending_payment',
+      'proof_path': null,
+      'ocr_amount': null,
+      'auto_confirmed': false,
+    }).eq('id', checkoutId);
   }
 
   /// Commission earned + pending payouts summary.

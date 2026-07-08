@@ -185,10 +185,53 @@ class _CheckoutCardState extends ConsumerState<_CheckoutCard> {
     );
   }
 
+  Future<void> _reject() async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('¿Rechazar comprobante?'),
+        content: const Text(
+            'El pedido volverá a "pendiente de pago" y el comprador '
+            'podrá subir un comprobante válido de nuevo.'),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancelar')),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.error,
+                foregroundColor: Colors.white),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Rechazar'),
+          ),
+        ],
+      ),
+    );
+    if (ok != true) return;
+
+    setState(() => _working = true);
+    try {
+      await ref
+          .read(adminRepositoryProvider)
+          .rejectCheckoutProof(widget.item.id);
+      ref.invalidate(adminCheckoutsProvider);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Comprobante rechazado')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _working = false);
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Error: $e')));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final it = widget.item;
-    final sellerGets = it.total - it.platformFee;
+    // El vendedor recibe: productos − comisión (el envío es de Baratito).
+    final sellerGets = it.total - it.shippingFee - it.platformFee;
     final awaiting = it.status == 'awaiting_confirmation';
 
     return Container(
@@ -241,13 +284,44 @@ class _CheckoutCardState extends ConsumerState<_CheckoutCard> {
           ),
           const Gap(10),
           _MoneyRow(label: 'Total pagado', value: it.total, bold: true),
+          _MoneyRow(label: 'Envío (Baratito)', value: it.shippingFee),
           _MoneyRow(
-              label: 'Comisión Baratito',
+              label: 'Comisión Baratito (8%)',
               value: it.platformFee,
               color: AppColors.success),
           _MoneyRow(label: 'A pagar a vendedores', value: sellerGets),
+          if (it.ocrAmount != null) ...[
+            const Gap(6),
+            Row(
+              children: [
+                Icon(
+                  (it.ocrAmount! - it.total).abs() <= 0.01
+                      ? Icons.check_circle
+                      : Icons.warning_amber_rounded,
+                  size: 16,
+                  color: (it.ocrAmount! - it.total).abs() <= 0.01
+                      ? AppColors.success
+                      : AppColors.warning,
+                ),
+                const Gap(6),
+                Expanded(
+                  child: Text(
+                    'OCR leyó: \$${it.ocrAmount!.toStringAsFixed(2)}'
+                    '${it.autoConfirmed ? " · validado automáticamente" : ""}',
+                    style: GoogleFonts.poppins(
+                        fontSize: 12, color: context.palette.textSecondary),
+                  ),
+                ),
+              ],
+            ),
+          ],
           const Gap(12),
-          Row(
+          // Wrap: si los dos botones no caben a lo ancho, pasan a dos líneas
+          // (evita el "right overflowed" en pantallas angostas).
+          Wrap(
+            alignment: WrapAlignment.end,
+            spacing: 10,
+            runSpacing: 8,
             children: [
               if (it.proofPath != null)
                 OutlinedButton.icon(
@@ -255,7 +329,16 @@ class _CheckoutCardState extends ConsumerState<_CheckoutCard> {
                   icon: const Icon(Icons.receipt_long, size: 18),
                   label: const Text('Ver comprobante'),
                 ),
-              const Spacer(),
+              if (awaiting && it.proofPath != null)
+                OutlinedButton.icon(
+                  onPressed: _working ? null : _reject,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.error,
+                    side: const BorderSide(color: AppColors.error),
+                  ),
+                  icon: const Icon(Icons.close, size: 18),
+                  label: const Text('Rechazar'),
+                ),
               if (awaiting)
                 ElevatedButton.icon(
                   onPressed: _working ? null : _confirm,
