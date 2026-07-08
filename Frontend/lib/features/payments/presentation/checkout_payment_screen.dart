@@ -1,5 +1,7 @@
-/// Checkout payment — the buyer pays the total to Baratito and uploads
-/// the transfer proof. Baratito later confirms and pays each seller.
+/// Checkout payment — el comprador transfiere el total (productos + envío)
+/// al Banco de Loja de Baratito (QR/datos), sube el comprobante y la app
+/// lo valida con OCR: si el monto coincide, el pago se confirma solo;
+/// si no, queda en revisión manual del equipo.
 library;
 
 import 'package:flutter/material.dart';
@@ -12,6 +14,7 @@ import 'package:flutter/services.dart' show Clipboard, ClipboardData;
 import '../../../core/theme/app_colors.dart';
 import 'package:baratito/core/theme/app_palette.dart';
 import '../data/payment_repository.dart';
+import '../data/receipt_ocr_service.dart';
 
 final _paymentRepoProvider = Provider<PaymentRepository>((ref) => PaymentRepository());
 final _settingsProvider =
@@ -31,25 +34,52 @@ class CheckoutPaymentScreen extends ConsumerStatefulWidget {
 class _CheckoutPaymentScreenState extends ConsumerState<CheckoutPaymentScreen> {
   bool _uploading = false;
 
-  Future<void> _uploadProof() async {
+  Future<void> _uploadProof(CheckoutInfo checkout) async {
     final file = await ImagePicker()
-        .pickImage(source: ImageSource.gallery, imageQuality: 80);
+        .pickImage(source: ImageSource.gallery, imageQuality: 90);
     if (file == null) return;
     setState(() => _uploading = true);
     try {
+      // 1. OCR local del comprobante (monto + referencia).
+      ReceiptOcrResult? ocr;
+      try {
+        ocr = await ReceiptOcrService.read(
+          file.path,
+          expectedTotal: checkout.totalAmount,
+        );
+      } catch (_) {
+        ocr = null; // si el OCR falla, igual se envía a revisión manual
+      }
+
+      // 2. Subir + validar en el backend.
       final bytes = await file.readAsBytes();
-      await ref
-          .read(_paymentRepoProvider)
-          .submitProof(widget.checkoutId, bytes);
+      final status = await ref.read(_paymentRepoProvider).submitProof(
+            widget.checkoutId,
+            bytes,
+            ocrAmount: ocr?.amount,
+            ocrReference: ocr?.reference,
+          );
+
+      ref.invalidate(_checkoutProvider(widget.checkoutId));
       if (!mounted) return;
+
+      final validated = status == 'paid';
       await showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: const Text('¡Comprobante enviado! 🎉'),
-          content: const Text(
-            'Estamos verificando tu pago. Cuando lo confirmemos, '
-            'tu pedido avanzará y se coordinará la entrega con cada vendedor.',
-          ),
+          title: Text(validated
+              ? '¡Pago validado! ✅'
+              : 'Comprobante en revisión 🕐'),
+          content: Text(validated
+              ? 'Leímos tu comprobante (\$${ocr?.amount?.toStringAsFixed(2)}) '
+                  'y coincide con el total. Tu pedido está confirmado; '
+                  'coordinaremos la entrega.'
+              : ocr?.amount != null
+                  ? 'El monto leído (\$${ocr!.amount!.toStringAsFixed(2)}) no '
+                      'coincide con el total (\$${checkout.totalAmount.toStringAsFixed(2)}). '
+                      'Una persona del equipo lo revisará en breve.'
+                  : 'No pudimos leer el monto del comprobante. '
+                      'Una persona del equipo lo revisará en breve.'),
           actions: [
             TextButton(
               onPressed: () {
@@ -92,7 +122,7 @@ class _CheckoutPaymentScreenState extends ConsumerState<CheckoutPaymentScreen> {
             data: (settings) => ListView(
               padding: const EdgeInsets.all(20),
               children: [
-                // Total
+                // Total con desglose (productos + envío)
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(20),
@@ -112,6 +142,13 @@ class _CheckoutPaymentScreenState extends ConsumerState<CheckoutPaymentScreen> {
                               fontSize: 34,
                               fontWeight: FontWeight.w800,
                               color: Colors.white)),
+                      const Gap(6),
+                      Text(
+                        'Productos \$${checkout.productsSubtotal.toStringAsFixed(2)}'
+                        '  ·  Envío \$${checkout.shippingFee.toStringAsFixed(2)}',
+                        style: GoogleFonts.poppins(
+                            fontSize: 12, color: Colors.white70),
+                      ),
                     ],
                   ),
                 ),
@@ -121,12 +158,44 @@ class _CheckoutPaymentScreenState extends ConsumerState<CheckoutPaymentScreen> {
                         fontSize: 16, fontWeight: FontWeight.w700)),
                 const Gap(4),
                 Text(
-                  'Realiza la transferencia por el total y sube el comprobante. '
-                  'Verificamos y coordinamos la entrega con cada vendedor.',
+                  'Transfiere el total (Banco de Loja) escaneando el QR o '
+                  'usando los datos de la cuenta, y sube el comprobante. '
+                  'La app lo valida al instante.',
                   style: GoogleFonts.poppins(
                       fontSize: 13, color: context.palette.textSecondary),
                 ),
                 const Gap(16),
+                // ── QR de cobro (si está configurado) ──
+                if (PaymentRepository.qrUrl(settings.qrPath) != null) ...[
+                  Center(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: Container(
+                        color: Colors.white,
+                        padding: const EdgeInsets.all(12),
+                        child: Image.network(
+                          PaymentRepository.qrUrl(settings.qrPath)!,
+                          width: 220,
+                          height: 220,
+                          fit: BoxFit.contain,
+                          errorBuilder: (_, _, _) => const SizedBox(
+                            width: 220,
+                            height: 100,
+                            child: Center(child: Text('QR no disponible')),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const Gap(8),
+                  Center(
+                    child: Text('Escanea con tu app del Banco de Loja',
+                        style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            color: context.palette.textSecondary)),
+                  ),
+                  const Gap(16),
+                ],
                 _InfoRow(label: 'Banco', value: settings.bank),
                 _InfoRow(label: 'Titular', value: settings.accountName),
                 if (settings.accountNumber != null)
@@ -137,7 +206,10 @@ class _CheckoutPaymentScreenState extends ConsumerState<CheckoutPaymentScreen> {
                   ),
                 const Gap(24),
                 if (checkout.status == 'pending_payment')
-                  _UploadButton(uploading: _uploading, onTap: _uploadProof)
+                  _UploadButton(
+                    uploading: _uploading,
+                    onTap: () => _uploadProof(checkout),
+                  )
                 else
                   _StatusBanner(status: checkout.status),
               ],

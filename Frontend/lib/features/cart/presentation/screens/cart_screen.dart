@@ -226,6 +226,12 @@ class _CheckoutBarState extends ConsumerState<_CheckoutBar> {
 
   @override
   Widget build(BuildContext context) {
+    // Envío: $2 con un vendedor; $1 por vendedor si son 2 o más
+    // (Baratito consolida las entregas). Misma regla que checkout_cart().
+    final shipping =
+        widget.sellerCount <= 1 ? 2.0 : widget.sellerCount * 1.0;
+    final grandTotal = widget.total + shipping;
+
     return Container(
       padding: EdgeInsets.fromLTRB(
           16, 12, 16, 12 + MediaQuery.of(context).padding.bottom),
@@ -238,10 +244,10 @@ class _CheckoutBarState extends ConsumerState<_CheckoutBar> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Total',
+              Text('Total + envío \$${shipping.toStringAsFixed(2)}',
                   style: GoogleFonts.poppins(
                       fontSize: 12, color: context.palette.textSecondary)),
-              Text('\$${widget.total.toStringAsFixed(2)}',
+              Text('\$${grandTotal.toStringAsFixed(2)}',
                   style: GoogleFonts.poppins(
                       fontSize: 20,
                       fontWeight: FontWeight.w800,

@@ -34,6 +34,7 @@ class CheckoutInfo {
   final String id;
   final double totalAmount;
   final double platformFeeTotal;
+  final double shippingFee;
   final String status;
   final String? proofPath;
 
@@ -41,14 +42,19 @@ class CheckoutInfo {
     required this.id,
     required this.totalAmount,
     required this.platformFeeTotal,
+    required this.shippingFee,
     required this.status,
     this.proofPath,
   });
+
+  /// Subtotal de los productos (total − envío).
+  double get productsSubtotal => totalAmount - shippingFee;
 
   factory CheckoutInfo.fromJson(Map<String, dynamic> j) => CheckoutInfo(
         id: j['id'] as String,
         totalAmount: (j['total_amount'] as num?)?.toDouble() ?? 0,
         platformFeeTotal: (j['platform_fee_total'] as num?)?.toDouble() ?? 0,
+        shippingFee: (j['shipping_fee'] as num?)?.toDouble() ?? 0,
         status: (j['status'] as String?) ?? 'pending_payment',
         proofPath: j['proof_path'] as String?,
       );
@@ -70,8 +76,16 @@ class PaymentRepository {
     return CheckoutInfo.fromJson(data);
   }
 
-  /// Upload the buyer's transfer proof and mark the checkout awaiting review.
-  Future<void> submitProof(String checkoutId, Uint8List bytes) async {
+  /// Sube el comprobante y lo envía con los datos del OCR.
+  /// El backend decide: si el monto OCR cubre el total → 'paid' (automático);
+  /// si no → 'awaiting_confirmation' (revisión del admin).
+  /// Devuelve el estado resultante ('paid' | 'awaiting_confirmation').
+  Future<String> submitProof(
+    String checkoutId,
+    Uint8List bytes, {
+    double? ocrAmount,
+    String? ocrReference,
+  }) async {
     final uid = _client.auth.currentUser?.id;
     if (uid == null) throw Exception('Sin sesión.');
 
@@ -82,9 +96,22 @@ class PaymentRepository {
           fileOptions: const FileOptions(
               contentType: 'image/jpeg', upsert: true),
         );
-    await _client.from('checkouts').update({
-      'proof_path': path,
-      'status': 'awaiting_confirmation',
-    }).eq('id', checkoutId);
+
+    final res = await _client.rpc('submit_payment_proof', params: {
+      'p_checkout': checkoutId,
+      'p_proof_path': path,
+      'p_ocr_amount': ocrAmount,
+      'p_ocr_ref': ocrReference,
+    });
+    return (res as Map)['status'] as String? ?? 'awaiting_confirmation';
+  }
+
+  /// URL pública del QR de cobro de Baratito (bucket platform-assets).
+  static String? qrUrl(String? path) {
+    if (path == null || path.isEmpty) return null;
+    if (path.startsWith('http')) return path;
+    return SupabaseClientHelper.client.storage
+        .from('platform-assets')
+        .getPublicUrl(path);
   }
 }
