@@ -77,9 +77,15 @@ class _MainShellState extends ConsumerState<MainShell> {
       return;
     }
 
-    // Gate: solo usuarios verificados pueden publicar.
+    // Los admins están exentos de la verificación de identidad.
+    final isAdmin = ref.read(isAdminProvider).maybeWhen(
+          data: (v) => v,
+          orElse: () => false,
+        );
+
+    // Gate: solo usuarios verificados (o admins) pueden publicar.
     final gate = ref.read(verifyGateProvider);
-    if (gate == VerifyGate.verified) {
+    if (isAdmin || gate == VerifyGate.verified) {
       context.push('/publish');
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -411,6 +417,13 @@ class _VerificationCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Los admins no necesitan verificar identidad: no mostrar la tarjeta.
+    final isAdmin = ref.watch(isAdminProvider).maybeWhen(
+          data: (v) => v,
+          orElse: () => false,
+        );
+    if (isAdmin) return const SizedBox.shrink();
+
     final gate = ref.watch(verifyGateProvider);
 
     final (IconData icon, Color color, String title, String subtitle, bool action) =

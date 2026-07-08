@@ -364,6 +364,42 @@ class _BottomCtaState extends ConsumerState<_BottomCta> {
 
   @override
   Widget build(BuildContext context) {
+    // Si el producto es del propio usuario: sin carrito, sin chat,
+    // sin favorito — solo un aviso con acceso a sus publicaciones.
+    final uid = SupabaseClientHelper.auth.currentUser?.id;
+    final isOwn = uid != null && uid == widget.product.sellerId;
+    if (isOwn) {
+      return Container(
+        padding: EdgeInsets.fromLTRB(
+            16, 12, 16, 12 + MediaQuery.of(context).padding.bottom),
+        decoration: BoxDecoration(
+          color: context.palette.surface,
+          boxShadow: [
+            BoxShadow(color: Colors.black.withAlpha(20), blurRadius: 12),
+          ],
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.storefront_outlined, color: AppColors.primary),
+            const Gap(10),
+            Expanded(
+              child: Text(
+                'Este producto es tuyo',
+                style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: context.palette.textPrimary),
+              ),
+            ),
+            TextButton(
+              onPressed: () => context.push('/my-products'),
+              child: const Text('Mis productos'),
+            ),
+          ],
+        ),
+      );
+    }
+
     final inCart = ref.watch(cartIdsProvider).maybeWhen(
           data: (ids) => ids.contains(widget.product.id),
           orElse: () => false,

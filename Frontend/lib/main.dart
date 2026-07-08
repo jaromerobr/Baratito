@@ -58,7 +58,10 @@ class BaratitoApp extends StatelessWidget {
       ],
       child: Consumer2<AuthProvider, ThemeModel>(
         builder: (context, authProvider, themeModel, _) {
-          final router = buildRouter(authProvider);
+          // El router se crea UNA sola vez y se reutiliza: si se
+          // reconstruyera en cada cambio de tema, la navegación se
+          // reiniciaría y el usuario volvería al inicio.
+          final router = rootRouter ?? buildRouter(authProvider);
 
           return MaterialApp.router(
             title: 'Baratito',
