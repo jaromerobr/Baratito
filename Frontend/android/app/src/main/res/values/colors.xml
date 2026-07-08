@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Verde Baratito: tinte del ícono y acento de las notificaciones -->
+    <color name="baratito_notification">#2D6A4F</color>
+</resources>
