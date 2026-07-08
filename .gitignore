@@ -11,3 +11,11 @@ package-lock.json
 # Secretos del servicio de verificación (service_role key) — NUNCA subir
 Backend/verification_service/.env
 __pycache__/
+
+# Llave privada de la cuenta de servicio de Firebase — NUNCA subir
+# (google-services.json SÍ es commiteable; este otro NO)
+*firebase-adminsdk*.json
+service-account*.json
+
+# Temporales del CLI de Supabase
+supabase/.temp/
