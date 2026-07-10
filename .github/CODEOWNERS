@@ -1,0 +1,76 @@
+# CODEOWNERS — Baratito
+# Última actualización: 10 de junio de 2026
+# Asignación explícita de responsabilidad por módulo del proyecto
+# Formato: ruta/en/repo @usuario-github
+# ============================================================
+# MÓDULO DE AUTENTICACIÓN
+# ============================================================
+# James Romero (@jaromerobr) implementó LoginScreen y RegisterScreen
+# desde cero. Entiende la integración con Supabase Auth, manejo de
+# sesión con StreamBuilder, y flujo de tokens JWT.
+lib/features/auth/ @jaromerobr
+# ============================================================
+# MÓDULO DE PRODUCTOS - CATÁLOGO Y BÚSQUEDA
+# ============================================================
+# Angel Paladines (@StormXiz) implementó HomeScreen.
+# Conoce el flujo de datos desde Supabase (query de productos activos),
+# filtros por categoría/precio/condición, búsqueda por texto,
+# y carga asíncrona con FutureBuilder.
+lib/features/home/ @StormXiz
+# ============================================================
+# MÓDULO DE PRODUCTOS - PUBLICACIÓN
+# ============================================================
+# Angel Paladines (@StormXiz) implementó PublishProductScreen.
+# Maneja: formularios complejos, selección de imágenes de galería,
+# validación de campos, compresión de fotos, carga a Supabase Storage,
+# y guarda de metadatos en PostgreSQL.
+lib/features/products/publish/ @StormXiz
+# ============================================================
+# MÓDULO DE PRODUCTOS - DETALLE
+# ============================================================
+# Angel Paladines (@StormXiz) implementó ProductDetailScreen.
+# Muestra: galería de imágenes, datos completos del vendedor,
+# TrustScore, badge de verificación, botones de contacto y favorito.
+lib/features/products/detail/ @StormXiz
+# ============================================================
+# MÓDULO DE PERFIL DE USUARIO
+# ============================================================
+# Eduardo Pardo (@Eduardopard) implementó ProfileScreen.
+# Gestiona: visualización de datos del usuario, edición de perfil
+# (nombre, avatar, bio), histórico de ventas/compras, reseñas recibidas.
+lib/features/profile/ @Eduardopard
+# ============================================================
+# CORE - DISEÑO, COLORES, TIPOGRAFÍA
+# ============================================================
+# James Romero (@jaromerobr) definió el sistema de diseño de Baratito.
+# Colores: verde #2C5F2D, amarillo #F4D03F, espaciados, tipografía Poppins.
+# Cualquier cambio visual debe mantener coherencia con este sistema.
+lib/core/theme/ @jaromerobr
+# ============================================================
+# CORE - SERVICIOS Y CONEXIÓN A SUPABASE
+# ============================================================
+# Angel Paladines (@StormXiz) configuró Supabase connection,
+# inicialización de cliente, servicios de API (repositories),
+# y manejo de autenticación en backend.
+lib/core/services/ @StormXiz
+# ============================================================
+# CORE - RUTAS Y NAVEGACIÓN
+# ============================================================
+# James Romero (@jaromerobr) configuró Go Router.
+# Estructura de rutas, transiciones entre pantallas, deep linking,
+# guardias de autenticación.
+lib/core/router.dart @jaromerobr
+# ============================================================
+# CONFIGURACIÓN DEL PROYECTO
+# ============================================================
+# James Romero (@jaromerobr) es responsable de la configuración general.
+# pubspec.yaml (dependencias), archivos de build, variables de entorno,
+# CI/CD configuration, y GitHub actions.
+.github/ @jaromerobr
+pubspec.yaml @jaromerobr
+.gitignore @jaromerobr
+# ============================================================
+# DOCUMENTACIÓN
+# ============================================================
+# Cualquier integrante puede actualizar documentación,
+# pero al menos un revisor de la sección relevante debe verificar
