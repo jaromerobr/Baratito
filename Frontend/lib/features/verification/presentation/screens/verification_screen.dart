@@ -10,12 +10,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gap/gap.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:camera/camera.dart' show XFile;
 import 'dart:typed_data';
 import '../../../../core/theme/app_colors.dart';
 import 'package:baratito/core/theme/app_palette.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../providers/verification_provider.dart';
+import 'guided_camera_screen.dart';
 
 class VerificationScreen extends ConsumerWidget {
   const VerificationScreen({super.key});
@@ -135,18 +136,26 @@ class _CaptureForm extends ConsumerStatefulWidget {
 }
 
 class _CaptureFormState extends ConsumerState<_CaptureForm> {
-  final _picker = ImagePicker();
   Uint8List? _front;
   Uint8List? _back;
   Uint8List? _selfie;
   bool _loading = false;
 
-  Future<Uint8List?> _capture({required CameraDevice camera}) async {
-    final file = await _picker.pickImage(
-      source: ImageSource.camera,
-      preferredCameraDevice: camera,
-      imageQuality: 80,
-      maxWidth: 1280,
+  /// Abre la cámara guiada (cuadrícula para cédula, óvalo para rostro)
+  /// y devuelve los bytes de la foto capturada.
+  Future<Uint8List?> _capture({
+    required GuidedCaptureMode mode,
+    required String title,
+    required String instruction,
+  }) async {
+    final file = await Navigator.of(context).push<XFile?>(
+      MaterialPageRoute(
+        builder: (_) => GuidedCameraScreen(
+          mode: mode,
+          title: title,
+          instruction: instruction,
+        ),
+      ),
     );
     if (file == null) return null;
     return file.readAsBytes();
@@ -256,33 +265,48 @@ class _CaptureFormState extends ConsumerState<_CaptureForm> {
         const Gap(20),
         _CaptureTile(
           label: 'Cédula — parte frontal',
-          hint: 'Foto clara del frente de tu cédula',
+          hint: 'Ubícala dentro del marco con cuadrícula',
           icon: Icons.badge_outlined,
           bytes: _front,
           onTap: () async {
-            final b = await _capture(camera: CameraDevice.rear);
+            final b = await _capture(
+              mode: GuidedCaptureMode.document,
+              title: 'Cédula — parte frontal',
+              instruction:
+                  'Ubica el frente de tu cédula dentro del marco, sin brillos',
+            );
             if (b != null) setState(() => _front = b);
           },
         ),
         const Gap(12),
         _CaptureTile(
           label: 'Cédula — parte posterior',
-          hint: 'Foto clara del reverso de tu cédula',
+          hint: 'Ubícala dentro del marco con cuadrícula',
           icon: Icons.badge_outlined,
           bytes: _back,
           onTap: () async {
-            final b = await _capture(camera: CameraDevice.rear);
+            final b = await _capture(
+              mode: GuidedCaptureMode.document,
+              title: 'Cédula — parte posterior',
+              instruction:
+                  'Ubica el reverso de tu cédula dentro del marco, sin brillos',
+            );
             if (b != null) setState(() => _back = b);
           },
         ),
         const Gap(12),
         _CaptureTile(
           label: 'Selfie en vivo',
-          hint: 'Tómate una foto ahora (no se permite galería)',
+          hint: 'Ubica tu rostro dentro del óvalo',
           icon: Icons.face_retouching_natural,
           bytes: _selfie,
           onTap: () async {
-            final b = await _capture(camera: CameraDevice.front);
+            final b = await _capture(
+              mode: GuidedCaptureMode.face,
+              title: 'Selfie',
+              instruction:
+                  'Ubica tu rostro dentro del óvalo, con buena luz y sin gorra',
+            );
             if (b != null) setState(() => _selfie = b);
           },
         ),
