@@ -3,7 +3,7 @@
 Marketplace de compra-venta de segunda mano para **Loja, Ecuador** (estilo Depop/Wallapop).
 Documento de estado: **qué está hecho, qué funciona, y qué falta por hacer/mejorar**, explicado desde el login hasta lo último implementado.
 
-> Última actualización: 2026-07-06 · Rama de trabajo: `Eduardo`
+> Última actualización: 2026-07-09 · Rama de trabajo: `Eduardo`
 
 ---
 
@@ -62,6 +62,7 @@ Scripts SQL en `Backend/` — correr **en orden** en el SQL Editor de Supabase:
 | `09_push_tokens_setup.sql` | RLS de `push_tokens` (tokens FCM multi-dispositivo) |
 | `10_notifications_push.sql` | Triggers de notificaciones + webhook pg_net → Edge Function |
 | `11_payments_shipping_ocr.sql` | Comisión 8%, envío, RPC de validación OCR, QR, anti auto-compra |
+| `12_fix_push_tokens.sql` | RPCs de tokens push: reasignación correcta al cambiar de cuenta en un dispositivo |
 
 **Edge Function:** `supabase/functions/send-push/index.ts` — se despliega con `supabase functions deploy send-push` (requiere el secreto `FIREBASE_SERVICE_ACCOUNT`).
 
@@ -107,6 +108,7 @@ Scripts SQL en `Backend/` — correr **en orden** en el SQL Editor de Supabase:
 
 ### 3.6 Verificación de identidad (KYC) — probada de punta a punta ✅
 - Flujo: cédula frontal + posterior + **selfie en vivo** (cámara frontal) → bucket privado → servicio Python compara rostros.
+- **Cámara guiada** (sugerencia de los testers): la captura se hace con una cámara propia dentro de la app — marco con la **proporción real de la cédula + cuadrícula** de tercios para el documento, y **óvalo** donde ubicar el rostro para el selfie, con instrucciones en pantalla y el resto oscurecido.
 - Motor: DeepFace **Facenet512** con detector **RetinaFace** (el haarcascade por defecto fallaba con la foto pequeña de la cédula) + **corrección de rotación EXIF** de las fotos de celular.
 - **Regla de decisión (interna):** coincidencia **>70% → aprobado automático**; **≤70% → revisión manual** por el equipo. **El sistema nunca rechaza solo** — rechazar es siempre decisión humana.
 - Al aprobar (auto o admin), trigger marca `profiles.is_verified = true`.
@@ -150,6 +152,7 @@ El parser OCR está **calibrado con comprobantes reales del Banco de Loja** (ign
 
 ### 3.10 Chat en tiempo real
 - Conversaciones + mensajes en vivo (Supabase Realtime), doble check de leído; se abre desde "Contactar".
+- La **lista de chats también se actualiza en vivo**: un mensaje o conversación nueva recarga la pestaña automáticamente, sin refrescar a mano.
 
 ### 3.11 Perfil
 - Editar nombre, usuario único, teléfono, bio y avatar. Accesos a Mis productos (En venta/Vendidos), Mis compras, tema oscuro y panel admin (si aplica).
@@ -175,9 +178,14 @@ El parser OCR está **calibrado con comprobantes reales del Banco de Loja** (ign
 
 - **Envío automático (sin humanos):** trigger de Postgres en el evento → fila en `notifications` (historial in-app) → `pg_net` llama a la Edge Function `send-push` → FCM HTTP v1 (OAuth con la service account) → todos los **dispositivos activos** del usuario (`push_tokens`, multi-dispositivo). Tokens de apps desinstaladas se marcan inactivos automáticamente.
 - Modelo de tokens: una fila por dispositivo con `is_active` (se desactiva al cerrar sesión), documentado en el README ("Decisiones técnicas S9").
+- **Cambio de cuenta en el mismo dispositivo:** el token se registra vía RPC (`register_push_token`, script 12) que **reasigna el aparato a quien esté autenticado** — antes el token quedaba a nombre del usuario anterior y el nuevo no recibía notificaciones.
 
 ### 3.14 🗺️ Mapas
 - `flutter_map` + OpenStreetMap (decisión documentada: sin API key, sin facturación, licencia abierta) — mapa con marcador en el detalle del producto.
+
+### 3.15 📄 Términos y condiciones
+- Pantalla `/terms` con el texto completo (12 secciones con las reglas reales: verificación y privacidad de la cédula, publicaciones prohibidas, pagos con comisión 8%, envíos, conducta, datos personales y contacto).
+- Enlazada desde el **checkbox del registro** (texto subrayado, accesible sin cuenta) y desde el **menú del perfil**.
 
 ---
 
@@ -251,6 +259,6 @@ Ejecutar los scripts SQL `00` → `11` en orden (sección 2).
 
 ## 7. Resumen ejecutivo
 
-**Funciona hoy:** registro/login con OTP, verificación de identidad con reconocimiento facial (auto >70%, revisión humana el resto, probada end-to-end), catálogo con filtros y mapa, publicar con fotos, favoritos, carrito multi-vendedor con **envío** ($2 / $1×vendedor), **pagos por transferencia al Banco de Loja con QR y validación automática del comprobante por OCR** (comisión 8% para Baratito, payouts por vendedor), chat en tiempo real, **notificaciones push automáticas con la marca Baratito** (mensaje, venta, pago, verificación — generadas por el backend, sin tocar la consola de Firebase), perfil editable, tema oscuro persistente y panel de administración completo (métricas, verificaciones y pagos con aprobar/rechazar).
+**Funciona hoy:** registro/login con OTP (con **términos y condiciones legibles** desde el registro), verificación de identidad con reconocimiento facial (auto >70%, revisión humana el resto, probada end-to-end, con **cámara guiada**: cuadrícula para la cédula y óvalo para el rostro), catálogo con filtros y mapa, publicar con fotos, favoritos, carrito multi-vendedor con **envío** ($2 / $1×vendedor), **pagos por transferencia al Banco de Loja con QR y validación automática del comprobante por OCR** (comisión 8% para Baratito, payouts por vendedor), **chat en tiempo real con lista que se refresca sola**, **notificaciones push automáticas con la marca Baratito** (mensaje, venta, pago, verificación — generadas por el backend y correctas incluso al cambiar de cuenta en el mismo dispositivo), perfil editable, tema oscuro persistente y panel de administración completo (métricas, verificaciones y pagos con aprobar/rechazar).
 
 **Lo más importante por construir:** desplegar el servicio de verificación a la nube (quitar la dependencia de la PC local), cerrar el ciclo del pedido (enviado/entregado + payouts pagados + producto vendido), terminar el dominio de correo, y reseñas/reputación.
