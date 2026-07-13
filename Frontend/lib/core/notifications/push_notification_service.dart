@@ -223,6 +223,9 @@ class PushNotificationService {
   }
 
   // ── Registro del token en Supabase (multi-dispositivo) ──
+  // Se hace vía RPC (register_push_token) para que el token del
+  // dispositivo se reasigne correctamente cuando OTRO usuario inicia
+  // sesión en el mismo aparato (un upsert directo lo impedía el RLS).
   Future<void> _syncToken() async {
     final uid = SupabaseClientHelper.auth.currentUser?.id;
     if (uid == null) return; // se guardará cuando inicie sesión
@@ -230,13 +233,11 @@ class PushNotificationService {
     if (token == null) return;
 
     try {
-      await SupabaseClientHelper.client.from('push_tokens').upsert({
-        'user_id': uid,
-        'token': token,
-        'platform': Platform.isIOS ? 'ios' : 'android',
-        'is_active': true,
-        'updated_at': DateTime.now().toUtc().toIso8601String(),
-      }, onConflict: 'token');
+      await SupabaseClientHelper.client.rpc('register_push_token', params: {
+        'p_token': token,
+        'p_platform': Platform.isIOS ? 'ios' : 'android',
+      });
+      debugPrint('Token FCM registrado para el usuario actual');
     } catch (e) {
       debugPrint('No se pudo guardar el token FCM: $e');
     }
@@ -247,8 +248,7 @@ class PushNotificationService {
       final token = await _fcm.getToken();
       if (token == null) return;
       await SupabaseClientHelper.client
-          .from('push_tokens')
-          .update({'is_active': false}).eq('token', token);
+          .rpc('deactivate_push_token', params: {'p_token': token});
     } catch (e) {
       debugPrint('No se pudo desactivar el token FCM: $e');
     }

@@ -28,6 +28,14 @@ class ConversationsScreen extends ConsumerWidget {
       );
     }
 
+    // Refresco en vivo: cualquier cambio en las conversaciones del usuario
+    // (mensaje nuevo, conversación nueva) recarga la lista automáticamente.
+    ref.listen(conversationChangesProvider, (previous, next) {
+      if (previous?.valueOrNull != null || next.valueOrNull != null) {
+        ref.invalidate(conversationsProvider);
+      }
+    });
+
     final async = ref.watch(conversationsProvider);
 
     return async.when(

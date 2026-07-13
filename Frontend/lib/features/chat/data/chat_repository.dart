@@ -63,6 +63,15 @@ class ChatRepository {
     return row['id'] as String;
   }
 
+  /// Cambios en vivo de las conversaciones del usuario (sin joins).
+  /// RLS limita las filas a las conversaciones donde participa, así que
+  /// no hace falta filtro: cualquier evento indica que hay algo nuevo.
+  Stream<List<Map<String, dynamic>>> streamConversationChanges() {
+    return _client
+        .from('conversations')
+        .stream(primaryKey: ['id']).order('last_message_at');
+  }
+
   /// Real-time stream of messages in a conversation (oldest → newest).
   Stream<List<Message>> streamMessages(String conversationId) {
     return _client
