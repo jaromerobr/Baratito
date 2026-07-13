@@ -278,6 +278,12 @@ class _ProfileTab extends ConsumerWidget {
               subtitle: 'Foto, nombre, bio y más',
               onTap: () => context.push('/profile/edit'),
             ),
+            _MenuItem(
+              icon: Icons.description_outlined,
+              label: 'Términos y condiciones',
+              subtitle: 'Cómo funciona Baratito',
+              onTap: () => context.push('/terms'),
+            ),
             const Gap(8),
             const _AdminEntry(),
             const Gap(16),

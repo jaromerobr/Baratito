@@ -121,9 +121,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       onChanged: (v) => setState(() => _acceptedTerms = v ?? false),
                     ),
                     Expanded(
-                      child: Text(
-                        'Acepto los términos y condiciones',
-                        style: TextStyle(color: context.palette.textPrimary),
+                      child: Text.rich(
+                        TextSpan(
+                          text: 'Acepto los ',
+                          style: TextStyle(color: context.palette.textPrimary),
+                          children: [
+                            WidgetSpan(
+                              alignment: PlaceholderAlignment.baseline,
+                              baseline: TextBaseline.alphabetic,
+                              child: GestureDetector(
+                                // Abre el texto completo de los términos.
+                                onTap: () => context.push('/terms'),
+                                child: Text(
+                                  'términos y condiciones',
+                                  style: TextStyle(
+                                    color: Theme.of(context).colorScheme.primary,
+                                    fontWeight: FontWeight.w600,
+                                    decoration: TextDecoration.underline,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ],

@@ -17,6 +17,7 @@ import '../features/chat/presentation/screens/chat_screen.dart';
 import '../features/chat/domain/chat_models.dart';
 import '../features/cart/presentation/screens/cart_screen.dart';
 import '../features/payments/presentation/checkout_payment_screen.dart';
+import '../features/legal/terms_screen.dart';
 
 const _authRoutes = [
   '/login',
@@ -40,8 +41,9 @@ GoRouter buildRouter(AuthProvider authProvider) {
       final goingToAuth = _authRoutes.contains(loc);
 
       // Rutas que un invitado (sin sesión) también puede ver.
-      final isGuestAllowed =
-          loc == '/home' || loc.startsWith('/product');
+      final isGuestAllowed = loc == '/home' ||
+          loc.startsWith('/product') ||
+          loc == '/terms';
 
       // Si no hay sesión y va a una ruta protegida → login.
       if (!loggedIn && !goingToAuth && !isGuestAllowed) return '/login';
@@ -113,6 +115,10 @@ GoRouter buildRouter(AuthProvider authProvider) {
         builder: (c, s) => CheckoutPaymentScreen(
           checkoutId: s.pathParameters['id']!,
         ),
+      ),
+      GoRoute(
+        path: '/terms',
+        builder: (c, s) => const TermsScreen(),
       ),
     ],
   );
