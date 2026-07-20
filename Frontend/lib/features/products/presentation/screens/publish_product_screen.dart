@@ -11,6 +11,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gap/gap.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
 import '../../../../core/theme/app_colors.dart';
 import 'package:baratito/core/theme/app_palette.dart';
 import '../../data/product_repository.dart';
@@ -37,6 +39,9 @@ class _PublishProductScreenState extends ConsumerState<PublishProductScreen> {
   String _conditionLabel = 'Nuevo';
   bool _negotiable = false;
   bool _loading = false;
+  // Ubicación opcional: dónde se publica. Si el usuario no la comparte, Loja.
+  String _locationCity = 'Loja';
+  bool _locating = false;
 
   @override
   void dispose() {
@@ -48,15 +53,58 @@ class _PublishProductScreenState extends ConsumerState<PublishProductScreen> {
   }
 
   Future<void> _pickImages() async {
+    // Preguntar de dónde: cámara (tomar ahora) o galería (fotos existentes).
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_camera_outlined,
+                  color: AppColors.primary),
+              title: const Text('Tomar foto'),
+              onTap: () => Navigator.pop(ctx, ImageSource.camera),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library_outlined,
+                  color: AppColors.primary),
+              title: const Text('Elegir de la galería'),
+              onTap: () => Navigator.pop(ctx, ImageSource.gallery),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (source == null) return;
+
     try {
       final picker = ImagePicker();
-      final files = await picker.pickMultiImage(imageQuality: 75);
-      if (files.isEmpty) return;
-      for (final f in files) {
-        if (_images.length >= 6) break;
+      // Redimensiona en el dispositivo antes de subir: fotos a resolución
+      // completa (varios MB) hacían la subida lenta y pesada.
+      if (source == ImageSource.camera) {
+        if (_images.length >= 6) return;
+        final f = await picker.pickImage(
+          source: ImageSource.camera,
+          imageQuality: 75,
+          maxWidth: 1600,
+        );
+        if (f == null) return;
         final bytes = await f.readAsBytes();
         final ext = f.name.toLowerCase().endsWith('.png') ? 'png' : 'jpg';
         _images.add((bytes: bytes, ext: ext));
+      } else {
+        final files = await picker.pickMultiImage(
+          imageQuality: 75,
+          maxWidth: 1600,
+        );
+        if (files.isEmpty) return;
+        for (final f in files) {
+          if (_images.length >= 6) break;
+          final bytes = await f.readAsBytes();
+          final ext = f.name.toLowerCase().endsWith('.png') ? 'png' : 'jpg';
+          _images.add((bytes: bytes, ext: ext));
+        }
       }
       setState(() {});
     } catch (_) {
@@ -66,6 +114,51 @@ class _PublishProductScreenState extends ConsumerState<PublishProductScreen> {
         );
       }
     }
+  }
+
+  /// Pide permiso de ubicación y usa la ciudad detectada. Si el usuario no la
+  /// concede o falla, se mantiene "Loja" (valor por defecto, opcional).
+  Future<void> _useMyLocation() async {
+    setState(() => _locating = true);
+    try {
+      if (!await Geolocator.isLocationServiceEnabled()) {
+        _locMsg('Activa la ubicación del dispositivo para usarla.');
+        return;
+      }
+      var perm = await Geolocator.checkPermission();
+      if (perm == LocationPermission.denied) {
+        perm = await Geolocator.requestPermission();
+      }
+      if (perm == LocationPermission.denied ||
+          perm == LocationPermission.deniedForever) {
+        _locMsg('Sin permiso de ubicación. Se usará Loja.');
+        return;
+      }
+      final pos = await Geolocator.getCurrentPosition();
+      final places =
+          await placemarkFromCoordinates(pos.latitude, pos.longitude);
+      String? city;
+      if (places.isNotEmpty) {
+        final p = places.first;
+        city = (p.locality != null && p.locality!.trim().isNotEmpty)
+            ? p.locality!.trim()
+            : p.subAdministrativeArea?.trim();
+      }
+      if (!mounted) return;
+      setState(() =>
+          _locationCity = (city == null || city.isEmpty) ? 'Loja' : city);
+    } catch (_) {
+      _locMsg('No pudimos obtener tu ubicación. Se usará Loja.');
+    } finally {
+      if (mounted) setState(() => _locating = false);
+    }
+  }
+
+  void _locMsg(String m) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(m), behavior: SnackBarBehavior.floating),
+    );
   }
 
   Future<void> _submit() async {
@@ -88,6 +181,7 @@ class _PublishProductScreenState extends ConsumerState<PublishProductScreen> {
         conditionRaw: ProductCondition.selectable[_conditionLabel]!,
         brand: _brandCtrl.text.isEmpty ? null : _brandCtrl.text,
         isNegotiable: _negotiable,
+        locationCity: _locationCity,
         images: _images,
       );
 
@@ -193,6 +287,7 @@ class _PublishProductScreenState extends ConsumerState<PublishProductScreen> {
               _label('Marca (opcional)'),
               TextFormField(
                 controller: _brandCtrl,
+                maxLength: 40,
                 decoration: _dec('Ej. Apple, Nike...'),
               ),
               const Gap(8),
@@ -205,6 +300,47 @@ class _PublishProductScreenState extends ConsumerState<PublishProductScreen> {
                 value: _negotiable,
                 activeThumbColor: AppColors.primary,
                 onChanged: (v) => setState(() => _negotiable = v),
+              ),
+              _label('Ubicación'),
+              Material(
+                color: context.palette.surface,
+                borderRadius: BorderRadius.circular(12),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(14, 6, 8, 6),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.place_outlined, color: AppColors.primary),
+                      const Gap(10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(_locationCity,
+                                style: GoogleFonts.poppins(
+                                    fontWeight: FontWeight.w700,
+                                    color: context.palette.textPrimary)),
+                            Text('Dónde se publica (opcional)',
+                                style: GoogleFonts.poppins(
+                                    fontSize: 12,
+                                    color: context.palette.textSecondary)),
+                          ],
+                        ),
+                      ),
+                      _locating
+                          ? const Padding(
+                              padding: EdgeInsets.all(8),
+                              child: SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                      strokeWidth: 2)),
+                            )
+                          : TextButton(
+                              onPressed: _useMyLocation,
+                              child: const Text('Usar mi ubicación')),
+                    ],
+                  ),
+                ),
               ),
               const Gap(16),
               SizedBox(

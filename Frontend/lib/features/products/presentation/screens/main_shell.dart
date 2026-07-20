@@ -15,6 +15,8 @@ import '../../../../core/theme/theme_provider.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../verification/presentation/providers/verification_provider.dart';
 import '../../../admin/presentation/providers/admin_provider.dart';
+import '../../../chat/domain/chat_models.dart';
+import '../../../chat/presentation/providers/chat_provider.dart';
 import '../../../chat/presentation/screens/conversations_screen.dart';
 import '../../../favorites/presentation/screens/saved_screen.dart';
 import '../../../profile/data/profile_repository.dart';
@@ -34,27 +36,44 @@ class _MainShellState extends ConsumerState<MainShell> {
 
   @override
   Widget build(BuildContext context) {
+    // Las cuentas admin no publican: sin FAB (ni muesca en la barra).
+    final isAdmin = ref.watch(isAdminProvider).maybeWhen(
+          data: (v) => v,
+          orElse: () => false,
+        );
+
     return Scaffold(
       backgroundColor: context.palette.background,
-      body: IndexedStack(
-        index: _index,
-        children: const [
-          HomeScreen(),
-          SavedScreen(),
-          ConversationsScreen(),
-          _ProfileTab(),
-        ],
+      // Evita que el teclado empuje el FAB/barra inferior hacia arriba
+      // (al abrir el buscador el "+" saltaba hacia arriba).
+      resizeToAvoidBottomInset: false,
+      // Tocar fuera de un campo oculta el teclado.
+      body: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: IndexedStack(
+          index: _index,
+          children: const [
+            HomeScreen(),
+            SavedScreen(),
+            ConversationsScreen(),
+            _ProfileTab(),
+          ],
+        ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _onPublishTap(context),
-        backgroundColor: AppColors.primary,
-        shape: const CircleBorder(),
-        child: const Icon(Icons.add, color: Colors.white, size: 30),
-      ),
+      floatingActionButton: isAdmin
+          ? null
+          : FloatingActionButton(
+              onPressed: () => _onPublishTap(context),
+              backgroundColor: AppColors.primary,
+              shape: const CircleBorder(),
+              child: const Icon(Icons.add, color: Colors.white, size: 30),
+            ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: _BottomBar(
         index: _index,
         onTap: (i) => setState(() => _index = i),
+        showFab: !isAdmin,
       ),
     );
   }
@@ -65,9 +84,13 @@ class _MainShellState extends ConsumerState<MainShell> {
       // Capturamos el router AHORA (contexto válido); la acción del SnackBar
       // se dispara después, cuando este contexto podría estar desactivado.
       final router = GoRouter.of(context);
-      ScaffoldMessenger.of(context).showSnackBar(
+      final messenger = ScaffoldMessenger.of(context);
+      messenger.clearSnackBars();
+      messenger.showSnackBar(
         SnackBar(
           content: const Text('Inicia sesión para publicar'),
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(milliseconds: 2500),
           action: SnackBarAction(
             label: 'Entrar',
             onPressed: () => router.go(AppRoutes.login),
@@ -101,14 +124,19 @@ class _MainShellState extends ConsumerState<MainShell> {
 class _BottomBar extends StatelessWidget {
   final int index;
   final ValueChanged<int> onTap;
+  final bool showFab;
 
-  const _BottomBar({required this.index, required this.onTap});
+  const _BottomBar({
+    required this.index,
+    required this.onTap,
+    this.showFab = true,
+  });
 
   @override
   Widget build(BuildContext context) {
     return BottomAppBar(
       color: context.palette.surface,
-      shape: const CircularNotchedRectangle(),
+      shape: showFab ? const CircularNotchedRectangle() : null,
       notchMargin: 8,
       height: 68,
       padding: EdgeInsets.zero,
@@ -127,7 +155,7 @@ class _BottomBar extends StatelessWidget {
             active: index == 1,
             onTap: () => onTap(1),
           ),
-          const SizedBox(width: 40), // space for the FAB notch
+          if (showFab) const SizedBox(width: 40), // space for the FAB notch
           _BarItem(
             icon: Icons.chat_bubble_rounded,
             label: 'Chats',
@@ -197,6 +225,10 @@ class _ProfileTab extends ConsumerWidget {
     final p = profileAsync.valueOrNull;
     final avatarUrl = ProfileRepository.avatarUrl(p?.avatarPath);
     final loggedIn = SupabaseClientHelper.auth.currentUser != null;
+    final isAdmin = ref.watch(isAdminProvider).maybeWhen(
+          data: (v) => v,
+          orElse: () => false,
+        );
 
     return SafeArea(
       child: ListView(
@@ -260,24 +292,56 @@ class _ProfileTab extends ConsumerWidget {
 
           // Menú
           if (loggedIn) ...[
-            _MenuItem(
-              icon: Icons.inventory_2_outlined,
-              label: 'Mis productos',
-              subtitle: 'En venta y vendidos',
-              onTap: () => context.push('/my-products'),
-            ),
-            _MenuItem(
-              icon: Icons.shopping_bag_outlined,
-              label: 'Mis compras',
-              subtitle: 'Historial de compras',
-              onTap: () => context.push('/purchases'),
-            ),
+            // Comprar/vender es solo para usuarios normales, no para admins.
+            if (!isAdmin) ...[
+              _MenuItem(
+                icon: Icons.inventory_2_outlined,
+                label: 'Mis productos',
+                subtitle: 'En venta y vendidos',
+                onTap: () => context.push('/my-products'),
+              ),
+              _MenuItem(
+                icon: Icons.shopping_bag_outlined,
+                label: 'Mis compras',
+                subtitle: 'Historial de compras',
+                onTap: () => context.push('/purchases'),
+              ),
+            ],
             _MenuItem(
               icon: Icons.person_outline,
               label: 'Editar perfil',
               subtitle: 'Foto, nombre, bio y más',
               onTap: () => context.push('/profile/edit'),
             ),
+            if (!isAdmin)
+              _MenuItem(
+                icon: Icons.support_agent_outlined,
+                label: 'Reportar un problema',
+                subtitle: 'Escríbele al equipo de Baratito',
+                onTap: () async {
+                  try {
+                    final id = await ref
+                        .read(chatRepositoryProvider)
+                        .getOrCreateSupportConversation();
+                    if (!context.mounted) return;
+                    context.push(
+                      '/chat/$id',
+                      extra: Conversation(
+                        id: id,
+                        kind: 'support',
+                        otherUserId: '',
+                        otherUserName: 'Soporte Baratito',
+                      ),
+                    );
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('No se pudo abrir soporte: $e')),
+                      );
+                    }
+                  }
+                },
+              ),
             _MenuItem(
               icon: Icons.description_outlined,
               label: 'Términos y condiciones',

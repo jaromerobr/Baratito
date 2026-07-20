@@ -10,6 +10,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import 'package:baratito/core/theme/app_palette.dart';
 import '../../../products/domain/product_model.dart';
+import '../../domain/shipping_rules.dart';
 import '../providers/cart_provider.dart';
 
 class CartScreen extends ConsumerWidget {
@@ -226,10 +227,7 @@ class _CheckoutBarState extends ConsumerState<_CheckoutBar> {
 
   @override
   Widget build(BuildContext context) {
-    // Envío: $2 con un vendedor; $1 por vendedor si son 2 o más
-    // (Baratito consolida las entregas). Misma regla que checkout_cart().
-    final shipping =
-        widget.sellerCount <= 1 ? 2.0 : widget.sellerCount * 1.0;
+    final shipping = shippingFeeForSellers(widget.sellerCount);
     final grandTotal = widget.total + shipping;
 
     return Container(

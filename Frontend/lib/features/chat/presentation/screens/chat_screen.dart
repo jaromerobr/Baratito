@@ -227,10 +227,13 @@ class _Composer extends StatelessWidget {
               controller: controller,
               minLines: 1,
               maxLines: 4,
+              // Límite real alineado con el CHECK de la base de datos (1–1000).
+              maxLength: 1000,
               textInputAction: TextInputAction.send,
               onSubmitted: (_) => onSend(),
               decoration: InputDecoration(
                 hintText: 'Escribe un mensaje...',
+                counterText: '',
                 filled: true,
                 fillColor: context.palette.inputFill,
                 contentPadding:

@@ -2,6 +2,10 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <!-- Android 13+ requiere permiso en runtime para mostrar notificaciones -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <!-- Ubicación OPCIONAL: para marcar dónde se publicó un producto.
+         Si el usuario no la concede, se usa "Loja" por defecto. -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <application
         android:label="baratito"
         android:name="${applicationName}"

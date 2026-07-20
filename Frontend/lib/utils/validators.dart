@@ -37,4 +37,26 @@ class Validators {
     if (!RegExp(r'^\d{6}$').hasMatch(v)) return 'El código solo debe tener números';
     return null;
   }
+
+  /// Teléfono OPCIONAL: vacío es válido; si se escribe, solo dígitos
+  /// (7 a 10, formato Ecuador: fijo o celular 09XXXXXXXX).
+  static String? phoneOptional(String? value) {
+    final v = value?.trim() ?? '';
+    if (v.isEmpty) return null;
+    if (!RegExp(r'^\d{7,10}$').hasMatch(v)) {
+      return 'Solo números (7 a 10 dígitos, ej. 0991234567)';
+    }
+    return null;
+  }
+
+  /// Nombre de usuario OPCIONAL: vacío es válido; si se escribe,
+  /// 3–20 caracteres con minúsculas, números, punto o guion bajo.
+  static String? usernameOptional(String? value) {
+    final v = value?.trim() ?? '';
+    if (v.isEmpty) return null;
+    if (!RegExp(r'^[a-z0-9._]{3,20}$').hasMatch(v)) {
+      return '3–20 caracteres: minúsculas, números, punto o _';
+    }
+    return null;
+  }
 }

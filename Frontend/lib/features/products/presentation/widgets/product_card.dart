@@ -1,10 +1,11 @@
 /// Product card used in the marketplace grid.
 ///
-/// Shows the primary image with "Negociable" + condition badges overlaid,
-/// then the title and price below — matching the Baratito home design.
+/// Shows the primary image with small color dots for condition (and
+/// "negociable"), then the title and price below.
 library;
 
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
 import 'package:baratito/core/theme/app_palette.dart';
@@ -21,7 +22,7 @@ class ProductCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: context.palette.surface,
-      borderRadius: BorderRadius.circular(18),
+      borderRadius: BorderRadius.zero,
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
@@ -34,30 +35,25 @@ class ProductCard extends StatelessWidget {
                 fit: StackFit.expand,
                 children: [
                   _ProductImage(url: product.primaryImageUrl),
+                  // Indicadores discretos: un punto de color por condición y,
+                  // si aplica, otro para "negociable". Ocupan poco y dejan ver
+                  // mejor el producto que las antiguas etiquetas de texto.
                   Positioned(
                     top: 8,
                     left: 8,
-                    right: 8,
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        if (product.isNegotiable)
-                          Flexible(
-                            child: _Badge(
-                              text: 'Negociable',
-                              color: AppColors.accent,
-                              textColor: Colors.white,
-                            ),
-                          )
-                        else
-                          const SizedBox.shrink(),
-                        Flexible(
-                          child: _Badge(
-                            text: product.conditionLabel,
-                            color: Colors.black.withAlpha(140),
-                            textColor: Colors.white,
-                          ),
+                        _ConditionDot(
+                          color: conditionColor(product.condition),
+                          tooltip: product.conditionLabel,
                         ),
+                        if (product.isNegotiable) ...[
+                          const SizedBox(width: 6),
+                          const _ConditionDot(
+                            color: Color(0xFF8E5BF2),
+                            tooltip: 'Negociable',
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -122,23 +118,23 @@ class _ProductImage extends StatelessWidget {
         ),
       );
     }
-    return Image.network(
-      url!,
+    // CachedNetworkImage cachea en memoria y disco: al volver a la pantalla
+    // las imágenes aparecen al instante, sin recargar desde la red.
+    return CachedNetworkImage(
+      imageUrl: url!,
       fit: BoxFit.cover,
-      loadingBuilder: (context, child, progress) {
-        if (progress == null) return child;
-        return Container(
-          color: context.palette.inputFill,
-          child: const Center(
-            child: SizedBox(
-              width: 22,
-              height: 22,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            ),
+      fadeInDuration: const Duration(milliseconds: 150),
+      placeholder: (context, _) => Container(
+        color: context.palette.inputFill,
+        child: const Center(
+          child: SizedBox(
+            width: 22,
+            height: 22,
+            child: CircularProgressIndicator(strokeWidth: 2),
           ),
-        );
-      },
-      errorBuilder: (context, error, stack) => Container(
+        ),
+      ),
+      errorWidget: (context, _, _) => Container(
         color: context.palette.inputFill,
         child: Icon(
           Icons.broken_image_outlined,
@@ -150,33 +146,57 @@ class _ProductImage extends StatelessWidget {
   }
 }
 
-class _Badge extends StatelessWidget {
-  final String text;
-  final Color color;
-  final Color textColor;
+/// Color que representa cada condición del producto.
+/// Público para reusarlo en la leyenda del home.
+Color conditionColor(String raw) {
+  switch (raw.toLowerCase()) {
+    case 'new':
+    case 'nuevo':
+      return const Color(0xFF27AE60); // verde — nuevo
+    case 'like_new':
+    case 'como_nuevo':
+    case 'como nuevo':
+      return const Color(0xFF2D9CDB); // azul — como nuevo
+    case 'good':
+    case 'buen_estado':
+    case 'buen estado':
+      return const Color(0xFFF2B01D); // ámbar — buen estado
+    case 'fair':
+    case 'aceptable':
+      return const Color(0xFFE67E22); // naranja — aceptable
+    case 'used':
+    case 'usado':
+    default:
+      return const Color(0xFF9AA0A6); // gris — usado
+  }
+}
 
-  const _Badge({
-    required this.text,
-    required this.color,
-    required this.textColor,
-  });
+/// Punto de color sobre la foto con borde blanco para verse en cualquier fondo.
+/// El [tooltip] muestra el significado al mantener presionado.
+class _ConditionDot extends StatelessWidget {
+  final Color color;
+  final String tooltip;
+
+  const _ConditionDot({required this.color, required this.tooltip});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Text(
-        text,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: GoogleFonts.poppins(
-          fontSize: 10,
-          fontWeight: FontWeight.w600,
-          color: textColor,
+    return Tooltip(
+      message: tooltip,
+      child: Container(
+        width: 13,
+        height: 13,
+        decoration: BoxDecoration(
+          color: color,
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.white, width: 1.6),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withAlpha(60),
+              blurRadius: 3,
+              offset: const Offset(0, 1),
+            ),
+          ],
         ),
       ),
     );

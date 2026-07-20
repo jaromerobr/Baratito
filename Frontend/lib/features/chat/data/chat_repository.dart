@@ -63,6 +63,30 @@ class ChatRepository {
     return row['id'] as String;
   }
 
+  /// Conversación de soporte del usuario actual con el equipo Baratito
+  /// (kind='support', sin producto ni vendedor). La reusa si ya existe.
+  Future<String> getOrCreateSupportConversation() async {
+    final uid = _uid;
+    if (uid == null) throw Exception('Inicia sesión para reportar.');
+
+    final existing = await _client
+        .from('conversations')
+        .select('id')
+        .eq('buyer_id', uid)
+        .eq('kind', 'support')
+        .maybeSingle();
+
+    if (existing != null) return existing['id'] as String;
+
+    final row = await _client
+        .from('conversations')
+        .insert({'buyer_id': uid, 'kind': 'support'})
+        .select('id')
+        .single();
+
+    return row['id'] as String;
+  }
+
   /// Cambios en vivo de las conversaciones del usuario (sin joins).
   /// RLS limita las filas a las conversaciones donde participa, así que
   /// no hace falta filtro: cualquier evento indica que hay algo nuevo.
@@ -78,7 +102,10 @@ class ChatRepository {
         .from('messages')
         .stream(primaryKey: ['id'])
         .eq('conversation_id', conversationId)
-        .order('sent_at')
+        // ascending: en el stream de Supabase .order() es DESCENDENTE por
+        // defecto, lo que hacía que el mensaje nuevo apareciera arriba.
+        // Con ascending: true quedan en orden cronológico (nuevo abajo).
+        .order('sent_at', ascending: true)
         .map((rows) => rows.map(Message.fromJson).toList());
   }
 

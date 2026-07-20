@@ -92,6 +92,7 @@ class ProductRepository {
     required String conditionRaw,
     String? brand,
     bool isNegotiable = false,
+    String locationCity = 'Loja',
     List<NewImage> images = const [],
   }) async {
     final userId = _client.auth.currentUser?.id;
@@ -112,6 +113,7 @@ class ProductRepository {
           'status': 'active',
           'brand': brand?.trim(),
           'is_negotiable': isNegotiable,
+          'location_city': locationCity,
           'published_at': DateTime.now().toUtc().toIso8601String(),
         })
         .select('id')
@@ -119,27 +121,35 @@ class ProductRepository {
 
     final productId = row['id'] as String;
 
-    // 2. Upload each image and register it.
-    for (var i = 0; i < images.length; i++) {
-      final img = images[i];
-      final ext = img.ext == 'png' ? 'png' : 'jpg';
-      final path = '$userId/$productId/$i.$ext';
+    // 2. Upload all images in parallel, then register them in a single insert.
+    //    (Subir en serie hacía la publicación mucho más lenta con varias fotos.)
+    final rows = await Future.wait(
+      images.asMap().entries.map((entry) async {
+        final i = entry.key;
+        final img = entry.value;
+        final ext = img.ext == 'png' ? 'png' : 'jpg';
+        final path = '$userId/$productId/$i.$ext';
 
-      await _client.storage.from(kProductImagesBucket).uploadBinary(
-            path,
-            img.bytes,
-            fileOptions: FileOptions(
-              contentType: ext == 'png' ? 'image/png' : 'image/jpeg',
-              upsert: true,
-            ),
-          );
+        await _client.storage.from(kProductImagesBucket).uploadBinary(
+              path,
+              img.bytes,
+              fileOptions: FileOptions(
+                contentType: ext == 'png' ? 'image/png' : 'image/jpeg',
+                upsert: true,
+              ),
+            );
 
-      await _client.from('product_images').insert({
-        'product_id': productId,
-        'image_path': path,
-        'is_primary': i == 0,
-        'sort_order': i,
-      });
+        return {
+          'product_id': productId,
+          'image_path': path,
+          'is_primary': i == 0,
+          'sort_order': i,
+        };
+      }),
+    );
+
+    if (rows.isNotEmpty) {
+      await _client.from('product_images').insert(rows);
     }
 
     return productId;

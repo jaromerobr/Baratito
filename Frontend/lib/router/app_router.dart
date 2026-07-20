@@ -18,6 +18,7 @@ import '../features/chat/domain/chat_models.dart';
 import '../features/cart/presentation/screens/cart_screen.dart';
 import '../features/payments/presentation/checkout_payment_screen.dart';
 import '../features/legal/terms_screen.dart';
+import '../screens/welcome_screen.dart';
 
 const _authRoutes = [
   '/login',
@@ -48,8 +49,8 @@ GoRouter buildRouter(AuthProvider authProvider) {
       // Si no hay sesión y va a una ruta protegida → login.
       if (!loggedIn && !goingToAuth && !isGuestAllowed) return '/login';
 
-      // Si hay sesión y va a una pantalla de auth → home.
-      if (loggedIn && goingToAuth) return '/home';
+      // Si hay sesión y va a una pantalla de auth → bienvenida (y de ahí al home).
+      if (loggedIn && goingToAuth) return '/welcome';
 
       return null;
     },
@@ -64,6 +65,10 @@ GoRouter buildRouter(AuthProvider authProvider) {
       GoRoute(
         path: '/reset-password',
         builder: (c, s) => ResetPasswordScreen(email: s.extra as String? ?? ''),
+      ),
+      GoRoute(
+        path: '/welcome',
+        builder: (c, s) => const WelcomeScreen(),
       ),
       GoRoute(
         path: '/home',

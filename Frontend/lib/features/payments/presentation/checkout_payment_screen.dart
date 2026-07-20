@@ -245,10 +245,14 @@ class _InfoRow extends StatelessWidget {
           Text(label,
               style: GoogleFonts.poppins(
                   fontSize: 13, color: context.palette.textSecondary)),
-          const Spacer(),
-          Text(value,
-              style: GoogleFonts.poppins(
-                  fontSize: 14, fontWeight: FontWeight.w700)),
+          const Gap(12),
+          Expanded(
+            child: Text(value,
+                textAlign: TextAlign.end,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.poppins(
+                    fontSize: 14, fontWeight: FontWeight.w700)),
+          ),
           if (copyable) ...[
             const Gap(8),
             GestureDetector(

@@ -82,6 +82,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   controller: _nameCtrl,
                   label: 'Nombre completo',
                   keyboardType: TextInputType.name,
+                  maxLength: 60,
                   validator: Validators.fullName,
                 ),
                 const SizedBox(height: 16),

@@ -2,6 +2,12 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 	<dict>
+		<key>NSCameraUsageDescription</key>
+		<string>Baratito usa la cámara para tomar fotos de tus productos y para la verificación de identidad.</string>
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>Baratito accede a tus fotos para publicar imágenes de productos y subir comprobantes.</string>
+		<key>NSLocationWhenInUseUsageDescription</key>
+		<string>Baratito usa tu ubicación (opcional) para indicar dónde se publica un producto.</string>
 		<key>CADisableMinimumFrameDurationOnPhone</key>
 		<true/>
 		<key>CFBundleDevelopmentRegion</key>

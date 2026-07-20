@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:baratito/core/theme/app_palette.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../config/app_colors.dart';
 import '../../providers/auth_provider.dart';
@@ -13,10 +14,12 @@ class EmailConfirmationScreen extends StatefulWidget {
   const EmailConfirmationScreen({super.key, required this.email});
 
   @override
-  State<EmailConfirmationScreen> createState() => _EmailConfirmationScreenState();
+  State<EmailConfirmationScreen> createState() =>
+      _EmailConfirmationScreenState();
 }
 
 class _EmailConfirmationScreenState extends State<EmailConfirmationScreen> {
+  final _formKey = GlobalKey<FormState>();
   final _codeCtrl = TextEditingController();
   bool _loading = false;
   int _resendCooldown = 30;
@@ -48,8 +51,11 @@ class _EmailConfirmationScreenState extends State<EmailConfirmationScreen> {
   }
 
   Future<void> _verify() async {
-    if (_codeCtrl.text.length != 6) return;
-    
+    // Ejecuta el validator del campo: si el código está incompleto o
+    // no es numérico, el error se muestra DEBAJO del campo (nada de
+    // fallar en silencio).
+    if (!_formKey.currentState!.validate()) return;
+
     setState(() => _loading = true);
     final error = await context.read<AuthProvider>().verifySignupCode(
       widget.email,
@@ -60,7 +66,9 @@ class _EmailConfirmationScreenState extends State<EmailConfirmationScreen> {
     setState(() => _loading = false);
 
     if (error != null) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error)));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error)));
       return;
     }
   }
@@ -68,15 +76,19 @@ class _EmailConfirmationScreenState extends State<EmailConfirmationScreen> {
   Future<void> _resend() async {
     if (_resendCooldown > 0) return;
 
-    final error = await context.read<AuthProvider>().resendSignupCode(widget.email);
+    final error = await context.read<AuthProvider>().resendSignupCode(
+      widget.email,
+    );
     if (!mounted) return;
 
     if (error != null) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error)));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error)));
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Código reenviado')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Código reenviado')));
       _startCooldown();
     }
   }
@@ -88,52 +100,57 @@ class _EmailConfirmationScreenState extends State<EmailConfirmationScreen> {
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const Icon(
-                Icons.mark_email_unread_outlined,
-                size: 80,
-                color: AppColors.secondary,
-              ),
-              const SizedBox(height: 24),
-              Text(
-                'Confirma tu cuenta',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'Enviamos un código de 6 dígitos a ${widget.email}. Ingrésalo aquí para activar tu cuenta.',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: context.palette.textSecondary),
-              ),
-              const SizedBox(height: 32),
-              AuthTextField(
-                controller: _codeCtrl,
-                label: 'Código de 6 dígitos',
-                keyboardType: TextInputType.number,
-                maxLength: 6,
-                validator: Validators.otpCode,
-              ),
-              const SizedBox(height: 24),
-              PrimaryButton(
-                label: 'Confirmar cuenta',
-                loading: _loading,
-                onPressed: _verify,
-              ),
-              const SizedBox(height: 16),
-              TextButton(
-                onPressed: _resendCooldown > 0 ? null : _resend,
-                child: Text(
-                  _resendCooldown > 0
-                      ? 'Reenviar en ${_resendCooldown}s'
-                      : 'Reenviar código',
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Icon(
+                  Icons.mark_email_unread_outlined,
+                  size: 80,
+                  color: AppColors.secondary,
                 ),
-              ),
-            ],
+                const SizedBox(height: 24),
+                Text(
+                  'Confirma tu cuenta',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Enviamos un código de 6 dígitos a ${widget.email}. Ingrésalo aquí para activar tu cuenta.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: context.palette.textSecondary),
+                ),
+                const SizedBox(height: 32),
+                AuthTextField(
+                  controller: _codeCtrl,
+                  label: 'Código de 6 dígitos',
+                  keyboardType: TextInputType.number,
+                  maxLength: 6,
+                  // Rechaza letras incluso pegadas desde el portapapeles.
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  validator: Validators.otpCode,
+                ),
+                const SizedBox(height: 24),
+                PrimaryButton(
+                  label: 'Confirmar cuenta',
+                  loading: _loading,
+                  onPressed: _verify,
+                ),
+                const SizedBox(height: 16),
+                TextButton(
+                  onPressed: _resendCooldown > 0 ? null : _resend,
+                  child: Text(
+                    _resendCooldown > 0
+                        ? 'Reenviar en ${_resendCooldown}s'
+                        : 'Reenviar código',
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

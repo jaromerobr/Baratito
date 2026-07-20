@@ -6,14 +6,12 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import 'package:baratito/core/theme/app_palette.dart';
-import '../../../../core/theme/theme_provider.dart';
-import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../admin/presentation/providers/admin_provider.dart';
 import '../../../cart/presentation/providers/cart_provider.dart';
 import '../../domain/category_model.dart';
 import '../../domain/product_model.dart';
@@ -35,6 +33,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return RefreshIndicator(
       onRefresh: () async => ref.refresh(productsProvider.future),
       child: CustomScrollView(
+        // Al arrastrar la lista se oculta el teclado.
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         slivers: [
           // ── Header (greeting + search + filtros) ────
           const SliverToBoxAdapter(child: _HomeHeader()),
@@ -46,13 +46,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
             sliver: SliverToBoxAdapter(
-              child: Text(
-                'Publicaciones recientes',
-                style: GoogleFonts.poppins(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w800,
-                  color: context.palette.textPrimary,
-                ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Publicaciones recientes',
+                      style: GoogleFonts.poppins(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        color: context.palette.textPrimary,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: 'Qué significan los colores',
+                    visualDensity: VisualDensity.compact,
+                    onPressed: () => _showConditionLegend(context),
+                    icon: Icon(Icons.info_outline,
+                        size: 20, color: context.palette.textSecondary),
+                  ),
+                ],
               ),
             ),
           ),
@@ -104,16 +117,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 }
 
 // ── Header ──────────────────────────────────────────────
-class _HomeHeader extends ConsumerWidget {
+class _HomeHeader extends ConsumerStatefulWidget {
   const _HomeHeader();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final profileAsync = ref.watch(currentUserProfileProvider);
-    final firstName = profileAsync.maybeWhen(
-      data: (p) => (p?.fullName?.trim().split(' ').first) ?? 'tú',
-      orElse: () => 'tú',
-    );
+  ConsumerState<_HomeHeader> createState() => _HomeHeaderState();
+}
+
+class _HomeHeaderState extends ConsumerState<_HomeHeader> {
+  // El buscador arranca oculto; se despliega al tocar la lupa.
+  bool _searchOpen = false;
+
+  @override
+  Widget build(BuildContext context) {
     final topPad = MediaQuery.of(context).padding.top;
 
     return Container(
@@ -124,10 +140,6 @@ class _HomeHeader extends ConsumerWidget {
           colors: [AppColors.primary, AppColors.primaryLight],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(28),
-          bottomRight: Radius.circular(28),
         ),
       ),
       child: Column(
@@ -166,55 +178,42 @@ class _HomeHeader extends ConsumerWidget {
                 ),
               ),
               const Spacer(),
-              const _ThemeToggleButton(),
+              IconButton(
+                tooltip: _searchOpen ? 'Cerrar búsqueda' : 'Buscar',
+                onPressed: () {
+                  setState(() => _searchOpen = !_searchOpen);
+                  if (!_searchOpen) FocusScope.of(context).unfocus();
+                },
+                icon: Icon(
+                  _searchOpen ? Icons.close : Icons.search,
+                  color: Colors.white,
+                ),
+              ),
               _CartButton(),
             ],
           ),
-          const Gap(18),
-          Text(
-            '¡Hola, $firstName!',
-            style: GoogleFonts.poppins(
-              fontSize: 24,
-              fontWeight: FontWeight.w800,
-              color: Colors.white,
+          // El buscador y "¿Qué buscas hoy?" solo aparecen al tocar la lupa.
+          if (_searchOpen) ...[
+            const Gap(18),
+            Text(
+              '¿Qué buscas hoy?',
+              style: GoogleFonts.poppins(
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+                color: Colors.white,
+              ),
             ),
-          ),
-          const Gap(2),
-          Text(
-            '¿Qué buscas hoy?',
-            style: GoogleFonts.poppins(
-              fontSize: 14,
-              color: Colors.white.withAlpha(220),
+            const Gap(16),
+            // Search bar + filtros
+            Row(
+              children: [
+                const Expanded(child: _SearchBar(autofocus: true)),
+                const Gap(10),
+                const _FilterButton(),
+              ],
             ),
-          ),
-          const Gap(16),
-          // Search bar + filtros
-          Row(
-            children: [
-              Expanded(child: _SearchBar()),
-              const Gap(10),
-              const _FilterButton(),
-            ],
-          ),
+          ],
         ],
-      ),
-    );
-  }
-}
-
-// ── Theme toggle (claro/oscuro) ─────────────────────────
-class _ThemeToggleButton extends StatelessWidget {
-  const _ThemeToggleButton();
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = context.watch<ThemeModel>().isDarkMode;
-    return IconButton(
-      tooltip: isDark ? 'Modo claro' : 'Modo oscuro',
-      onPressed: () => context.read<ThemeModel>().toggleTheme(),
-      icon: Icon(
-        isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
-        color: Colors.white,
       ),
     );
   }
@@ -272,7 +271,110 @@ void _openFilterSheet(BuildContext context) {
   );
 }
 
+// ── Leyenda de colores de condición ─────────────────────
+void _showConditionLegend(BuildContext context) {
+  showModalBottomSheet(
+    context: context,
+    backgroundColor: context.palette.surface,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (ctx) => SafeArea(
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+            Text('¿Qué significan los colores?',
+                style: GoogleFonts.poppins(
+                    fontSize: 16, fontWeight: FontWeight.w800)),
+            const Gap(4),
+            Text('El punto sobre cada producto indica su estado.',
+                style: GoogleFonts.poppins(
+                    fontSize: 12, color: ctx.palette.textSecondary)),
+            const Gap(14),
+            _LegendItem(
+                color: conditionColor('new'),
+                label: 'Nuevo',
+                desc: 'Sin uso, sellado o con etiqueta'),
+            _LegendItem(
+                color: conditionColor('like_new'),
+                label: 'Como nuevo',
+                desc: 'Usado muy poco, impecable'),
+            _LegendItem(
+                color: conditionColor('good'),
+                label: 'Buen estado',
+                desc: 'Usado, sin daños importantes'),
+            _LegendItem(
+                color: conditionColor('used'),
+                label: 'Usado',
+                desc: 'Con señales de uso'),
+            const Divider(height: 24),
+            _LegendItem(
+                color: const Color(0xFF8E5BF2),
+                label: 'Negociable',
+                desc: 'El precio es conversable'),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+class _LegendItem extends StatelessWidget {
+  final Color color;
+  final String label;
+  final String desc;
+  const _LegendItem(
+      {required this.color, required this.label, required this.desc});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          Container(
+            width: 14,
+            height: 14,
+            decoration: BoxDecoration(
+              color: color,
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white, width: 1.5),
+              boxShadow: [
+                BoxShadow(color: Colors.black.withAlpha(40), blurRadius: 2),
+              ],
+            ),
+          ),
+          const Gap(12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label,
+                    style: GoogleFonts.poppins(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: context.palette.textPrimary)),
+                Text(desc,
+                    style: GoogleFonts.poppins(
+                        fontSize: 12, color: context.palette.textSecondary)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _SearchBar extends ConsumerStatefulWidget {
+  final bool autofocus;
+  const _SearchBar({this.autofocus = false});
+
   @override
   ConsumerState<_SearchBar> createState() => _SearchBarState();
 }
@@ -290,6 +392,7 @@ class _SearchBarState extends ConsumerState<_SearchBar> {
   Widget build(BuildContext context) {
     return TextField(
       controller: _ctrl,
+      autofocus: widget.autofocus,
       textInputAction: TextInputAction.search,
       onSubmitted: (v) =>
           ref.read(productFiltersProvider.notifier).setSearch(v),
@@ -327,6 +430,13 @@ class _SearchBarState extends ConsumerState<_SearchBar> {
 class _CartButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Las cuentas admin no compran: sin carrito.
+    final isAdmin = ref.watch(isAdminProvider).maybeWhen(
+          data: (v) => v,
+          orElse: () => false,
+        );
+    if (isAdmin) return const SizedBox.shrink();
+
     final count = ref.watch(cartCountProvider);
     return Stack(
       clipBehavior: Clip.none,

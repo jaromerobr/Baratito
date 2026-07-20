@@ -5,6 +5,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gap/gap.dart';
@@ -12,6 +13,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import 'package:baratito/core/theme/app_palette.dart';
 import '../../../../core/supabase_client.dart';
+import '../../../admin/presentation/providers/admin_provider.dart';
 import '../../../chat/domain/chat_models.dart';
 import '../../../chat/presentation/providers/chat_provider.dart';
 import '../../../cart/presentation/providers/cart_provider.dart';
@@ -187,11 +189,13 @@ class _ImageCarouselState extends State<_ImageCarousel> {
           PageView.builder(
             itemCount: widget.urls.length,
             onPageChanged: (i) => setState(() => _page = i),
-            itemBuilder: (context, i) => Image.network(
-              widget.urls[i],
+            itemBuilder: (context, i) => CachedNetworkImage(
+              imageUrl: widget.urls[i],
               fit: BoxFit.cover,
               width: double.infinity,
-              errorBuilder: (_, _, _) => Container(
+              fadeInDuration: const Duration(milliseconds: 150),
+              placeholder: (_, _) => Container(color: context.palette.inputFill),
+              errorWidget: (_, _, _) => Container(
                 color: context.palette.inputFill,
                 child: Icon(Icons.broken_image_outlined,
                     size: 50, color: context.palette.textHint),
@@ -352,10 +356,14 @@ class _BottomCtaState extends ConsumerState<_BottomCta> {
     }
     await ref.read(cartControllerProvider).add(product.id);
     if (!mounted) return;
+    final messenger = ScaffoldMessenger.of(context);
     final router = GoRouter.of(context);
-    ScaffoldMessenger.of(context).showSnackBar(
+    messenger.clearSnackBars();
+    messenger.showSnackBar(
       SnackBar(
         content: const Text('Agregado al carrito'),
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(milliseconds: 1500),
         action: SnackBarAction(
             label: 'Ver carrito', onPressed: () => router.push('/cart')),
       ),
@@ -364,6 +372,13 @@ class _BottomCtaState extends ConsumerState<_BottomCta> {
 
   @override
   Widget build(BuildContext context) {
+    // Las cuentas admin solo miran el catálogo: sin barra de compra/contacto.
+    final isAdmin = ref.watch(isAdminProvider).maybeWhen(
+          data: (v) => v,
+          orElse: () => false,
+        );
+    if (isAdmin) return const SizedBox.shrink();
+
     // Si el producto es del propio usuario: sin carrito, sin chat,
     // sin favorito — solo un aviso con acceso a sus publicaciones.
     final uid = SupabaseClientHelper.auth.currentUser?.id;

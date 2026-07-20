@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class AuthTextField extends StatelessWidget {
   final TextEditingController controller;
@@ -9,6 +10,10 @@ class AuthTextField extends StatelessWidget {
   final int? maxLength;
   final String? Function(String?)? validator;
 
+  /// Filtros de entrada: rechazan caracteres inválidos incluso al PEGAR
+  /// desde el portapapeles (el teclado numérico por sí solo no lo impide).
+  final List<TextInputFormatter>? inputFormatters;
+
   const AuthTextField({
     super.key,
     required this.controller,
@@ -18,6 +23,7 @@ class AuthTextField extends StatelessWidget {
     this.suffixIcon,
     this.maxLength,
     this.validator,
+    this.inputFormatters,
   });
 
   @override
@@ -28,11 +34,12 @@ class AuthTextField extends StatelessWidget {
       keyboardType: keyboardType,
       maxLength: maxLength,
       validator: validator,
+      inputFormatters: inputFormatters,
       autovalidateMode: AutovalidateMode.onUserInteraction,
       decoration: InputDecoration(
         labelText: label,
         suffixIcon: suffixIcon,
-        counterText: '', 
+        counterText: '',
       ),
     );
   }

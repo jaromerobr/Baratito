@@ -51,8 +51,10 @@ class _LoginScreenState extends State<LoginScreen> {
     final isDark = context.watch<ThemeModel>().isDarkMode;
 
     return Scaffold(
+      // Fondo explícito para que el overscroll no muestre una franja negra.
+      backgroundColor: context.palette.background,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: context.palette.background,
         elevation: 0,
         actions: [
           IconButton(
@@ -64,6 +66,7 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
+          physics: const ClampingScrollPhysics(),
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Form(
             key: _formKey,

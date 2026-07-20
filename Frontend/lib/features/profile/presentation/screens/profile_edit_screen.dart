@@ -1,8 +1,8 @@
 /// Edit profile screen — name, username, phone, bio and avatar.
 library;
 
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gap/gap.dart';
@@ -11,6 +11,7 @@ import 'package:supabase_flutter/supabase_flutter.dart' show PostgrestException;
 import '../../../../core/theme/app_colors.dart';
 import 'package:baratito/core/theme/app_palette.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../../utils/validators.dart';
 import '../../data/profile_repository.dart';
 
 class ProfileEditScreen extends ConsumerStatefulWidget {
@@ -143,6 +144,7 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
               _label('Nombre completo'),
               TextFormField(
                 controller: _nameCtrl,
+                maxLength: 60,
                 decoration: _dec('Tu nombre'),
                 validator: (v) =>
                     (v == null || v.trim().length < 3) ? 'Mínimo 3 caracteres' : null,
@@ -150,12 +152,24 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
               _label('Nombre de usuario'),
               TextFormField(
                 controller: _userCtrl,
+                maxLength: 20,
+                // Solo minúsculas, números, punto y guion bajo (también al pegar).
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'[a-z0-9._]')),
+                ],
+                validator: Validators.usernameOptional,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
                 decoration: _dec('@usuario (opcional)'),
               ),
               _label('Teléfono'),
               TextFormField(
                 controller: _phoneCtrl,
                 keyboardType: TextInputType.phone,
+                maxLength: 10,
+                // Rechaza letras incluso pegadas desde el portapapeles.
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                validator: Validators.phoneOptional,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
                 decoration: _dec('Ej. 0991234567 (opcional)'),
               ),
               _label('Biografía'),

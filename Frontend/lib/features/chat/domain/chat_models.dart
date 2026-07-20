@@ -15,6 +15,9 @@ class Conversation {
   final String? otherUserAvatarUrl;
   final DateTime? lastMessageAt;
 
+  /// 'product' (comprador↔vendedor) o 'support' (usuario↔equipo Baratito).
+  final String kind;
+
   const Conversation({
     required this.id,
     this.productId,
@@ -24,7 +27,10 @@ class Conversation {
     required this.otherUserName,
     this.otherUserAvatarUrl,
     this.lastMessageAt,
+    this.kind = 'product',
   });
+
+  bool get isSupport => kind == 'support';
 
   /// Build from a row that embeds product, buyer and seller, picking the
   /// "other" participant relative to [currentUid].
@@ -32,18 +38,34 @@ class Conversation {
     final buyer = json['buyer'] as Map<String, dynamic>?;
     final seller = json['seller'] as Map<String, dynamic>?;
     final buyerId = json['buyer_id'] as String?;
+    final kind = json['kind'] as String? ?? 'product';
 
-    final other = (buyerId == currentUid) ? seller : buyer;
+    // Determinar el "otro" participante y su nombre.
+    final Map<String, dynamic>? other;
+    final String otherName;
+    if (kind == 'support' && buyerId == currentUid) {
+      // El usuario que reporta ve al equipo de soporte.
+      other = null;
+      otherName = 'Soporte Baratito';
+    } else if (kind == 'support') {
+      // El admin ve a la persona que reportó.
+      other = buyer;
+      otherName = (buyer?['full_name'] as String?) ?? 'Usuario';
+    } else {
+      other = (buyerId == currentUid) ? seller : buyer;
+      otherName = (other?['full_name'] as String?) ?? 'Usuario';
+    }
 
     final product = json['products'] as Map<String, dynamic>?;
 
     return Conversation(
       id: json['id'] as String,
+      kind: kind,
       productId: json['product_id'] as String?,
       productTitle: product?['title'] as String?,
       productImageUrl: _firstImage(product),
       otherUserId: (other?['id'] as String?) ?? '',
-      otherUserName: (other?['full_name'] as String?) ?? 'Usuario',
+      otherUserName: otherName,
       otherUserAvatarUrl:
           ProfileRepository.avatarUrl(other?['avatar_path'] as String?),
       lastMessageAt: json['last_message_at'] != null

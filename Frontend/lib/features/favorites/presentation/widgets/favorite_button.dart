@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import 'package:baratito/core/theme/app_palette.dart';
 import '../../../../core/supabase_client.dart';
+import '../../../admin/presentation/providers/admin_provider.dart';
 import '../providers/favorites_provider.dart';
 
 class FavoriteButton extends ConsumerWidget {
@@ -22,6 +23,13 @@ class FavoriteButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Las cuentas admin no compran ni guardan: sin botón de favorito.
+    final isAdmin = ref.watch(isAdminProvider).maybeWhen(
+          data: (v) => v,
+          orElse: () => false,
+        );
+    if (isAdmin) return const SizedBox.shrink();
+
     final isFav = ref.watch(favoriteIdsProvider).maybeWhen(
           data: (ids) => ids.contains(productId),
           orElse: () => false,

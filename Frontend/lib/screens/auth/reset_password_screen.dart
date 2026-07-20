@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:baratito/core/theme/app_palette.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -97,6 +98,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   label: 'Código de 6 dígitos',
                   keyboardType: TextInputType.number,
                   maxLength: 6,
+                  // Rechaza letras incluso pegadas desde el portapapeles.
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   validator: Validators.otpCode,
                 ),
                 const SizedBox(height: 24),

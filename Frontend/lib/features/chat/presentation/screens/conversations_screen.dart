@@ -10,6 +10,7 @@ import 'package:intl/intl.dart' show DateFormat;
 import '../../../../core/theme/app_colors.dart';
 import 'package:baratito/core/theme/app_palette.dart';
 import '../../../../core/supabase_client.dart';
+import '../../../admin/presentation/providers/admin_provider.dart';
 import '../../domain/chat_models.dart';
 import '../providers/chat_provider.dart';
 
@@ -36,6 +37,12 @@ class ConversationsScreen extends ConsumerWidget {
       }
     });
 
+    // En una cuenta admin, esta pestaña es el buzón de soporte (reportes).
+    final isAdmin = ref.watch(isAdminProvider).maybeWhen(
+          data: (v) => v,
+          orElse: () => false,
+        );
+
     final async = ref.watch(conversationsProvider);
 
     return async.when(
@@ -43,20 +50,40 @@ class ConversationsScreen extends ConsumerWidget {
       error: (e, _) => Center(child: Text('Error: $e')),
       data: (items) {
         if (items.isEmpty) {
-          return const _CenterMessage(
-            icon: Icons.chat_bubble_outline_rounded,
-            title: 'Sin conversaciones',
-            subtitle: 'Escríbele a un vendedor desde un producto',
+          return _CenterMessage(
+            icon: isAdmin
+                ? Icons.support_agent_outlined
+                : Icons.chat_bubble_outline_rounded,
+            title: isAdmin ? 'Sin reportes' : 'Sin conversaciones',
+            subtitle: isAdmin
+                ? 'Aquí llegan los reportes de los usuarios'
+                : 'Escríbele a un vendedor desde un producto',
           );
         }
         return RefreshIndicator(
           onRefresh: () async => ref.refresh(conversationsProvider.future),
-          child: ListView.separated(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            itemCount: items.length,
-            separatorBuilder: (_, _) =>
-                const Divider(height: 1, indent: 78),
-            itemBuilder: (context, i) => _ConversationTile(conv: items[i]),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (isAdmin)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 6),
+                  child: Text(
+                    'Reportes de usuarios',
+                    style: GoogleFonts.poppins(
+                        fontSize: 16, fontWeight: FontWeight.w800),
+                  ),
+                ),
+              Expanded(
+                child: ListView.separated(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  itemCount: items.length,
+                  separatorBuilder: (_, _) =>
+                      const Divider(height: 1, indent: 78),
+                  itemBuilder: (context, i) => _ConversationTile(conv: items[i]),
+                ),
+              ),
+            ],
           ),
         );
       },
