@@ -19,3 +19,6 @@ service-account*.json
 
 # Temporales del CLI de Supabase
 supabase/.temp/
+
+# Caché de Vite de la landing (se regenera sola, no debe subirse)
+frontend_web/.vite/
