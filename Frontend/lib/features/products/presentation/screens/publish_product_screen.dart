@@ -5,6 +5,8 @@
 /// the marketplace and pops back.
 library;
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -15,7 +17,6 @@ import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import '../../../../core/theme/app_colors.dart';
 import 'package:baratito/core/theme/app_palette.dart';
-import '../../data/product_repository.dart';
 import '../../domain/product_model.dart';
 import '../providers/products_provider.dart';
 
@@ -34,7 +35,7 @@ class _PublishProductScreenState extends ConsumerState<PublishProductScreen> {
   final _priceCtrl = TextEditingController();
   final _brandCtrl = TextEditingController();
 
-  final List<NewImage> _images = [];
+  final List<XFile> _images = [];
   String? _categoryId;
   String _conditionLabel = 'Nuevo';
   bool _negotiable = false;
@@ -82,6 +83,7 @@ class _PublishProductScreenState extends ConsumerState<PublishProductScreen> {
       final picker = ImagePicker();
       // Redimensiona en el dispositivo antes de subir: fotos a resolución
       // completa (varios MB) hacían la subida lenta y pesada.
+      // Guardamos el XFile tal cual; MinioService lee los bytes al subir.
       if (source == ImageSource.camera) {
         if (_images.length >= 6) return;
         final f = await picker.pickImage(
@@ -90,9 +92,7 @@ class _PublishProductScreenState extends ConsumerState<PublishProductScreen> {
           maxWidth: 1600,
         );
         if (f == null) return;
-        final bytes = await f.readAsBytes();
-        final ext = f.name.toLowerCase().endsWith('.png') ? 'png' : 'jpg';
-        _images.add((bytes: bytes, ext: ext));
+        _images.add(f);
       } else {
         final files = await picker.pickMultiImage(
           imageQuality: 75,
@@ -101,9 +101,7 @@ class _PublishProductScreenState extends ConsumerState<PublishProductScreen> {
         if (files.isEmpty) return;
         for (final f in files) {
           if (_images.length >= 6) break;
-          final bytes = await f.readAsBytes();
-          final ext = f.name.toLowerCase().endsWith('.png') ? 'png' : 'jpg';
-          _images.add((bytes: bytes, ext: ext));
+          _images.add(f);
         }
       }
       setState(() {});
@@ -405,7 +403,7 @@ class _PublishProductScreenState extends ConsumerState<PublishProductScreen> {
 
 // ── Image picker row ────────────────────────────────────
 class _ImagePickerRow extends StatelessWidget {
-  final List<NewImage> images;
+  final List<XFile> images;
   final VoidCallback onAdd;
   final ValueChanged<int> onRemove;
 
@@ -425,7 +423,7 @@ class _ImagePickerRow extends StatelessWidget {
           _AddButton(onTap: onAdd, count: images.length),
           const Gap(10),
           for (var i = 0; i < images.length; i++) ...[
-            _Thumb(bytes: images[i].bytes, onRemove: () => onRemove(i)),
+            _Thumb(file: images[i], onRemove: () => onRemove(i)),
             const Gap(10),
           ],
         ],
@@ -469,9 +467,9 @@ class _AddButton extends StatelessWidget {
 }
 
 class _Thumb extends StatelessWidget {
-  final Uint8List bytes;
+  final XFile file;
   final VoidCallback onRemove;
-  const _Thumb({required this.bytes, required this.onRemove});
+  const _Thumb({required this.file, required this.onRemove});
 
   @override
   Widget build(BuildContext context) {
@@ -479,7 +477,7 @@ class _Thumb extends StatelessWidget {
       children: [
         ClipRRect(
           borderRadius: BorderRadius.circular(14),
-          child: Image.memory(bytes,
+          child: Image.file(File(file.path),
               width: 100, height: 100, fit: BoxFit.cover),
         ),
         Positioned(

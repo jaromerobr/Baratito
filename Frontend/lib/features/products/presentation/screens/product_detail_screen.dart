@@ -5,7 +5,7 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:baratito/widgets/minio_image.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gap/gap.dart';
@@ -54,7 +54,7 @@ class _DetailBody extends StatelessWidget {
         CustomScrollView(
           slivers: [
             // ── Image carousel ──────────────────────────
-            SliverToBoxAdapter(child: _ImageCarousel(urls: product.imageUrls)),
+            SliverToBoxAdapter(child: _ImageCarousel(keys: product.imageKeys)),
 
             SliverToBoxAdapter(
               child: Padding(
@@ -161,8 +161,8 @@ class _DetailBody extends StatelessWidget {
 
 // ── Image carousel ──────────────────────────────────────
 class _ImageCarousel extends StatefulWidget {
-  final List<String> urls;
-  const _ImageCarousel({required this.urls});
+  final List<String> keys;
+  const _ImageCarousel({required this.keys});
 
   @override
   State<_ImageCarousel> createState() => _ImageCarouselState();
@@ -173,7 +173,7 @@ class _ImageCarouselState extends State<_ImageCarousel> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.urls.isEmpty) {
+    if (widget.keys.isEmpty) {
       return Container(
         height: 320,
         color: context.palette.inputFill,
@@ -187,28 +187,21 @@ class _ImageCarouselState extends State<_ImageCarousel> {
         alignment: Alignment.bottomCenter,
         children: [
           PageView.builder(
-            itemCount: widget.urls.length,
+            itemCount: widget.keys.length,
             onPageChanged: (i) => setState(() => _page = i),
-            itemBuilder: (context, i) => CachedNetworkImage(
-              imageUrl: widget.urls[i],
+            itemBuilder: (context, i) => MinioImage(
+              objectKey: widget.keys[i],
               fit: BoxFit.cover,
               width: double.infinity,
-              fadeInDuration: const Duration(milliseconds: 150),
-              placeholder: (_, _) => Container(color: context.palette.inputFill),
-              errorWidget: (_, _, _) => Container(
-                color: context.palette.inputFill,
-                child: Icon(Icons.broken_image_outlined,
-                    size: 50, color: context.palette.textHint),
-              ),
             ),
           ),
-          if (widget.urls.length > 1)
+          if (widget.keys.length > 1)
             Padding(
               padding: const EdgeInsets.only(bottom: 12),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List.generate(
-                  widget.urls.length,
+                  widget.keys.length,
                   (i) => AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
                     margin: const EdgeInsets.symmetric(horizontal: 3),

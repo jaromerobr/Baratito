@@ -30,6 +30,8 @@ dependencies:
   cached_network_image: ^3.4.1
   geolocator: ^13.0.1
   geocoding: ^3.0.0
+  minio: ^3.5.8
+  uuid: ^4.6.0
 
 dev_dependencies:
   flutter_test:

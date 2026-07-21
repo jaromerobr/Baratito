@@ -5,11 +5,6 @@
 /// for the `product_condition` enum, tolerating English or Spanish values.
 library;
 
-import '../../../core/supabase_client.dart';
-
-/// Storage bucket where product images live. Must be a *public* bucket.
-const String kProductImagesBucket = 'product-images';
-
 class Product {
   final String id;
   final String sellerId;
@@ -29,7 +24,8 @@ class Product {
   final DateTime? publishedAt;
 
   // ── Joined data ───────────────────────────────────────
-  final List<String> imageUrls;
+  /// Object keys de las imágenes en MinIO (la URL se firma al mostrarlas).
+  final List<String> imageKeys;
   final String? sellerName;
   final String? sellerAvatarPath;
   final String? categoryName;
@@ -51,14 +47,14 @@ class Product {
     this.viewsCount = 0,
     required this.createdAt,
     this.publishedAt,
-    this.imageUrls = const [],
+    this.imageKeys = const [],
     this.sellerName,
     this.sellerAvatarPath,
     this.categoryName,
   });
 
-  /// Primary image URL, or null when the product has no images.
-  String? get primaryImageUrl => imageUrls.isNotEmpty ? imageUrls.first : null;
+  /// Primary image key, or null when the product has no images.
+  String? get primaryImageKey => imageKeys.isNotEmpty ? imageKeys.first : null;
 
   /// Human-readable Spanish label for the condition.
   String get conditionLabel => ProductCondition.label(condition);
@@ -77,9 +73,10 @@ class Product {
         return ((a['sort_order'] as num?) ?? 0)
             .compareTo((b['sort_order'] as num?) ?? 0);
       });
-    final imageUrls = rawImages
-        .map((img) => _resolveImageUrl(img['image_path'] as String?))
+    final imageKeys = rawImages
+        .map((img) => img['image_path'] as String?)
         .whereType<String>()
+        .where((path) => path.isNotEmpty)
         .toList();
 
     // ── Seller (embedded profile) ──
@@ -106,23 +103,11 @@ class Product {
       publishedAt: json['published_at'] != null
           ? DateTime.parse(json['published_at'] as String)
           : null,
-      imageUrls: imageUrls,
+      imageKeys: imageKeys,
       sellerName: seller?['full_name'] as String?,
       sellerAvatarPath: seller?['avatar_path'] as String?,
       categoryName: category?['name'] as String?,
     );
-  }
-
-  /// Turns a stored `image_path` into a displayable URL.
-  ///
-  /// - If it is already a full http(s) URL → used as-is (handy for seed data).
-  /// - Otherwise it is treated as a path inside the public storage bucket.
-  static String? _resolveImageUrl(String? path) {
-    if (path == null || path.isEmpty) return null;
-    if (path.startsWith('http://') || path.startsWith('https://')) return path;
-    return SupabaseClientHelper.client.storage
-        .from(kProductImagesBucket)
-        .getPublicUrl(path);
   }
 }
 

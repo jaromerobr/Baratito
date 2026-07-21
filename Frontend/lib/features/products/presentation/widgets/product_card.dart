@@ -5,10 +5,10 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
 import 'package:baratito/core/theme/app_palette.dart';
+import 'package:baratito/widgets/minio_image.dart';
 import '../../../favorites/presentation/widgets/favorite_button.dart';
 import '../../domain/product_model.dart';
 
@@ -34,7 +34,7 @@ class ProductCard extends StatelessWidget {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  _ProductImage(url: product.primaryImageUrl),
+                  MinioImage(objectKey: product.primaryImageKey),
                   // Indicadores discretos: un punto de color por condición y,
                   // si aplica, otro para "negociable". Ocupan poco y dejan ver
                   // mejor el producto que las antiguas etiquetas de texto.
@@ -96,50 +96,6 @@ class ProductCard extends StatelessWidget {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ProductImage extends StatelessWidget {
-  final String? url;
-  const _ProductImage({required this.url});
-
-  @override
-  Widget build(BuildContext context) {
-    if (url == null) {
-      return Container(
-        color: context.palette.inputFill,
-        child: Icon(
-          Icons.image_outlined,
-          color: context.palette.textHint,
-          size: 40,
-        ),
-      );
-    }
-    // CachedNetworkImage cachea en memoria y disco: al volver a la pantalla
-    // las imágenes aparecen al instante, sin recargar desde la red.
-    return CachedNetworkImage(
-      imageUrl: url!,
-      fit: BoxFit.cover,
-      fadeInDuration: const Duration(milliseconds: 150),
-      placeholder: (context, _) => Container(
-        color: context.palette.inputFill,
-        child: const Center(
-          child: SizedBox(
-            width: 22,
-            height: 22,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          ),
-        ),
-      ),
-      errorWidget: (context, _, _) => Container(
-        color: context.palette.inputFill,
-        child: Icon(
-          Icons.broken_image_outlined,
-          color: context.palette.textHint,
-          size: 40,
         ),
       ),
     );

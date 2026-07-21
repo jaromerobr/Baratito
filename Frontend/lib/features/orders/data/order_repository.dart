@@ -2,7 +2,6 @@
 library;
 
 import '../../../core/supabase_client.dart';
-import '../../products/domain/product_model.dart' show kProductImagesBucket;
 
 /// A purchase (order) joined with minimal product/seller info.
 class PurchaseItem {
@@ -11,7 +10,7 @@ class PurchaseItem {
   final double agreedPrice;
   final DateTime createdAt;
   final String productTitle;
-  final String? productImageUrl;
+  final String? productImageKey;
   final String sellerName;
 
   const PurchaseItem({
@@ -20,7 +19,7 @@ class PurchaseItem {
     required this.agreedPrice,
     required this.createdAt,
     required this.productTitle,
-    required this.productImageUrl,
+    required this.productImageKey,
     required this.sellerName,
   });
 
@@ -51,7 +50,7 @@ class OrderRepository {
         agreedPrice: (row['agreed_price'] as num?)?.toDouble() ?? 0,
         createdAt: DateTime.parse(row['created_at'] as String),
         productTitle: (product?['title'] as String?) ?? 'Producto',
-        productImageUrl: _firstImage(product),
+        productImageKey: _firstImage(product),
         sellerName: (seller?['full_name'] as String?) ?? 'Vendedor',
       );
     }).toList();
@@ -66,9 +65,6 @@ class OrderRepository {
             .compareTo((a['is_primary'] as bool? ?? false) ? 1 : 0));
     final path = images.first['image_path'] as String?;
     if (path == null || path.isEmpty) return null;
-    if (path.startsWith('http')) return path;
-    return SupabaseClientHelper.client.storage
-        .from(kProductImagesBucket)
-        .getPublicUrl(path);
+    return path;
   }
 }

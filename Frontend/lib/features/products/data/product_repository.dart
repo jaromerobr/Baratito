@@ -4,14 +4,11 @@
 /// us independent from the exact value of the `product_status` enum.
 library;
 
-import 'dart:typed_data';
-import 'package:supabase_flutter/supabase_flutter.dart' show FileOptions;
+import 'package:image_picker/image_picker.dart';
 import '../../../core/supabase_client.dart';
+import '../../../core/minio_service.dart';
 import '../domain/product_model.dart';
 import '../domain/category_model.dart';
-
-/// One image to upload when publishing a product.
-typedef NewImage = ({Uint8List bytes, String ext});
 
 class ProductRepository {
   final _client = SupabaseClientHelper.client;
@@ -93,7 +90,7 @@ class ProductRepository {
     String? brand,
     bool isNegotiable = false,
     String locationCity = 'Loja',
-    List<NewImage> images = const [],
+    List<XFile> images = const [],
   }) async {
     final userId = _client.auth.currentUser?.id;
     if (userId == null) {
@@ -121,27 +118,17 @@ class ProductRepository {
 
     final productId = row['id'] as String;
 
-    // 2. Upload all images in parallel, then register them in a single insert.
-    //    (Subir en serie hacía la publicación mucho más lenta con varias fotos.)
+    // 2. Sube las imágenes a MinIO en paralelo (subir en serie hacía la
+    //    publicación mucho más lenta con varias fotos) y las registra en un
+    //    solo insert. La key devuelta por MinIO se guarda en `image_path`.
     final rows = await Future.wait(
       images.asMap().entries.map((entry) async {
         final i = entry.key;
-        final img = entry.value;
-        final ext = img.ext == 'png' ? 'png' : 'jpg';
-        final path = '$userId/$productId/$i.$ext';
-
-        await _client.storage.from(kProductImagesBucket).uploadBinary(
-              path,
-              img.bytes,
-              fileOptions: FileOptions(
-                contentType: ext == 'png' ? 'image/png' : 'image/jpeg',
-                upsert: true,
-              ),
-            );
+        final key = await MinioService().uploadImage(entry.value);
 
         return {
           'product_id': productId,
-          'image_path': path,
+          'image_path': key,
           'is_primary': i == 0,
           'sort_order': i,
         };

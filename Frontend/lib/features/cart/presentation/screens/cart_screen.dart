@@ -9,6 +9,7 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import 'package:baratito/core/theme/app_palette.dart';
+import 'package:baratito/widgets/minio_image.dart';
 import '../../../products/domain/product_model.dart';
 import '../../domain/shipping_rules.dart';
 import '../providers/cart_provider.dart';
@@ -153,17 +154,11 @@ class _CartRow extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       child: Row(
         children: [
-          ClipRRect(
+          MinioImage(
+            objectKey: product.primaryImageKey,
+            width: 56,
+            height: 56,
             borderRadius: BorderRadius.circular(10),
-            child: product.primaryImageUrl != null
-                ? Image.network(product.primaryImageUrl!,
-                    width: 56, height: 56, fit: BoxFit.cover)
-                : Container(
-                    width: 56,
-                    height: 56,
-                    color: context.palette.inputFill,
-                    child: Icon(Icons.image_outlined,
-                        color: context.palette.textHint)),
           ),
           const Gap(12),
           Expanded(

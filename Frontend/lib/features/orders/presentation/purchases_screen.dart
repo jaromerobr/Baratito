@@ -8,6 +8,7 @@ import 'package:gap/gap.dart';
 import 'package:intl/intl.dart' show DateFormat;
 import '../../../core/theme/app_colors.dart';
 import 'package:baratito/core/theme/app_palette.dart';
+import 'package:baratito/widgets/minio_image.dart';
 import '../../auth/presentation/providers/auth_provider.dart';
 import '../data/order_repository.dart';
 
@@ -83,18 +84,11 @@ class _PurchaseTile extends StatelessWidget {
       ),
       child: Row(
         children: [
-          ClipRRect(
+          MinioImage(
+            objectKey: item.productImageKey,
+            width: 60,
+            height: 60,
             borderRadius: BorderRadius.circular(10),
-            child: item.productImageUrl != null
-                ? Image.network(item.productImageUrl!,
-                    width: 60, height: 60, fit: BoxFit.cover)
-                : Container(
-                    width: 60,
-                    height: 60,
-                    color: context.palette.inputFill,
-                    child: Icon(Icons.image_outlined,
-                        color: context.palette.textHint),
-                  ),
           ),
           const Gap(12),
           Expanded(

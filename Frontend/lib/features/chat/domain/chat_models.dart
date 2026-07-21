@@ -1,15 +1,13 @@
 /// Chat domain models: Conversation + Message.
 library;
 
-import '../../products/domain/product_model.dart' show kProductImagesBucket;
-import '../../../core/supabase_client.dart';
 import '../../profile/data/profile_repository.dart';
 
 class Conversation {
   final String id;
   final String? productId;
   final String? productTitle;
-  final String? productImageUrl;
+  final String? productImageKey;
   final String otherUserId;
   final String otherUserName;
   final String? otherUserAvatarUrl;
@@ -22,7 +20,7 @@ class Conversation {
     required this.id,
     this.productId,
     this.productTitle,
-    this.productImageUrl,
+    this.productImageKey,
     required this.otherUserId,
     required this.otherUserName,
     this.otherUserAvatarUrl,
@@ -63,7 +61,7 @@ class Conversation {
       kind: kind,
       productId: json['product_id'] as String?,
       productTitle: product?['title'] as String?,
-      productImageUrl: _firstImage(product),
+      productImageKey: _firstImage(product),
       otherUserId: (other?['id'] as String?) ?? '',
       otherUserName: otherName,
       otherUserAvatarUrl:
@@ -80,10 +78,7 @@ class Conversation {
     if (images.isEmpty) return null;
     final path = images.first['image_path'] as String?;
     if (path == null || path.isEmpty) return null;
-    if (path.startsWith('http')) return path;
-    return SupabaseClientHelper.client.storage
-        .from(kProductImagesBucket)
-        .getPublicUrl(path);
+    return path;
   }
 }
 
