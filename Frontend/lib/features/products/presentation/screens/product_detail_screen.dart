@@ -21,6 +21,7 @@ import '../../../favorites/presentation/widgets/favorite_button.dart';
 import '../../domain/product_model.dart';
 import '../providers/products_provider.dart';
 import '../widgets/product_location_map.dart';
+import '../../../reviews/presentation/widgets/star_rating.dart';
 
 class ProductDetailScreen extends ConsumerWidget {
   final String productId;
@@ -222,52 +223,91 @@ class _ImageCarouselState extends State<_ImageCarousel> {
 }
 
 // ── Seller card ─────────────────────────────────────────
-class _SellerCard extends StatelessWidget {
+class _SellerCard extends ConsumerWidget {
   final Product product;
   const _SellerCard({required this.product});
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: context.palette.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: context.palette.divider),
-      ),
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: 24,
-            backgroundColor: AppColors.primary,
-            child: const Icon(Icons.person, color: Colors.white),
-          ),
-          const Gap(12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  product.sellerName ?? 'Vendedor',
-                  style: GoogleFonts.poppins(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                    color: context.palette.textPrimary,
-                  ),
-                ),
-                Text(
-                  'Vendedor en ${product.locationCity}',
-                  style: GoogleFonts.poppins(
-                    fontSize: 12,
-                    color: context.palette.textSecondary,
-                  ),
-                ),
-              ],
+  Widget build(BuildContext context, WidgetRef ref) {
+    return GestureDetector(
+      onTap: () => context.push('/user/${product.sellerId}'),
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: context.palette.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: context.palette.divider),
+        ),
+        child: Row(
+          children: [
+            CircleAvatar(
+              radius: 24,
+              backgroundColor: AppColors.primary,
+              child: const Icon(Icons.person, color: Colors.white),
             ),
-          ),
-          Icon(Icons.chevron_right, color: context.palette.textHint),
-        ],
+            const Gap(12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    product.sellerName ?? 'Vendedor',
+                    style: GoogleFonts.poppins(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: context.palette.textPrimary,
+                    ),
+                  ),
+                  const Gap(3),
+                  _SellerRatingLine(product: product),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right, color: context.palette.textHint),
+          ],
+        ),
       ),
+    );
+  }
+}
+
+/// Star rating for the seller, or "Primera publicación" / "Sin valoraciones
+/// aún" when there are no reviews yet.
+class _SellerRatingLine extends ConsumerWidget {
+  final Product product;
+  const _SellerRatingLine({required this.product});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (product.sellerRatingCount > 0) {
+      return StarRating(
+        rating: product.sellerRatingAvg,
+        count: product.sellerRatingCount,
+        size: 15,
+      );
+    }
+    // No reviews yet: distinguish a brand-new seller (first publication).
+    final countAsync = ref.watch(sellerPublishedCountProvider(product.sellerId));
+    final isFirst = countAsync.maybeWhen(
+      data: (n) => n <= 1,
+      orElse: () => false,
+    );
+    return Row(
+      children: [
+        Icon(
+          isFirst ? Icons.fiber_new_rounded : Icons.star_outline_rounded,
+          size: 15,
+          color: context.palette.textSecondary,
+        ),
+        const Gap(4),
+        Text(
+          isFirst ? 'Primera publicación' : 'Sin valoraciones aún',
+          style: GoogleFonts.poppins(
+            fontSize: 12,
+            color: context.palette.textSecondary,
+          ),
+        ),
+      ],
     );
   }
 }
