@@ -2,6 +2,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:baratito/widgets/baratito_app_bar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -10,6 +11,8 @@ import '../providers/admin_provider.dart';
 import 'admin_dashboard_screen.dart';
 import 'admin_verifications_screen.dart';
 import 'admin_payments_screen.dart';
+import 'admin_orders_screen.dart';
+import 'admin_reports_screen.dart';
 
 class AdminShell extends ConsumerWidget {
   const AdminShell({super.key});
@@ -23,13 +26,13 @@ class AdminShell extends ConsumerWidget {
         body: Center(child: CircularProgressIndicator()),
       ),
       error: (e, _) => Scaffold(
-        appBar: AppBar(),
+        appBar: BaratitoAppBar(),
         body: Center(child: Text('Error: $e')),
       ),
       data: (admin) {
         if (!admin) {
           return Scaffold(
-            appBar: AppBar(title: const Text('Panel de administración')),
+            appBar: BaratitoAppBar(title: const Text('Panel de administración')),
             body: Center(
               child: Padding(
                 padding: const EdgeInsets.all(24),
@@ -55,23 +58,27 @@ class AdminShell extends ConsumerWidget {
         }
 
         return DefaultTabController(
-          length: 3,
+          length: 5,
           child: Scaffold(
             backgroundColor: context.palette.background,
-            appBar: AppBar(
+            appBar: BaratitoAppBar(
               title: Text('Administración',
                   style: GoogleFonts.poppins(fontWeight: FontWeight.w700)),
               bottom: TabBar(
                 isScrollable: true,
-                labelColor: AppColors.primary,
-                unselectedLabelColor: context.palette.textSecondary,
-                indicatorColor: AppColors.primary,
+                labelColor: Colors.white,
+                unselectedLabelColor: Colors.white70,
+                indicatorColor: AppColors.accent,
                 tabs: [
                   Tab(icon: Icon(Icons.bar_chart_rounded), text: 'Resumen'),
                   Tab(
                       icon: Icon(Icons.verified_user_rounded),
                       text: 'Verificaciones'),
                   Tab(icon: Icon(Icons.payments_rounded), text: 'Pagos'),
+                  Tab(
+                      icon: Icon(Icons.local_shipping_rounded),
+                      text: 'Pedidos'),
+                  Tab(icon: Icon(Icons.flag_rounded), text: 'Reportes'),
                 ],
               ),
             ),
@@ -80,6 +87,8 @@ class AdminShell extends ConsumerWidget {
                 AdminDashboardScreen(),
                 AdminVerificationsScreen(),
                 AdminPaymentsScreen(),
+                AdminOrdersScreen(),
+                AdminReportsScreen(),
               ],
             ),
           ),

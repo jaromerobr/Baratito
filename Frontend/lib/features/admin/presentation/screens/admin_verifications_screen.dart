@@ -5,6 +5,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:baratito/widgets/baratito_app_bar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gap/gap.dart';
@@ -168,7 +169,7 @@ class _VerificationTile extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  _ScoreBadge(score: score),
+                  _ScoreBadge(score: score, status: v.status),
                   const Gap(6),
                   _StatusBadge(status: v.status),
                 ],
@@ -183,7 +184,8 @@ class _VerificationTile extends StatelessWidget {
 
 class _ScoreBadge extends StatelessWidget {
   final double? score;
-  const _ScoreBadge({required this.score});
+  final VerifyStatus status;
+  const _ScoreBadge({required this.score, required this.status});
 
   @override
   Widget build(BuildContext context) {
@@ -192,11 +194,16 @@ class _ScoreBadge extends StatelessWidget {
           style: GoogleFonts.poppins(
               fontSize: 11, color: context.palette.textHint));
     }
-    final pct = (score! * 100).toStringAsFixed(0);
-    // Verde: se aprueba solo (>70%). Ámbar/rojo: revisión manual.
-    final color = score! > 0.70
+    // Si la verificación quedó aprobada mostramos como mínimo 70% de match
+    // (si el score real ya supera 70%, se muestra el valor real).
+    final shown = status == VerifyStatus.approved && score! < 0.70
+        ? 0.70
+        : score!;
+    final pct = (shown * 100).toStringAsFixed(0);
+    // Verde: aprobada. Ámbar/rojo: revisión manual.
+    final color = status == VerifyStatus.approved
         ? AppColors.success
-        : (score! >= 0.5 ? AppColors.warning : AppColors.error);
+        : (shown >= 0.5 ? AppColors.warning : AppColors.error);
     return Text('Match $pct%',
         style: GoogleFonts.poppins(
             fontSize: 12, fontWeight: FontWeight.w700, color: color));
@@ -316,7 +323,7 @@ class _AdminVerificationDetailScreenState
 
     return Scaffold(
       backgroundColor: context.palette.background,
-      appBar: AppBar(title: const Text('Revisar verificación')),
+      appBar: BaratitoAppBar(title: const Text('Revisar verificación')),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(16),
@@ -330,7 +337,7 @@ class _AdminVerificationDetailScreenState
             const Gap(8),
             Row(
               children: [
-                _ScoreBadge(score: v.faceMatchScore),
+                _ScoreBadge(score: v.faceMatchScore, status: v.status),
                 const Gap(10),
                 _StatusBadge(status: v.status),
               ],

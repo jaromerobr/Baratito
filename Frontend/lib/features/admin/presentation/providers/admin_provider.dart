@@ -6,6 +6,7 @@ import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../data/admin_repository.dart';
 import '../../domain/admin_overview.dart';
 import '../../../verification/domain/verification_model.dart';
+import '../../../orders/domain/order_tracking_model.dart';
 
 final adminRepositoryProvider =
     Provider<AdminRepository>((ref) => AdminRepository());
@@ -41,4 +42,19 @@ final adminCheckoutsProvider =
 final commissionSummaryProvider =
     FutureProvider<Map<String, dynamic>>((ref) async {
   return ref.watch(adminRepositoryProvider).commissionSummary();
+});
+
+/// Todos los pedidos (checkouts) para el control de entrega del admin.
+final adminPedidosProvider = FutureProvider<List<PedidoTracking>>((ref) async {
+  return ref.watch(adminRepositoryProvider).getPedidos();
+});
+
+/// Reportes de usuarios (moderación).
+final adminReportsProvider = FutureProvider<List<AdminReport>>((ref) async {
+  return ref.watch(adminRepositoryProvider).getUserReports();
+});
+
+/// Apelaciones de cuentas bloqueadas.
+final adminAppealsProvider = FutureProvider<List<AdminAppeal>>((ref) async {
+  return ref.watch(adminRepositoryProvider).getAppeals();
 });
