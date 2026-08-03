@@ -3,6 +3,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:baratito/widgets/baratito_app_bar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gap/gap.dart';
@@ -21,13 +22,13 @@ class MyProductsScreen extends StatelessWidget {
       length: 2,
       child: Scaffold(
         backgroundColor: context.palette.background,
-        appBar: AppBar(
+        appBar: BaratitoAppBar(
           title: Text('Mis productos',
               style: GoogleFonts.poppins(fontWeight: FontWeight.w700)),
           bottom: TabBar(
-            labelColor: AppColors.primary,
-            unselectedLabelColor: context.palette.textSecondary,
-            indicatorColor: AppColors.primary,
+            labelColor: Colors.white,
+            unselectedLabelColor: Colors.white70,
+            indicatorColor: AppColors.accent,
             tabs: [
               Tab(text: 'En venta'),
               Tab(text: 'Vendidos'),

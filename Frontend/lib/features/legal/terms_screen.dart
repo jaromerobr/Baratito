@@ -5,6 +5,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:baratito/widgets/baratito_app_bar.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/app_colors.dart';
 import 'package:baratito/core/theme/app_palette.dart';
@@ -16,7 +17,7 @@ class TermsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: context.palette.background,
-      appBar: AppBar(
+      appBar: BaratitoAppBar(
         title: Text('Términos y Condiciones',
             style: GoogleFonts.poppins(fontWeight: FontWeight.w700)),
       ),

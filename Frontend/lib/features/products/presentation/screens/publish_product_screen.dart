@@ -8,6 +8,7 @@ library;
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:baratito/widgets/baratito_app_bar.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -204,7 +205,7 @@ class _PublishProductScreenState extends ConsumerState<PublishProductScreen> {
 
     return Scaffold(
       backgroundColor: context.palette.background,
-      appBar: AppBar(
+      appBar: BaratitoAppBar(
         title: Text('Publicar artículo',
             style: GoogleFonts.poppins(fontWeight: FontWeight.w700)),
       ),
