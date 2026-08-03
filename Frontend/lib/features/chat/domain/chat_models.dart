@@ -90,6 +90,12 @@ class Message {
   final bool isRead;
   final DateTime sentAt;
 
+  /// text | image | video | audio
+  final String type;
+
+  /// Key del objeto en MinIO (para imagen/video/audio), o null si es texto.
+  final String? mediaPath;
+
   const Message({
     required this.id,
     required this.conversationId,
@@ -97,7 +103,11 @@ class Message {
     required this.content,
     required this.isRead,
     required this.sentAt,
+    this.type = 'text',
+    this.mediaPath,
   });
+
+  bool get isMedia => type != 'text' && mediaPath != null;
 
   factory Message.fromJson(Map<String, dynamic> json) => Message(
         id: json['id'] as String,
@@ -106,5 +116,7 @@ class Message {
         content: json['content'] as String? ?? '',
         isRead: json['is_read'] as bool? ?? false,
         sentAt: DateTime.parse(json['sent_at'] as String),
+        type: json['message_type'] as String? ?? 'text',
+        mediaPath: json['media_path'] as String?,
       );
 }

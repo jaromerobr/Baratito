@@ -10,7 +10,9 @@ import 'package:intl/intl.dart' show DateFormat;
 import '../../../../core/theme/app_colors.dart';
 import 'package:baratito/core/theme/app_palette.dart';
 import '../../../../core/supabase_client.dart';
+import 'package:baratito/widgets/baratito_app_bar.dart';
 import '../../../admin/presentation/providers/admin_provider.dart';
+import '../../../moderation/presentation/providers/moderation_providers.dart';
 import '../../domain/chat_models.dart';
 import '../providers/chat_provider.dart';
 
@@ -22,10 +24,15 @@ class ConversationsScreen extends ConsumerWidget {
     final loggedIn = SupabaseClientHelper.auth.currentUser != null;
 
     if (!loggedIn) {
-      return _CenterMessage(
-        icon: Icons.lock_outline,
-        title: 'Inicia sesión',
-        subtitle: 'Necesitas una cuenta para chatear',
+      return Scaffold(
+        backgroundColor: context.palette.background,
+        appBar: const BaratitoAppBar(title: Text('Chats')),
+        body: const _CenterMessage(
+          icon: Icons.lock_outline,
+          title: 'Inicia sesión',
+          subtitle: 'Necesitas una cuenta para chatear',
+          showLogin: true,
+        ),
       );
     }
 
@@ -44,11 +51,16 @@ class ConversationsScreen extends ConsumerWidget {
         );
 
     final async = ref.watch(conversationsProvider);
+    final blocked =
+        ref.watch(blockedIdsProvider).asData?.value ?? const <String>{};
 
-    return async.when(
+    final body = async.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, _) => Center(child: Text('Error: $e')),
-      data: (items) {
+      data: (all) {
+        // Oculta chats con usuarios bloqueados.
+        final items =
+            all.where((c) => !blocked.contains(c.otherUserId)).toList();
         if (items.isEmpty) {
           return _CenterMessage(
             icon: isAdmin
@@ -62,31 +74,22 @@ class ConversationsScreen extends ConsumerWidget {
         }
         return RefreshIndicator(
           onRefresh: () async => ref.refresh(conversationsProvider.future),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              if (isAdmin)
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 6),
-                  child: Text(
-                    'Reportes de usuarios',
-                    style: GoogleFonts.poppins(
-                        fontSize: 16, fontWeight: FontWeight.w800),
-                  ),
-                ),
-              Expanded(
-                child: ListView.separated(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  itemCount: items.length,
-                  separatorBuilder: (_, _) =>
-                      const Divider(height: 1, indent: 78),
-                  itemBuilder: (context, i) => _ConversationTile(conv: items[i]),
-                ),
-              ),
-            ],
+          child: ListView.separated(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            itemCount: items.length,
+            separatorBuilder: (_, _) => const Divider(height: 1, indent: 78),
+            itemBuilder: (context, i) => _ConversationTile(conv: items[i]),
           ),
         );
       },
+    );
+
+    return Scaffold(
+      backgroundColor: context.palette.background,
+      appBar: BaratitoAppBar(
+        title: Text(isAdmin ? 'Reportes de usuarios' : 'Chats'),
+      ),
+      body: body,
     );
   }
 }
@@ -146,10 +149,12 @@ class _CenterMessage extends StatelessWidget {
   final IconData icon;
   final String title;
   final String subtitle;
+  final bool showLogin;
   const _CenterMessage({
     required this.icon,
     required this.title,
     required this.subtitle,
+    this.showLogin = false,
   });
 
   @override
@@ -167,6 +172,13 @@ class _CenterMessage extends StatelessWidget {
           Text(subtitle,
               style: GoogleFonts.poppins(
                   fontSize: 13, color: context.palette.textSecondary)),
+          if (showLogin) ...[
+            const Gap(20),
+            FilledButton(
+              onPressed: () => context.go('/login'),
+              child: const Text('Iniciar sesión'),
+            ),
+          ],
         ],
       ),
     );

@@ -107,6 +107,31 @@ class MinioService {
     }
   }
 
+  /// Sube bytes arbitrarios (p. ej. media de chat: video/audio/imagen) y
+  /// devuelve la key. [ext] sin punto (mp4, m4a, jpg…), [contentType] el MIME.
+  Future<String> uploadBytes(
+    Uint8List bytes, {
+    required String ext,
+    required String contentType,
+    String folder = 'chat',
+  }) async {
+    try {
+      final String key = '$folder/${_uuid.v4()}.$ext';
+      await _client.putObject(
+        _bucket,
+        key,
+        Stream<Uint8List>.value(bytes),
+        size: bytes.length,
+        metadata: {'Content-Type': contentType},
+      );
+      return key;
+    } on MinioError catch (e) {
+      throw MinioServiceException('No se pudo subir el archivo: ${e.message}');
+    } catch (e) {
+      throw MinioServiceException('No se pudo subir el archivo: $e');
+    }
+  }
+
   /// Devuelve una URL utilizable para mostrar la imagen dada su [key].
   ///
   /// El bucket `baratito` es privado, así que se genera una **URL firmada**

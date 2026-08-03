@@ -1,7 +1,9 @@
 /// Chat repository — conversations + real-time messages (Supabase Realtime).
 library;
 
+import 'dart:typed_data';
 import '../../../core/supabase_client.dart';
+import '../../../core/minio_service.dart';
 import '../domain/chat_models.dart';
 
 class ChatRepository {
@@ -119,6 +121,43 @@ class ChatRepository {
       'conversation_id': conversationId,
       'sender_id': uid,
       'content': text,
+    });
+  }
+
+  /// Sube un archivo (imagen/video/audio) a MinIO y envía el mensaje.
+  /// [type] = image | video | audio.
+  Future<void> sendMedia({
+    required String conversationId,
+    required Uint8List bytes,
+    required String type,
+    required String ext,
+    required String contentType,
+  }) async {
+    final uid = _uid;
+    if (uid == null) return;
+
+    final key = await MinioService().uploadBytes(
+      bytes,
+      ext: ext,
+      contentType: contentType,
+      folder: 'chat',
+    );
+
+    // Etiqueta como contenido (respeta el CHECK 1–1000 de `content` y sirve de
+    // vista previa en la lista de chats). El burbuja muestra el media, no esto.
+    final label = switch (type) {
+      'image' => '📷 Imagen',
+      'video' => '🎥 Video',
+      'audio' => '🎤 Audio',
+      _ => 'Adjunto',
+    };
+
+    await _client.from('messages').insert({
+      'conversation_id': conversationId,
+      'sender_id': uid,
+      'content': label,
+      'message_type': type,
+      'media_path': key,
     });
   }
 
