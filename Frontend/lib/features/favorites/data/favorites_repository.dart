@@ -38,6 +38,7 @@ class FavoritesRepository {
         .map((row) => row['product'] as Map<String, dynamic>?)
         .whereType<Map<String, dynamic>>()
         .map(Product.fromJson)
+        .where((p) => p.hasVisibleImage)
         .toList();
   }
 

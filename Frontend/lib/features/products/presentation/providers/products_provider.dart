@@ -3,6 +3,7 @@ library;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../moderation/presentation/providers/moderation_providers.dart';
 import '../../data/product_repository.dart';
 import '../../domain/product_model.dart';
 import '../../domain/category_model.dart';
@@ -71,12 +72,14 @@ final categoriesProvider = FutureProvider<List<Category>>((ref) async {
 final productsProvider = FutureProvider<List<Product>>((ref) async {
   final repo = ref.watch(productRepositoryProvider);
   final filters = ref.watch(productFiltersProvider);
+  final blocked = await ref.watch(blockedIdsProvider.future);
   return repo.fetchProducts(
     categoryId: filters.categoryId,
     conditions: filters.condition == null
         ? null
         : ProductCondition.rawCandidates(filters.condition!),
     search: filters.search,
+    excludeSellerIds: blocked,
   );
 });
 
@@ -92,4 +95,10 @@ final productDetailProvider =
     FutureProvider.family<Product, String>((ref, id) async {
   final repo = ref.watch(productRepositoryProvider);
   return repo.fetchProductById(id);
+});
+
+// ── Seller's published product count (for "Primera publicación") ──
+final sellerPublishedCountProvider =
+    FutureProvider.family<int, String>((ref, sellerId) async {
+  return ref.watch(productRepositoryProvider).countSellerPublished(sellerId);
 });

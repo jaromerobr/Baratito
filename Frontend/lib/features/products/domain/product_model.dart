@@ -30,6 +30,10 @@ class Product {
   final String? sellerAvatarPath;
   final String? categoryName;
 
+  /// Valoración del vendedor (promedio 0-5 y número de reseñas).
+  final double sellerRatingAvg;
+  final int sellerRatingCount;
+
   const Product({
     required this.id,
     required this.sellerId,
@@ -51,10 +55,21 @@ class Product {
     this.sellerName,
     this.sellerAvatarPath,
     this.categoryName,
+    this.sellerRatingAvg = 0,
+    this.sellerRatingCount = 0,
   });
 
   /// Primary image key, or null when the product has no images.
   String? get primaryImageKey => imageKeys.isNotEmpty ? imageKeys.first : null;
+
+  /// True si el producto tiene al menos una imagen que hoy se puede mostrar:
+  /// una key de MinIO (`products/...`) o una URL http (semilla). Los productos
+  /// que solo tienen imágenes del storage viejo de Supabase (formato
+  /// `<userId>/<productId>/<i>.<ext>`, ya inexistentes) devuelven false y se
+  /// ocultan del catálogo.
+  bool get hasVisibleImage => imageKeys.any(
+        (k) => k.startsWith('products/') || k.startsWith('http'),
+      );
 
   /// Human-readable Spanish label for the condition.
   String get conditionLabel => ProductCondition.label(condition);
@@ -107,6 +122,8 @@ class Product {
       sellerName: seller?['full_name'] as String?,
       sellerAvatarPath: seller?['avatar_path'] as String?,
       categoryName: category?['name'] as String?,
+      sellerRatingAvg: (seller?['rating_avg'] as num?)?.toDouble() ?? 0,
+      sellerRatingCount: (seller?['rating_count'] as num?)?.toInt() ?? 0,
     );
   }
 }

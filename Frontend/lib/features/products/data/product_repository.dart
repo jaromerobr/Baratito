@@ -18,7 +18,7 @@ class ProductRepository {
   static const String productRelations = '''
         *,
         product_images ( image_path, is_primary, sort_order ),
-        profiles:seller_id ( full_name, username, avatar_path ),
+        profiles:seller_id ( full_name, username, avatar_path, rating_avg, rating_count ),
         categories:category_id ( name, slug )
       ''';
   static const String _select = productRelations;
@@ -31,6 +31,7 @@ class ProductRepository {
     String? categoryId,
     List<String>? conditions,
     String? search,
+    Set<String> excludeSellerIds = const {},
     int limit = 40,
   }) async {
     var query = _client
@@ -45,6 +46,10 @@ class ProductRepository {
     if (search != null && search.trim().isNotEmpty) {
       query = query.ilike('title', '%${search.trim()}%');
     }
+    // Oculta productos de vendedores que el usuario bloqueó.
+    if (excludeSellerIds.isNotEmpty) {
+      query = query.not('seller_id', 'in', '(${excludeSellerIds.join(',')})');
+    }
 
     final data = await query
         .order('published_at', ascending: false)
@@ -53,6 +58,7 @@ class ProductRepository {
     return (data as List<dynamic>)
         .cast<Map<String, dynamic>>()
         .map(Product.fromJson)
+        .where((p) => p.hasVisibleImage)
         .toList();
   }
 
@@ -69,6 +75,24 @@ class ProductRepository {
     return (data as List<dynamic>)
         .cast<Map<String, dynamic>>()
         .map(Product.fromJson)
+        .where((p) => p.hasVisibleImage)
+        .toList();
+  }
+
+  /// Products of a given seller (para el perfil público), opcionalmente por
+  /// estado ('active' = en venta, 'sold' = vendidos).
+  Future<List<Product>> fetchUserProducts({
+    required String sellerId,
+    String? status,
+  }) async {
+    var query =
+        _client.from('products').select(_select).eq('seller_id', sellerId);
+    if (status != null) query = query.eq('status', status);
+    final data = await query.order('created_at', ascending: false);
+    return (data as List<dynamic>)
+        .cast<Map<String, dynamic>>()
+        .map(Product.fromJson)
+        .where((p) => p.hasVisibleImage)
         .toList();
   }
 
@@ -77,6 +101,17 @@ class ProductRepository {
     final data =
         await _client.from('products').select(_select).eq('id', id).single();
     return Product.fromJson(data);
+  }
+
+  /// Number of published products the seller has. Used to detect a seller's
+  /// first publication ("Primera publicación").
+  Future<int> countSellerPublished(String sellerId) async {
+    final data = await _client
+        .from('products')
+        .select('id')
+        .eq('seller_id', sellerId)
+        .not('published_at', 'is', null);
+    return (data as List).length;
   }
 
   /// Publish a new product: insert the row, upload images to storage and

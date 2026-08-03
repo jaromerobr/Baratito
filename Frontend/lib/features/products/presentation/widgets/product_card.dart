@@ -72,15 +72,24 @@ class ProductCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    product.title,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      height: 1.25,
-                      fontWeight: FontWeight.w600,
-                      color: context.palette.textPrimary,
+                  // Altura fija = 2 líneas: así el bloque de texto mide igual
+                  // en toda tarjeta y la imagen (Expanded) queda del mismo
+                  // tamaño, con o sin título de una sola línea.
+                  SizedBox(
+                    height: 36,
+                    child: Align(
+                      alignment: Alignment.topLeft,
+                      child: Text(
+                        product.title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          height: 1.25,
+                          fontWeight: FontWeight.w600,
+                          color: context.palette.textPrimary,
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 6),
