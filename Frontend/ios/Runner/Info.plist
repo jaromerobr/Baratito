@@ -8,6 +8,8 @@
 		<string>Baratito accede a tus fotos para publicar imágenes de productos y subir comprobantes.</string>
 		<key>NSLocationWhenInUseUsageDescription</key>
 		<string>Baratito usa tu ubicación (opcional) para indicar dónde se publica un producto.</string>
+		<key>NSMicrophoneUsageDescription</key>
+		<string>Baratito usa el micrófono para grabar y enviar audios en el chat.</string>
 		<key>CADisableMinimumFrameDurationOnPhone</key>
 		<true/>
 		<key>CFBundleDevelopmentRegion</key>

@@ -12,7 +12,12 @@
           "package_name": "ec.edu.uide.baratito"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "758813187933-d5bfmr3fmn6ree2jl3a8f4rdmntk708u.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBMWuLAT7ngibAW2UiyhzzfJSPIqctJUZY"
@@ -20,7 +25,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "758813187933-d5bfmr3fmn6ree2jl3a8f4rdmntk708u.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

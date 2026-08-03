@@ -1,3 +1,13 @@
+import java.util.Properties
+import java.io.FileInputStream
+
+val keyProperties = Properties()
+val keyPropertiesFile = rootProject.file("key.properties")
+if (keyPropertiesFile.exists()) {
+    keyProperties.load(FileInputStream(keyPropertiesFile))
+}
+
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -25,18 +35,29 @@ android {
 
     defaultConfig {
         applicationId = "ec.edu.uide.baratito"
-        // FCM + flutter_local_notifications requieren minSdk 23+.
-        minSdk = flutter.minSdkVersion
+        // FCM/flutter_local_notifications y el paquete `record` (audios del
+        // chat) requieren minSdk 23+.
+        minSdk = maxOf(23, flutter.minSdkVersion)
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        create("release"){
+            keyAlias = keyProperties.getProperty("keyAlias")
+            keyPassword = keyProperties.getProperty("keyPassword")
+            storeFile = keyProperties.getProperty("storeFile")?.let { file(it) }
+            storePassword = keyProperties.getProperty("storePassword")
+        }
+    }
+
     buildTypes {
-        release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+    release {
+        signingConfig = signingConfigs.getByName("release")
+
+        isMinifyEnabled = false
+        isShrinkResources = false
         }
     }
 }
