@@ -5,6 +5,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:baratito/widgets/baratito_app_bar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gap/gap.dart';
@@ -64,34 +65,9 @@ class _CheckoutPaymentScreenState extends ConsumerState<CheckoutPaymentScreen> {
       if (!mounted) return;
 
       final validated = status == 'paid';
-      await showDialog(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          title: Text(validated
-              ? '¡Pago validado! ✅'
-              : 'Comprobante en revisión 🕐'),
-          content: Text(validated
-              ? 'Leímos tu comprobante (\$${ocr?.amount?.toStringAsFixed(2)}) '
-                  'y coincide con el total. Tu pedido está confirmado; '
-                  'coordinaremos la entrega.'
-              : ocr?.amount != null
-                  ? 'El monto leído (\$${ocr!.amount!.toStringAsFixed(2)}) no '
-                      'coincide con el total (\$${checkout.totalAmount.toStringAsFixed(2)}). '
-                      'Una persona del equipo lo revisará en breve.'
-                  : 'No pudimos leer el monto del comprobante. '
-                      'Una persona del equipo lo revisará en breve.'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(ctx);
-                context.go('/home');
-                context.push('/purchases');
-              },
-              child: const Text('Ver mis compras'),
-            ),
-          ],
-        ),
-      );
+      // Tras el comprobante pedimos la dirección de entrega ("estamos
+      // verificando tu pago…"). El estado del pago se muestra ahí.
+      context.push('/delivery/${widget.checkoutId}', extra: validated);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context)
@@ -108,7 +84,7 @@ class _CheckoutPaymentScreenState extends ConsumerState<CheckoutPaymentScreen> {
 
     return Scaffold(
       backgroundColor: context.palette.background,
-      appBar: AppBar(
+      appBar: BaratitoAppBar(
         title: Text('Pagar pedido',
             style: GoogleFonts.poppins(fontWeight: FontWeight.w700)),
       ),
@@ -204,6 +180,35 @@ class _CheckoutPaymentScreenState extends ConsumerState<CheckoutPaymentScreen> {
                     value: settings.accountNumber!,
                     copyable: true,
                   ),
+                const Gap(14),
+                // Aclaración: cómo llenar el motivo/concepto de la transferencia.
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.warning.withAlpha(22),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.warning.withAlpha(80)),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(Icons.info_outline_rounded,
+                          color: AppColors.warning, size: 20),
+                      const Gap(8),
+                      Expanded(
+                        child: Text(
+                          'En el motivo o concepto de la transferencia escribe '
+                          'el producto que compras y tu nombre de usuario en la '
+                          'app. Así podemos identificar tu pago.',
+                          style: GoogleFonts.poppins(
+                              fontSize: 12.5,
+                              height: 1.35,
+                              color: context.palette.textPrimary),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
                 const Gap(24),
                 if (checkout.status == 'pending_payment')
                   _UploadButton(
