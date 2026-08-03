@@ -1,4 +1,6 @@
-/// Pantalla de bienvenida tras iniciar sesión (y al abrir la app con sesión).
+/// Pantalla de bienvenida que se muestra UNA sola vez, tras el primer inicio
+/// de sesión (persistido en [AppPrefs.seenWelcome]). En aperturas posteriores
+/// se ve solo el splash con el logo y directo al catálogo.
 ///
 /// Muestra el logo con una animación de entrada (aparece con un pequeño
 /// rebote) y "¡Bienvenido, {nombre}!" deslizándose desde abajo, y luego
@@ -10,6 +12,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/theme/app_colors.dart';
+import '../core/app_prefs.dart';
 import '../features/auth/presentation/providers/auth_provider.dart';
 import '../widgets/auth/baratito_logo.dart';
 
@@ -31,6 +34,8 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen>
   @override
   void initState() {
     super.initState();
+    // La bienvenida solo se muestra una vez en la vida de la app.
+    AppPrefs.markWelcomeSeen();
     _c = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1100),

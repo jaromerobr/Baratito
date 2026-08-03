@@ -178,15 +178,16 @@ class _GuidedCameraScreenState extends State<GuidedCameraScreen>
             ),
           ),
 
-          // ── Botón de captura ──────────────────────────
-          SafeArea(
-            child: Align(
-              alignment: Alignment.bottomCenter,
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 32),
-                child: GestureDetector(
-                  onTap: _capture,
-                  child: Container(
+          // ── Botón de captura (solo si la cámara está lista) ──
+          if (_controller != null && _controller!.value.isInitialized)
+            SafeArea(
+              child: Align(
+                alignment: Alignment.bottomCenter,
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 32),
+                  child: GestureDetector(
+                    onTap: _capture,
+                    child: Container(
                     width: 76,
                     height: 76,
                     decoration: BoxDecoration(

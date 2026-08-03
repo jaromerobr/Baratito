@@ -12,12 +12,15 @@
 /// ```
 library;
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' hide ChangeNotifierProvider;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'core/supabase_client.dart';
+import 'core/app_prefs.dart';
 import 'core/theme/theme_provider.dart';
 import 'core/theme/app_theme.dart';
 import 'core/notifications/push_notification_service.dart';
@@ -27,6 +30,7 @@ import 'router/app_router.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SupabaseClientHelper.initialize();
+  await AppPrefs.load();
 
   // Notificaciones push (FCM). El try/catch da robustez en runtime.
   // OJO: el build de Android requiere Frontend/android/app/google-services.json
@@ -34,7 +38,14 @@ Future<void> main() async {
   try {
     await Firebase.initializeApp();
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
-    await PushNotificationService.instance.init();
+    // No bloqueamos el arranque por las notificaciones: el permiso es opcional.
+    // Si el usuario no lo acepta, simplemente no recibirá notificaciones y la
+    // app continúa con normalidad (init() corre en segundo plano).
+    unawaited(
+      PushNotificationService.instance.init().catchError(
+        (e) => debugPrint('Notificaciones no inicializadas: $e'),
+      ),
+    );
   } catch (e) {
     debugPrint('Firebase/FCM no inicializado (¿falta google-services.json?): $e');
   }
