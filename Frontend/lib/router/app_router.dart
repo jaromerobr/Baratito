@@ -11,14 +11,20 @@ import '../features/products/presentation/screens/publish_product_screen.dart';
 import '../features/verification/presentation/screens/verification_screen.dart';
 import '../features/admin/presentation/screens/admin_shell.dart';
 import '../features/profile/presentation/screens/profile_edit_screen.dart';
+import '../features/profile/presentation/screens/user_profile_screen.dart';
 import '../features/products/presentation/screens/my_products_screen.dart';
 import '../features/orders/presentation/purchases_screen.dart';
+import '../features/orders/presentation/sales_screen.dart';
 import '../features/chat/presentation/screens/chat_screen.dart';
 import '../features/chat/domain/chat_models.dart';
 import '../features/cart/presentation/screens/cart_screen.dart';
 import '../features/payments/presentation/checkout_payment_screen.dart';
+import '../features/payments/presentation/delivery_form_screen.dart';
 import '../features/legal/terms_screen.dart';
 import '../screens/welcome_screen.dart';
+import '../screens/splash_screen.dart';
+import '../features/moderation/presentation/screens/blocked_account_screen.dart';
+import '../core/app_prefs.dart';
 
 const _authRoutes = [
   '/login',
@@ -34,27 +40,39 @@ GoRouter? rootRouter;
 
 GoRouter buildRouter(AuthProvider authProvider) {
   final router = GoRouter(
-    initialLocation: '/login',
+    // Arranca en el splash (solo el logo, estilo Instagram); de ahí va al
+    // catálogo. Cualquiera puede ver productos y precios sin sesión; comprar,
+    // guardar, chatear, etc. sí piden login.
+    initialLocation: '/splash',
     refreshListenable: authProvider,
     redirect: (context, state) {
       final loggedIn = authProvider.status == AuthStatus.authenticated;
       final loc = state.matchedLocation;
       final goingToAuth = _authRoutes.contains(loc);
 
+      // El splash decide él mismo a dónde ir; nunca se redirige.
+      if (loc == '/splash') return null;
+
       // Rutas que un invitado (sin sesión) también puede ver.
       final isGuestAllowed = loc == '/home' ||
           loc.startsWith('/product') ||
+          loc.startsWith('/user') ||
           loc == '/terms';
 
       // Si no hay sesión y va a una ruta protegida → login.
       if (!loggedIn && !goingToAuth && !isGuestAllowed) return '/login';
 
-      // Si hay sesión y va a una pantalla de auth → bienvenida (y de ahí al home).
-      if (loggedIn && goingToAuth) return '/welcome';
+      // Tras iniciar sesión: la bienvenida SOLO la primera vez; si ya la vio,
+      // directo al catálogo.
+      if (loggedIn && goingToAuth) {
+        return AppPrefs.seenWelcome ? '/home' : '/welcome';
+      }
 
       return null;
     },
     routes: [
+      GoRoute(path: '/splash', builder: (c, s) => const SplashScreen()),
+      GoRoute(path: '/blocked', builder: (c, s) => const BlockedAccountScreen()),
       GoRoute(path: '/login', builder: (c, s) => const LoginScreen()),
       GoRoute(path: '/register', builder: (c, s) => const RegisterScreen()),
       GoRoute(
@@ -81,6 +99,10 @@ GoRouter buildRouter(AuthProvider authProvider) {
         ),
       ),
       GoRoute(
+        path: '/user/:id',
+        builder: (c, s) => UserProfileScreen(userId: s.pathParameters['id']!),
+      ),
+      GoRoute(
         path: '/publish',
         builder: (c, s) => const PublishProductScreen(),
       ),
@@ -105,6 +127,10 @@ GoRouter buildRouter(AuthProvider authProvider) {
         builder: (c, s) => const PurchasesScreen(),
       ),
       GoRoute(
+        path: '/sales',
+        builder: (c, s) => const SalesScreen(),
+      ),
+      GoRoute(
         path: '/chat/:id',
         builder: (c, s) => ChatScreen(
           conversationId: s.pathParameters['id']!,
@@ -119,6 +145,13 @@ GoRouter buildRouter(AuthProvider authProvider) {
         path: '/checkout/:id',
         builder: (c, s) => CheckoutPaymentScreen(
           checkoutId: s.pathParameters['id']!,
+        ),
+      ),
+      GoRoute(
+        path: '/delivery/:id',
+        builder: (c, s) => DeliveryFormScreen(
+          checkoutId: s.pathParameters['id']!,
+          validated: s.extra as bool? ?? false,
         ),
       ),
       GoRoute(

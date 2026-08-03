@@ -21,6 +21,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
   bool _loading = false;
+  bool _googleLoading = false;
   bool _obscure = true;
 
   @override
@@ -46,6 +47,18 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  Future<void> _googleSignIn() async {
+    setState(() => _googleLoading = true);
+    final auth = context.read<AuthProvider>();
+    final error = await auth.signInWithGoogle();
+    if (!mounted) return;
+    setState(() => _googleLoading = false);
+    if (error != null) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error)));
+    }
+    // En éxito, el AuthProvider notifica y el router redirige solo a /welcome.
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = context.watch<ThemeModel>().isDarkMode;
@@ -56,6 +69,11 @@ class _LoginScreenState extends State<LoginScreen> {
       appBar: AppBar(
         backgroundColor: context.palette.background,
         elevation: 0,
+        // Cerrar y volver a explorar el catálogo sin sesión.
+        leading: IconButton(
+          icon: Icon(Icons.close_rounded, color: context.palette.textPrimary),
+          onPressed: () => context.go('/home'),
+        ),
         actions: [
           IconButton(
             icon: Icon(isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded),
@@ -121,16 +139,35 @@ class _LoginScreenState extends State<LoginScreen> {
                   loading: _loading,
                   onPressed: _submit,
                 ),
-                const SizedBox(height: 12),
-                OutlinedButton(
-                  onPressed: () => context.go('/home'),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(child: Divider(color: context.palette.divider)),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: Text('o',
+                          style: TextStyle(color: context.palette.textSecondary)),
+                    ),
+                    Expanded(child: Divider(color: context.palette.divider)),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                OutlinedButton.icon(
+                  onPressed: _googleLoading ? null : _googleSignIn,
                   style: OutlinedButton.styleFrom(
                     foregroundColor: context.palette.textPrimary,
                     side: BorderSide(color: context.palette.divider),
                     minimumSize: const Size.fromHeight(52),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14)),
                   ),
-                  child: const Text('Ver como invitado'),
+                  icon: _googleLoading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2))
+                      : const _GoogleG(),
+                  label: const Text('Continuar con Google'),
                 ),
                 const SizedBox(height: 24),
                 Row(
@@ -147,6 +184,23 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// "G" de Google para el botón (color azul de marca de Google).
+class _GoogleG extends StatelessWidget {
+  const _GoogleG();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Text(
+      'G',
+      style: TextStyle(
+        fontSize: 20,
+        fontWeight: FontWeight.w900,
+        color: Color(0xFF4285F4),
       ),
     );
   }

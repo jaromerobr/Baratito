@@ -43,6 +43,21 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  /// Inicia sesión con Google. Devuelve null en éxito o cancelación
+  /// (en éxito, el cambio de sesión redirige solo); texto si hubo error real.
+  Future<String?> signInWithGoogle() async {
+    try {
+      await _authService.signInWithGoogle();
+      return null;
+    } on AuthException catch (e) {
+      debugPrint('GOOGLE/SUPABASE AuthException: ${e.message}');
+      return 'No se pudo iniciar con Google. Inténtalo de nuevo.';
+    } catch (e, st) {
+      debugPrint('GOOGLE SIGN-IN ERROR: $e\n$st');
+      return 'No se pudo iniciar con Google. Inténtalo de nuevo.';
+    }
+  }
+
   Future<String?> signUp(String email, String password, String fullName) async {
     try {
       await _authService.signUp(

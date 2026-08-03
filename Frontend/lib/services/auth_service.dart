@@ -1,4 +1,13 @@
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+/// "Web client ID" de Google (Google Cloud → Credenciales → cliente OAuth
+/// tipo *Web*). NO es secreto (viaja en la app). Reemplázalo por el tuyo o
+/// pásalo al compilar: --dart-define=GOOGLE_WEB_CLIENT_ID=xxxx.apps.googleusercontent.com
+const String kGoogleWebClientId = String.fromEnvironment(
+  'GOOGLE_WEB_CLIENT_ID',
+  defaultValue: '758813187933-d5bfmr3fmn6ree2jl3a8f4rdmntk708u.apps.googleusercontent.com',
+);
 
 class AuthService {
   final SupabaseClient _client = Supabase.instance.client;
@@ -60,5 +69,33 @@ class AuthService {
     return _client.auth.updateUser(UserAttributes(password: newPassword));
   }
 
-  Future<void> signOut() => _client.auth.signOut();
+  /// Inicio de sesión nativo con Google (rápido, sin abrir el navegador).
+  /// Obtiene el idToken de Google y crea/inicia la sesión en Supabase.
+  /// Devuelve null si el usuario cancela el selector de cuentas.
+  Future<AuthResponse?> signInWithGoogle() async {
+    final googleSignIn = GoogleSignIn(serverClientId: kGoogleWebClientId);
+    final googleUser = await googleSignIn.signIn();
+    if (googleUser == null) return null; // el usuario canceló
+
+    final googleAuth = await googleUser.authentication;
+    final idToken = googleAuth.idToken;
+    final accessToken = googleAuth.accessToken;
+    if (idToken == null) {
+      throw const AuthException('No se obtuvo el token de Google.');
+    }
+
+    return _client.auth.signInWithIdToken(
+      provider: OAuthProvider.google,
+      idToken: idToken,
+      accessToken: accessToken,
+    );
+  }
+
+  Future<void> signOut() async {
+    // Cierra también la sesión de Google para que vuelva a preguntar la cuenta.
+    try {
+      await GoogleSignIn().signOut();
+    } catch (_) {}
+    await _client.auth.signOut();
+  }
 }
