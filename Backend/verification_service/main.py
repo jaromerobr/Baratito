@@ -9,7 +9,7 @@ Flujo híbrido (configuración interna, no visible para el usuario):
   similarity > APPROVE_THRESHOLD  -> approved   (automático)
   en cualquier otro caso          -> pending    (revisión manual del equipo)
 El sistema NUNCA rechaza automáticamente.
-APPROVE_THRESHOLD se expresa en 0..1 (0.70 = 70% de coincidencia).
+APPROVE_THRESHOLD se expresa en 0..1 (0.50 = 50% de coincidencia).
 
 Ejecutar:
   pip install -r requirements.txt
@@ -33,8 +33,8 @@ SUPABASE_SERVICE_ROLE_KEY = os.environ["SUPABASE_SERVICE_ROLE_KEY"]
 BUCKET = os.getenv("VERIFICATION_BUCKET", "verification-docs")
 
 # Coincidencia (0..1) por encima de la cual se aprueba automáticamente.
-# 0.80 = 80%. Por debajo, lo revisa una persona del equipo Baratito.
-APPROVE_THRESHOLD = float(os.getenv("APPROVE_THRESHOLD", "0.70"))
+# 0.50 = 50%. Por debajo, lo revisa una persona del equipo Baratito.
+APPROVE_THRESHOLD = float(os.getenv("APPROVE_THRESHOLD", "0.50"))
 
 MODEL_NAME = os.getenv("DEEPFACE_MODEL", "Facenet512")
 DISTANCE_METRIC = os.getenv("DEEPFACE_METRIC", "cosine")
