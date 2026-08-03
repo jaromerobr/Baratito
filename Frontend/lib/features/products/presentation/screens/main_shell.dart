@@ -22,6 +22,11 @@ import '../../../favorites/presentation/screens/saved_screen.dart';
 import '../../../profile/data/profile_repository.dart';
 import '../../../../core/router.dart';
 import '../../../../core/supabase_client.dart';
+import 'package:baratito/widgets/baratito_app_bar.dart';
+import '../../../reviews/data/review_repository.dart';
+import '../../../reviews/presentation/providers/reviews_provider.dart';
+import '../../../reviews/presentation/widgets/rate_user_sheet.dart';
+import '../../../moderation/presentation/providers/moderation_providers.dart';
 import 'home_screen.dart';
 
 class MainShell extends ConsumerStatefulWidget {
@@ -33,6 +38,8 @@ class MainShell extends ConsumerStatefulWidget {
 
 class _MainShellState extends ConsumerState<MainShell> {
   int _index = 0;
+  // Solo mostramos el aviso de valoración una vez por sesión.
+  bool _promptedReview = false;
 
   @override
   Widget build(BuildContext context) {
@@ -41,6 +48,27 @@ class _MainShellState extends ConsumerState<MainShell> {
           data: (v) => v,
           orElse: () => false,
         );
+
+    // Si la cuenta fue bloqueada por el admin, se manda a la pantalla de
+    // cuenta bloqueada (con apelación).
+    ref.listen(banStatusProvider, (prev, next) {
+      if (next.asData?.value.banned == true) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) context.go('/blocked');
+        });
+      }
+    });
+
+    // Cuando un pedido del usuario queda entregado, la app le muestra (una vez)
+    // un aviso para calificar a la contraparte. No es obligatorio hacerlo.
+    ref.listen<AsyncValue<List<PendingReview>>>(pendingReviewsProvider,
+        (prev, next) {
+      final list = next.asData?.value;
+      if (list != null && list.isNotEmpty) {
+        WidgetsBinding.instance
+            .addPostFrameCallback((_) => _maybePromptReview(list));
+      }
+    });
 
     return Scaffold(
       backgroundColor: context.palette.background,
@@ -74,8 +102,46 @@ class _MainShellState extends ConsumerState<MainShell> {
         index: _index,
         onTap: (i) => setState(() => _index = i),
         showFab: !isAdmin,
+        // El admin no compra ni guarda: sin pestaña "Guardados".
+        showSaved: !isAdmin,
       ),
     );
+  }
+
+  Future<void> _maybePromptReview(List<PendingReview> pending) async {
+    if (_promptedReview || pending.isEmpty || !mounted) return;
+    _promptedReview = true;
+    final target = pending.first;
+
+    final go = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('¡Tu pedido llegó! 📦'),
+        content: Text(
+          '¿Cómo fue tu experiencia con ${target.revieweeName}? '
+          'Tu valoración ayuda a la comunidad.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Ahora no'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Calificar'),
+          ),
+        ],
+      ),
+    );
+
+    if (go == true && mounted) {
+      await showRateUserSheet(
+        context: context,
+        revieweeId: target.revieweeId,
+        revieweeName: target.revieweeName,
+      );
+      if (mounted) ref.invalidate(pendingReviewsProvider);
+    }
   }
 
   void _onPublishTap(BuildContext context) {
@@ -125,11 +191,13 @@ class _BottomBar extends StatelessWidget {
   final int index;
   final ValueChanged<int> onTap;
   final bool showFab;
+  final bool showSaved;
 
   const _BottomBar({
     required this.index,
     required this.onTap,
     this.showFab = true,
+    this.showSaved = true,
   });
 
   @override
@@ -149,12 +217,13 @@ class _BottomBar extends StatelessWidget {
             active: index == 0,
             onTap: () => onTap(0),
           ),
-          _BarItem(
-            icon: Icons.favorite_rounded,
-            label: 'Guardados',
-            active: index == 1,
-            onTap: () => onTap(1),
-          ),
+          if (showSaved)
+            _BarItem(
+              icon: Icons.favorite_rounded,
+              label: 'Guardados',
+              active: index == 1,
+              onTap: () => onTap(1),
+            ),
           if (showFab) const SizedBox(width: 40), // space for the FAB notch
           _BarItem(
             icon: Icons.chat_bubble_rounded,
@@ -230,8 +299,10 @@ class _ProfileTab extends ConsumerWidget {
           orElse: () => false,
         );
 
-    return SafeArea(
-      child: ListView(
+    return Scaffold(
+      backgroundColor: context.palette.background,
+      appBar: const BaratitoAppBar(title: Text('Perfil')),
+      body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
         children: [
           // Header: avatar + name + edit
@@ -303,8 +374,14 @@ class _ProfileTab extends ConsumerWidget {
               _MenuItem(
                 icon: Icons.shopping_bag_outlined,
                 label: 'Mis compras',
-                subtitle: 'Historial de compras',
+                subtitle: 'Historial y seguimiento',
                 onTap: () => context.push('/purchases'),
+              ),
+              _MenuItem(
+                icon: Icons.sell_outlined,
+                label: 'Mis ventas',
+                subtitle: 'Pedidos vendidos y calificar compradores',
+                onTap: () => context.push('/sales'),
               ),
             ],
             _MenuItem(
@@ -356,7 +433,8 @@ class _ProfileTab extends ConsumerWidget {
               child: OutlinedButton.icon(
                 onPressed: () async {
                   await ref.read(authControllerProvider.notifier).signOut();
-                  if (context.mounted) context.go(AppRoutes.login);
+                  // Vuelve al catálogo (modo invitado), no a la pantalla de login.
+                  if (context.mounted) context.go('/home');
                 },
                 icon: const Icon(Icons.logout_rounded),
                 label: const Text('Cerrar sesión'),
