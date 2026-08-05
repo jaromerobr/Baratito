@@ -1,0 +1,98 @@
+/* El chat es un recuadro con superficie propia, no un panel de
+   vidrio: sobre el oro nada translucido se lee. Todo lo de dentro
+   se calcula contra --surface, no contra el fondo de la pagina. */
+.chat {
+  background: var(--surface);
+  border: 1px solid var(--surface-rule);
+  border-radius: 22px;
+  padding: 18px;
+  color: var(--on-surface);
+  box-shadow: 0 34px 70px -34px rgba(0, 0, 0, 0.45);
+}
+
+.chat-head {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--surface-rule);
+}
+.chat-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  display: grid;
+  place-items: center;
+  font-size: 0.95rem;
+}
+.chat-who {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.chat-who strong {
+  font-size: 0.86rem;
+  font-weight: 900;
+}
+.chat-status {
+  font-size: 0.55rem;
+  color: var(--on-surface-dim);
+  letter-spacing: 0.1em;
+}
+
+.chat-log {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 14px;
+}
+
+.chat-msg {
+  max-width: 82%;
+  padding: 9px 14px;
+  border-radius: 16px;
+  font-size: 0.83rem;
+  font-weight: 700;
+  line-height: 1.35;
+  opacity: 0;
+  transform: translateY(9px);
+}
+/* Las burbujas solo se escriben cuando la slide esta en pantalla */
+.chat[data-play='true'] .chat-msg {
+  animation: bubbleIn 0.45s var(--ease) forwards;
+  animation-delay: calc(0.45s + var(--i) * 0.42s);
+}
+@keyframes bubbleIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.chat-msg[data-kind='in'] {
+  align-self: flex-start;
+  background: var(--surface-2);
+  color: var(--on-surface);
+  border-bottom-left-radius: 5px;
+}
+.chat-msg[data-kind='out'] {
+  align-self: flex-end;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 800;
+  border-bottom-right-radius: 5px;
+}
+.chat-msg[data-kind='sys'] {
+  align-self: center;
+  max-width: 100%;
+  text-align: center;
+  background: none;
+  color: var(--on-surface-dim);
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  font-weight: 500;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  padding: 4px 0;
+}

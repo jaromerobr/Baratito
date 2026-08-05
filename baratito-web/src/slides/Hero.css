@@ -1,0 +1,207 @@
+.hero {
+  background: var(--bg-main);
+}
+
+/* Un solo foco cálido detrás de la escena: la fuente de luz */
+.hero-glow {
+  position: absolute;
+  top: 50%;
+  right: 4%;
+  width: 820px;
+  height: 820px;
+  transform: translateY(-50%);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    var(--scene-glow) 0%,
+    transparent 66%
+  );
+  pointer-events: none;
+}
+
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1fr 0.92fr;
+  align-items: center;
+  gap: 52px;
+  position: relative;
+  z-index: 2;
+}
+
+/* El logo en grande abre la portada. Sin repetir la palabra
+   "Baratito", que ya esta en la barra: aqui manda la marca. */
+.hero-lockup {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 30px;
+}
+.hero-lockup-line {
+  width: 40px;
+  height: 1.5px;
+  background: var(--rule);
+}
+.hero-lockup-tag {
+  color: var(--fg);
+  font-weight: 700;
+  font-size: 0.64rem;
+}
+
+.hero-title {
+  font-size: var(--t-display);
+  letter-spacing: -0.045em;
+}
+
+.hero-lede {
+  margin-top: 26px;
+  max-width: 34ch;
+  font-size: 1.08rem;
+  font-weight: 700;
+  line-height: 1.55;
+  color: var(--fg-dim);
+}
+
+.hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 32px;
+  position: relative;
+  isolation: isolate;
+}
+
+.btn-solid,
+.btn-ghost {
+  border-radius: 100px;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  transition:
+    transform 0.35s var(--ease),
+    background 0.35s var(--ease),
+    box-shadow 0.35s var(--ease),
+    border-color 0.35s var(--ease);
+}
+
+/* El primario pesa mas por tamano, no solo por color: mas alto,
+   mas ancho y con sombra propia. Asi manda en los dos modos, sin
+   depender de que el fondo lo favorezca. */
+/* Los dos botones comparten alto y tamano de letra. El borde de
+   1.5px del secundario tambien lo lleva el primario, transparente,
+   para que el modelo de caja sea identico y no queden desalineados
+   por 3px. La jerarquia la marcan el relleno, el halo y el ancho. */
+.btn-solid {
+  position: relative;
+  z-index: 1;
+  padding: 18px 38px;
+  border: 1.5px solid transparent;
+  font-size: 1rem;
+  background: var(--cta-bg);
+  color: var(--cta-fg);
+  box-shadow:
+    0 10px 30px -8px rgb(var(--glow-rgb) / 0.42),
+    0 26px 60px -22px rgb(var(--glow-rgb) / 0.45);
+}
+.btn-solid:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    0 14px 38px -8px rgb(var(--glow-rgb) / 0.55),
+    0 34px 74px -22px rgb(var(--glow-rgb) / 0.55);
+}
+
+/* La superficie la define la regla compartida con .store-soon;
+   aqui solo la medida, que sigue a su hermano de al lado. */
+.btn-ghost {
+  position: relative;
+  z-index: 1;
+  padding: 18px 34px;
+  font-size: 1rem;
+}
+
+
+.hero-right {
+  display: flex;
+  justify-content: center;
+}
+/* En la portada el teléfono va mas grande: es lo primero que se ve
+   y con el tamano anterior la columna quedaba vacia. Las etiquetas
+   se alejan en la misma proporcion para no montarse encima. */
+.hero-phone {
+  position: relative;
+  --phone-scale: 1.22;
+}
+/* Las etiquetas se apoyan en el borde del aparato, no encima de la
+   pantalla: montadas sobre la interfaz tapan el saludo y el buscador. */
+.hero-phone .floater[data-pos='tl'] { left: -46%; top: 10%; }
+.hero-phone .floater[data-pos='bl'] { left: -52%; bottom: 20%; }
+.hero-phone .floater[data-pos='tr'] { right: -44%; top: 4%; }
+.hero-phone .floater[data-pos='br'] { right: -38%; bottom: 10%; }
+
+/* En pantallas de portatil (alto ~720px) el titular a tamano
+   completo empujaba los botones fuera del viewport y el telefono
+   se cortaba por abajo. Todo el bloque baja de escala junto. */
+@media (max-height: 820px) {
+  .hero-phone {
+    --phone-scale: 0.94;
+  }
+  .hero-title {
+    font-size: clamp(2.4rem, 5vw, 4rem);
+  }
+  .hero-lockup {
+    margin-bottom: 20px;
+  }
+  .hero-lede {
+    margin-top: 18px;
+    font-size: 0.98rem;
+  }
+  .hero-actions {
+    margin-top: 24px;
+  }
+  .hero-lockup .logo-tile {
+    --logo-size: 52px;
+  }
+}
+
+/* En vertical el teléfono NO se esconde: esta es una landing para
+   descargar una app, y el mockup es la prueba de que la app existe.
+   Se apila debajo del texto y baja de escala; las etiquetas si se
+   van, porque a ese ancho caerian sobre la pantalla. */
+@media (max-width: 1080px) {
+  .hero-grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+    justify-items: center;
+    text-align: center;
+  }
+  .hero-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .hero-lede {
+    max-width: 42ch;
+  }
+  .hero-actions {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .hero-glow {
+    right: 50%;
+    transform: translate(50%, -50%);
+  }
+  .hero-phone {
+    --phone-scale: 0.72;
+    /* La escala no encoge la caja de layout: el margen negativo
+       recupera el hueco que el teléfono ya no ocupa. */
+    margin: -68px 0;
+  }
+  .hero-phone .floater {
+    display: none;
+  }
+}
+
+/* Si ademas la pantalla es baja, texto y mockup no caben juntos */
+@media (max-width: 1080px) and (max-height: 700px) {
+  .hero-right {
+    display: none;
+  }
+}

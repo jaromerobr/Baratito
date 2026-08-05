@@ -1,0 +1,113 @@
+/* ============================================================
+   Cinta infinita.
+
+   El truco del bucle sin salto: la pista contiene el mismo set
+   DOS veces y la animacion la desplaza -50%, es decir un set
+   exacto. Al terminar, el segundo set esta justo donde arranco
+   el primero, asi que el reinicio es invisible. Nada de medir
+   anchos en JS ni de <marquee>.
+
+   Solo se anima `transform`, que va por GPU y no provoca
+   reflow; `will-change` reserva la capa.
+   ============================================================ */
+
+.ticker {
+  position: absolute;
+  top: var(--header-h);
+  left: 0;
+  right: 0;
+  z-index: 20;
+  height: var(--ticker-h);
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  background: var(--ticker-bg, #0e2c1c);
+  border-top: 1px solid rgb(255 255 255 / 0.06);
+  border-bottom: 1px solid rgb(0 0 0 / 0.18);
+  pointer-events: none;
+  user-select: none;
+}
+
+.ticker-track {
+  display: flex;
+  align-items: center;
+  width: max-content;
+  will-change: transform;
+  animation: tickerRun 26s linear infinite;
+}
+@keyframes tickerRun {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+/* Capa fantasma: la misma cinta detras, mas grande, desenfocada y
+   a menos de la mitad de velocidad. Las dos se cruzan sin coincidir
+   nunca, y eso es lo que hace que la franja se sienta viva en vez
+   de un texto deslizandose. */
+.ticker-ghost {
+  position: absolute;
+  inset: 0;
+  animation-duration: 62s;
+  opacity: 0.16;
+  filter: blur(5px);
+  pointer-events: none;
+}
+.ticker-ghost .ticker-item {
+  font-size: clamp(2.1rem, 3.5vw, 3.1rem);
+  text-shadow: none;
+}
+.ticker-ghost .ticker-dot {
+  opacity: 0.6;
+}
+
+.ticker-set {
+  display: flex;
+  flex: none;
+}
+
+.ticker-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.85em;
+  padding-right: 0.85em;
+  white-space: nowrap;
+
+  font-family: var(--sans);
+  font-size: clamp(1.2rem, 1.85vw, 1.75rem);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  color: var(--ticker-fg, #f4b321);
+  /* Bloom suave del mismo oro: la letra parece encendida sobre el
+     verde en vez de estampada. Es el mismo recurso que los botones. */
+  text-shadow:
+    0 0 18px rgb(var(--ticker-glow, 244 179 33) / 0.45),
+    0 0 48px rgb(var(--ticker-glow, 244 179 33) / 0.22);
+}
+
+.ticker-dot {
+  font-style: normal;
+  font-size: 0.7em;
+  /* El separador pesa menos que la palabra: marca el ritmo sin
+     competir con lo que hay que leer. */
+  opacity: 0.42;
+  text-shadow: none;
+}
+
+@media (max-width: 720px) {
+  .ticker-item {
+    gap: 0.7em;
+    padding-right: 0.7em;
+  }
+  .ticker-track {
+    animation-duration: 20s;
+  }
+  .ticker-ghost {
+    animation-duration: 48s;
+  }
+}

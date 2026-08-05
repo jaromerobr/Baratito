@@ -1,0 +1,356 @@
+/* ============================================================
+   Baratito — sistema de diseño
+
+   Dos modos, no una paleta con variantes: MODO VERDE y MODO
+   AMARILLO. Los tokens tienen nombres de ROL, no de color, para
+   que el interruptor los intercambie sin tocar un componente:
+
+     --bg-main   fondo de la portada
+     --bg-alt    fondo de "quiénes somos"
+     --bg-flip   fondo de la slide de contraste (invierte el tono)
+     --bg-deep   fondo de la slide de descarga
+     --fg-*      texto sobre bg-main / alt / deep
+     --fg-flip-* texto sobre bg-flip
+     --accent    el color que se gasta con avaricia
+     --mark-fg   el color de la palabra destacada
+   ============================================================ */
+
+:root {
+  /* Tipo */
+  --sans: 'Nunito', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+  /* Escala tipográfica */
+  --t-display: clamp(3.2rem, 7.6vw, 7rem);
+  --t-h2: clamp(2.1rem, 4.4vw, 3.9rem);
+  --t-h3: 1.08rem;
+  --t-body: 0.98rem;
+  --t-label: 0.7rem;
+
+  /* Ritmo */
+  --gut: clamp(28px, 5vw, 72px);
+  --rail: 68px;
+  --header-h: 84px;
+  --ticker-h: 70px;
+
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* El amarillo del logo. No cambia entre modos. */
+  --brand: #ffc107;
+  --on-brand: #12301f;
+
+  /* ----------------------------------------------------------
+     RESPLANDOR DE LOS BOTONES
+
+     El color del brillo no es fijo: depende del SUELO, no del
+     boton. Sobre verde oscuro brilla en oro; sobre oro brilla en
+     hueso calido, porque un halo dorado sobre fondo dorado no
+     existe. Cada suelo declara su --glow-rgb y estas tres
+     sombras se recalculan solas.
+
+     OJO: --glow-rgb es lo unico que se declara como variable. Las
+     sombras NO se pueden precomponer en una custom property aqui,
+     porque las variables se sustituyen en el elemento donde se
+     DECLARAN, no donde se usan: el var(--glow-rgb) se resolveria
+     con el valor de :root y bajaria ya congelado en oro. Por eso
+     las sombras se escriben como box-shadow en cada boton, donde
+     si toman el --glow-rgb del suelo que tienen encima.
+     ---------------------------------------------------------- */
+  --glow-rgb: 255 193 7;
+
+  /* ----------------------------------------------------------
+     SUELOS FIJOS — dos de las cuatro pantallas no dependen del
+     modo, y por eso viven aqui y no dentro de cada paleta:
+
+       ALT  (slide 2, "Quienes somos") → oro, siempre
+       FLIP (slide 3, "Que buscamos")  → hueso, siempre
+       DEEP (slide 4, "Descarga")      → verde profundo, siempre
+
+     El modo solo decide el color de la PORTADA. De ahi en
+     adelante el recorrido es el mismo: oro, hueso y cierre en
+     verde. En modo verde eso da un alternado limpio
+     (verde-oro-hueso-verde); en modo amarillo la portada y la
+     segunda comparten familia y el contraste llega en la tercera.
+     ---------------------------------------------------------- */
+  --bg-alt: #f8b906;
+  --fg-alt: #17331f;
+  --fg-alt-dim: rgba(23, 51, 31, 0.74);
+  --fg-alt-faint: rgba(23, 51, 31, 0.52);
+  --rule-alt: rgba(23, 51, 31, 0.22);
+  --accent-alt: #16331f;
+  --accent-text-alt: #14331e;
+  --mark-fg-alt: #f2ead6;
+  --scene-bg-alt: #143a24;
+  --scene-glow-alt: rgba(255, 255, 255, 0.42);
+  --glow-rgb-alt: 255 250 232;
+
+  --bg-flip: #f6f0e2;
+  --bg-flip-2: #e9e0c9;
+  --fg-flip: #17301f;
+  --fg-flip-dim: rgba(23, 48, 31, 0.68);
+  --fg-flip-faint: rgba(23, 48, 31, 0.46);
+  --rule-flip: rgba(23, 48, 31, 0.16);
+  /* Sobre hueso el amarillo puro es ilegible: baja a mostaza,
+     que sigue leyendose como amarillo y pasa AA. */
+  --accent-text-flip: #7d5f05;
+
+  --bg-deep: #0b2a1a;
+  --fg-deep: #f2ead6;
+  --fg-deep-dim: rgba(242, 234, 214, 0.7);
+  --fg-deep-faint: rgba(242, 234, 214, 0.46);
+  --rule-deep: rgba(242, 234, 214, 0.18);
+  --accent-text-deep: #ffc720;
+  --surface-deep: #16402c;
+  --surface-deep-2: rgba(242, 234, 214, 0.13);
+  --on-surface-deep: #f2ead6;
+  --on-surface-deep-dim: rgba(242, 234, 214, 0.55);
+  --surface-deep-rule: rgba(242, 234, 214, 0.18);
+}
+
+/* ------------------------------------------------------------
+   MODO VERDE — verde hoja profundo de suelo, tinta hueso, y el
+   amarillo entrando en bloque: el boton, la palabra resaltada,
+   las lineas del escaneo. Es el modo nocturno de la marca.
+   ------------------------------------------------------------ */
+:root,
+[data-palette='verde'] {
+  --bg-main: #0f3324;
+
+  --fg: #f2ead6;
+  --fg-dim: rgba(242, 234, 214, 0.68);
+  --fg-faint: rgba(242, 234, 214, 0.44);
+  --rule: rgba(242, 234, 214, 0.18);
+
+  --accent: #ffc107;
+  --on-accent: #17301f;
+  --accent-text: #ffc720;
+
+  --cta-bg: #ffc107;
+  --cta-fg: #17301f;
+  --cta-shadow: rgba(255, 193, 7, 0.9);
+
+  /* Solo la letra: en modo verde, amarillo pleno */
+  --mark-fg: #ffc720;
+
+  --scene-bg: #1a5c36;
+  --scene-glow: rgba(255, 193, 7, 0.17);
+
+  /* Banda del header: un escalon mas oscura que el suelo, para
+     que se lea como franja y no como parte de la pagina. */
+  --header-bg: #082014;
+  --header-fg: #f2ead6;
+
+  /* Superficie: el panel del chat y las etiquetas de vidrio.
+     Aqui puede ser translucida porque el suelo es oscuro. */
+  --surface: #17402d;
+  --surface-2: rgba(242, 234, 214, 0.13);
+  --on-surface: #f2ead6;
+  --on-surface-dim: rgba(242, 234, 214, 0.55);
+  --surface-rule: rgba(242, 234, 214, 0.18);
+}
+
+/* ------------------------------------------------------------
+   MODO AMARILLO — el oro exacto del logo, #FFC107, ocupando el
+   suelo. Las otras pantallas bajan un escalon minimo para que
+   las cuatro no sean la misma plancha. El verde profundo toma
+   todo lo que antes hacia el amarillo: botones, marcador,
+   rellenos, y la banda del header.
+   ------------------------------------------------------------ */
+[data-palette='amarillo'] {
+  --bg-main: #ffc107;
+
+  --fg: #17331f;
+  --fg-dim: rgba(23, 51, 31, 0.74);
+  --fg-faint: rgba(23, 51, 31, 0.52);
+  --rule: rgba(23, 51, 31, 0.22);
+
+  --accent: #16331f;
+  --on-accent: #ffc107;
+  --accent-text: #14331e;
+
+  /* Sobre el oro el halo va en hueso calido: el boton es verde
+     oscuro y un brillo dorado sobre fondo dorado no se ve. */
+  --glow-rgb: 255 250 232;
+
+  --cta-bg: #14331e;
+  --cta-fg: #ffd24a;
+  --cta-shadow: rgba(20, 51, 30, 0.6);
+
+  /* La palabra destacada va en el mismo hueso que usa el modo
+     verde para su texto, sin bloque detras. */
+  --mark-fg: #f2ead6;
+
+  --scene-bg: #143a24;
+  --scene-glow: rgba(255, 255, 255, 0.42);
+
+  /* Aqui la banda es lo que salva al logo: sobre el oro pleno la
+     baldosa amarilla se disolveria, sobre verde profundo salta. */
+  --header-bg: #12331f;
+  --header-fg: #f5e8c4;
+
+  /* Sobre el oro nada translucido se lee: el panel pasa a ser un
+     recuadro hueso solido, y todo lo que va encima se recalcula
+     contra ese hueso, no contra el fondo dorado. */
+  --surface: #f9f2df;
+  --surface-2: #ebe1c5;
+  --on-surface: #17331f;
+  --on-surface-dim: rgba(23, 51, 31, 0.6);
+  --surface-rule: rgba(23, 51, 31, 0.15);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  font-family: var(--sans);
+  font-weight: 700;
+  background: var(--bg-main);
+  color: var(--fg);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+h1,
+h2,
+h3 {
+  font-weight: 900;
+  line-height: 0.94;
+  text-wrap: balance;
+  letter-spacing: -0.03em;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent-text);
+  outline-offset: 4px;
+  border-radius: 3px;
+}
+
+/* Palabra destacada: solo cambia de color, sin bloque detras.
+   En modo verde va en amarillo; en modo amarillo, en verde casi
+   negro. El peso 900 hace el resto del trabajo. */
+.mark {
+  font-style: normal;
+  font-weight: 900;
+  color: var(--mark-fg);
+}
+
+/* ------------------------------------------------------------
+   BOTON SECUNDARIO — "Cómo funciona" y "Próximamente en App
+   Store" son el mismo control: la accion que acompana a la
+   principal sin disputarle el sitio. Por eso comparten regla en
+   vez de copiarse el estilo, que es como se separaron antes.
+
+   Vidrio tenido con la propia tinta del suelo: sobre verde el
+   velo es hueso y aclara; sobre oro es verde y hunde. En los dos
+   casos el boton se despega del fondo sin pintarse de un color
+   que no este en la paleta.
+   ------------------------------------------------------------ */
+.btn-ghost,
+.store-soon {
+  background: color-mix(in srgb, var(--fg) 7%, transparent);
+  border: 1.5px solid var(--rule);
+  color: var(--fg);
+  backdrop-filter: blur(8px);
+}
+.btn-ghost:hover,
+.store-soon:hover {
+  background: color-mix(in srgb, var(--fg) 13%, transparent);
+  border-color: var(--fg-dim);
+  transform: translateY(-3px);
+}
+
+/* Halo difuminado, sin anillo de contorno: un spread dibuja borde
+   y se lee como recuadro, justo lo contrario de brillar por detras. */
+.glow {
+  box-shadow:
+    0 10px 30px -8px rgb(var(--glow-rgb) / 0.42),
+    0 26px 60px -22px rgb(var(--glow-rgb) / 0.45);
+}
+.glow:hover {
+  box-shadow:
+    0 14px 38px -8px rgb(var(--glow-rgb) / 0.55),
+    0 34px 74px -22px rgb(var(--glow-rgb) / 0.55);
+}
+/* Contenido, para el chasis: enciende sin competir con el hero */
+.glow-soft {
+  box-shadow: 0 8px 24px -10px rgb(var(--glow-rgb) / 0.45);
+}
+.glow-soft:hover {
+  box-shadow: 0 12px 30px -10px rgb(var(--glow-rgb) / 0.6);
+}
+
+/* Nube difusa detras de un grupo de botones. El elemento que la
+   lleva solo necesita `position: relative` e `isolation: isolate`. */
+.bloom::before {
+  content: '';
+  position: absolute;
+  inset: -54px -70px -58px -64px;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      46% 108% at 21% 52%,
+      rgb(var(--glow-rgb) / 0.34),
+      rgb(var(--glow-rgb) / 0.1) 46%,
+      transparent 72%
+    ),
+    radial-gradient(42% 96% at 66% 50%, rgb(var(--glow-rgb) / 0.12), transparent 70%);
+  filter: blur(22px);
+  animation: bloomPulse 7.5s ease-in-out infinite;
+}
+@keyframes bloomPulse {
+  0%,
+  100% {
+    opacity: 0.72;
+    transform: scale(0.985);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.03);
+  }
+}
+
+/* Etiqueta mono — eyebrows, precios, datos.
+   Del mundo del subject: es información, no adorno. */
+.mono {
+  font-family: var(--mono);
+  /* 600, no 500: sobre el oro el trazo fino de IBM Plex Mono se
+     desvanece, y estas etiquetas son texto, no textura. */
+  font-weight: 600;
+  font-size: var(--t-label);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

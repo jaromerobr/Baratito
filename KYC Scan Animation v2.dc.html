@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/organic-15f8017f-093c-453b-a13d-592c8c516baf/styles.css">
+<script src="_ds/organic-15f8017f-093c-453b-a13d-592c8c516baf/_ds_bundle.js"></script>
+<style>
+@keyframes heroFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+@keyframes phoneWobble { 0%,100% { transform: translateY(0) rotate(-8deg); } 50% { transform: translateY(-4px) rotate(-8deg); } }
+@keyframes phoneSlide { 0% { transform: translateX(30px); } 17% { transform: translateX(0); } 93% { transform: translateX(0); } 100% { transform: translateX(30px); } }
+@keyframes shadowPulse { 0%,100% { transform: scale(1); opacity: .3; } 50% { transform: scale(.9); opacity: .2; } }
+@keyframes faceBrackets { 0%,13% { opacity: 0; } 20% { opacity: 1; } 27% { opacity: .7; } 34% { opacity: 1; } 41% { opacity: .7; } 48% { opacity: 1; } 55% { opacity: .7; } 58% { opacity: 1; } 63%,100% { opacity: 0; } }
+@keyframes ptA { 0%,23% { opacity: 0; transform: scale(.4); } 28% { opacity: .9; transform: scale(1); } 60% { opacity: .9; transform: scale(1); } 64%,100% { opacity: 0; transform: scale(1); } }
+@keyframes ptB { 0%,25% { opacity: 0; transform: scale(.4); } 30% { opacity: .9; transform: scale(1); } 60% { opacity: .9; transform: scale(1); } 64%,100% { opacity: 0; transform: scale(1); } }
+@keyframes ptC { 0%,27% { opacity: 0; transform: scale(.4); } 32% { opacity: .9; transform: scale(1); } 60% { opacity: .9; transform: scale(1); } 64%,100% { opacity: 0; transform: scale(1); } }
+@keyframes ptD { 0%,29% { opacity: 0; transform: scale(.4); } 34% { opacity: .9; transform: scale(1); } 60% { opacity: .9; transform: scale(1); } 64%,100% { opacity: 0; transform: scale(1); } }
+@keyframes ptE { 0%,31% { opacity: 0; transform: scale(.4); } 36% { opacity: .9; transform: scale(1); } 60% { opacity: .9; transform: scale(1); } 64%,100% { opacity: 0; transform: scale(1); } }
+@keyframes lnA { 0%,26% { stroke-dashoffset: 200; opacity: 0; } 27% { opacity: .75; } 34% { stroke-dashoffset: 0; opacity: .75; } 58% { stroke-dashoffset: 0; opacity: .75; } 64% { stroke-dashoffset: 0; opacity: 0; } 65%,100% { stroke-dashoffset: 200; opacity: 0; } }
+@keyframes lnB { 0%,28% { stroke-dashoffset: 200; opacity: 0; } 29% { opacity: .75; } 36% { stroke-dashoffset: 0; opacity: .75; } 58% { stroke-dashoffset: 0; opacity: .75; } 64% { stroke-dashoffset: 0; opacity: 0; } 65%,100% { stroke-dashoffset: 200; opacity: 0; } }
+@keyframes lnC { 0%,30% { stroke-dashoffset: 200; opacity: 0; } 31% { opacity: .75; } 38% { stroke-dashoffset: 0; opacity: .75; } 58% { stroke-dashoffset: 0; opacity: .75; } 64% { stroke-dashoffset: 0; opacity: 0; } 65%,100% { stroke-dashoffset: 200; opacity: 0; } }
+@keyframes lnD { 0%,32% { stroke-dashoffset: 200; opacity: 0; } 33% { opacity: .75; } 40% { stroke-dashoffset: 0; opacity: .75; } 58% { stroke-dashoffset: 0; opacity: .75; } 64% { stroke-dashoffset: 0; opacity: 0; } 65%,100% { stroke-dashoffset: 200; opacity: 0; } }
+@keyframes lnE { 0%,34% { stroke-dashoffset: 200; opacity: 0; } 35% { opacity: .75; } 42% { stroke-dashoffset: 0; opacity: .75; } 58% { stroke-dashoffset: 0; opacity: .75; } 64% { stroke-dashoffset: 0; opacity: 0; } 65%,100% { stroke-dashoffset: 200; opacity: 0; } }
+@keyframes lnF { 0%,36% { stroke-dashoffset: 200; opacity: 0; } 37% { opacity: .75; } 44% { stroke-dashoffset: 0; opacity: .75; } 58% { stroke-dashoffset: 0; opacity: .75; } 64% { stroke-dashoffset: 0; opacity: 0; } 65%,100% { stroke-dashoffset: 200; opacity: 0; } }
+@keyframes progressFill { 0%,23% { transform: scaleX(0); } 53% { transform: scaleX(1); } 92% { transform: scaleX(1); } 93%,100% { transform: scaleX(0); } }
+@keyframes screenScan { 0%,58% { opacity: 1; } 65% { opacity: 0; } 95% { opacity: 0; } 97%,100% { opacity: 1; } }
+@keyframes screenDone { 0%,58% { opacity: 0; } 65% { opacity: 1; } 94% { opacity: 1; } 96%,100% { opacity: 0; } }
+@keyframes checkPop { 0%,59% { transform: scale(0); } 66% { transform: scale(1.15); } 71% { transform: scale(1); } 94% { transform: scale(1); } 96%,100% { transform: scale(0); } }
+@keyframes labelIn { 0%,63% { opacity: 0; } 68% { opacity: 1; } 94% { opacity: 1; } 96%,100% { opacity: 0; } }
+@keyframes subLabelIn { 0%,70% { opacity: 0; } 75% { opacity: 1; } 94% { opacity: 1; } 96%,100% { opacity: 0; } }
+@keyframes badgeFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+</style>
+</helmet>
+<div style="min-height: 100%; display: flex; align-items: center; justify-content: center; padding: 56px; box-sizing: border-box; font-family: var(--font-body), system-ui, sans-serif;">
+  <div style="position: relative; width: 460px; height: 500px; border-radius: 24px; overflow: hidden; box-shadow: 0 20px 60px rgba(15,61,36,0.3);">
+    <sc-if value="{{ lightBackground }}" hint-placeholder-val="{{ false }}">
+      <div style="position: absolute; inset: 0; background: #FFFFFF;"></div>
+    </sc-if>
+    <sc-if value="{{ darkBackground }}" hint-placeholder-val="{{ true }}">
+      <div style="position: absolute; inset: 0; background: #1A5C36;"></div>
+    </sc-if>
+
+    <svg width="460" height="500" viewBox="0 0 460 500" style="position: absolute; inset: 0;">
+      <defs>
+        <clipPath id="v2Head">
+          <rect x="150" y="150" width="126" height="152" rx="56"></rect>
+        </clipPath>
+        <filter id="v2ShadowBlur" x="-50%" y="-100%" width="200%" height="300%">
+          <feGaussianBlur stdDeviation="7"></feGaussianBlur>
+        </filter>
+      </defs>
+
+      <ellipse cx="214" cy="484" rx="98" ry="14" fill="#000000" filter="url(#v2ShadowBlur)" style="transform-box: fill-box; transform-origin: center; animation: shadowPulse 3.5s cubic-bezier(.4,0,.6,1) infinite;"></ellipse>
+
+      <g style="animation: heroFloat 3.5s cubic-bezier(.4,0,.6,1) infinite;">
+        <rect x="192" y="278" width="46" height="82" rx="16" fill="#E8B080"></rect>
+        <rect x="138" y="344" width="152" height="120" rx="48" fill="#FFFFFF"></rect>
+        <rect x="196" y="340" width="38" height="15" rx="7.5" fill="#E8B080"></rect>
+        <text x="214" y="420" text-anchor="middle" style="font-family: var(--font-heading), Georgia, serif; font-size: 15px; font-weight: 700; fill: #1A5C36;">B</text>
+
+        <rect x="146" y="222" width="16" height="34" rx="8" fill="#E8B080"></rect>
+        <rect x="150" y="150" width="126" height="152" rx="56" fill="#F5C9A0"></rect>
+        <g clip-path="url(#v2Head)">
+          <rect x="150" y="150" width="26" height="152" fill="#E8B080"></rect>
+          <path d="M 150,212 L 150,196 C 150,166 178,146 213,146 C 248,146 276,166 276,196 L 276,200 L 150,212 Z" fill="#2C1810"></path>
+        </g>
+
+        <rect x="216" y="215" width="26" height="5.5" rx="2.75" fill="#2C1810"></rect>
+        <rect x="252" y="213" width="23" height="5.5" rx="2.75" fill="#2C1810"></rect>
+        <circle cx="229" cy="237" r="7" fill="#2C1810"></circle>
+        <circle cx="263" cy="236" r="7" fill="#2C1810"></circle>
+        <circle cx="231.5" cy="234" r="2.2" fill="#FFFFFF"></circle>
+        <circle cx="265.5" cy="233" r="2.2" fill="#FFFFFF"></circle>
+        <path d="M 250,252 L 250,264 L 242,264" fill="none" stroke="#E8B080" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
+        <path d="M 236,276 Q 250,288 264,274" fill="none" stroke="#2C1810" stroke-width="3.5" stroke-linecap="round"></path>
+
+        <g clip-path="url(#v2Head)">
+          <g fill="none" stroke="#FFC107" stroke-width="1.2" stroke-linecap="round" stroke-dasharray="200">
+            <path d="M 176,214 L 206,208" style="animation: lnA 6s cubic-bezier(.4,0,.2,1) infinite;"></path>
+            <path d="M 206,208 L 240,206" style="animation: lnB 6s cubic-bezier(.4,0,.2,1) infinite;"></path>
+            <path d="M 240,206 L 268,212" style="animation: lnC 6s cubic-bezier(.4,0,.2,1) infinite;"></path>
+            <path d="M 176,214 L 166,240" style="animation: lnD 6s cubic-bezier(.4,0,.2,1) infinite;"></path>
+            <path d="M 206,208 L 196,232" style="animation: lnE 6s cubic-bezier(.4,0,.2,1) infinite;"></path>
+            <path d="M 240,206 L 228,236" style="animation: lnF 6s cubic-bezier(.4,0,.2,1) infinite;"></path>
+            <path d="M 268,212 L 262,236" style="animation: lnA 6s cubic-bezier(.4,0,.2,1) infinite;"></path>
+            <path d="M 166,240 L 196,232" style="animation: lnB 6s cubic-bezier(.4,0,.2,1) infinite;"></path>
+            <path d="M 196,232 L 228,236" style="animation: lnC 6s cubic-bezier(.4,0,.2,1) infinite;"></path>
+            <path d="M 228,236 L 262,236" style="animation: lnD 6s cubic-bezier(.4,0,.2,1) infinite;"></path>
+            <path d="M 166,240 L 172,266" style="animation: lnE 6s cubic-bezier(.4,0,.2,1) infinite;"></path>
+            <path d="M 196,232 L 200,258" style="animation: lnF 6s cubic-bezier(.4,0,.2,1) infinite;"></path>
+            <path d="M 196,232 L 216,262" style="animation: lnA 6s cubic-bezier(.4,0,.2,1) infinite;"></path>
+            <path d="M 228,236 L 216,262" style="animation: lnB 6s cubic-bezier(.4,0,.2,1) infinite;"></path>
+            <path d="M 228,236 L 250,252" style="animation: lnC 6s cubic-bezier(.4,0,.2,1) infinite;"></path>
+            <path d="M 262,236 L 250,252" style="animation: lnD 6s cubic-bezier(.4,0,.2,1) infinite;"></path>
+            <path d="M 262,236 L 272,258" style="animation: lnE 6s cubic-bezier(.4,0,.2,1) infinite;"></path>
+            <path d="M 172,266 L 200,258" style="animation: lnF 6s cubic-bezier(.4,0,.2,1) infinite;"></path>
+            <path d="M 200,258 L 216,262" style="animation: lnA 6s cubic-bezier(.4,0,.2,1) infinite;"></path>
+            <path d="M 216,262 L 250,252" style="animation: lnB 6s cubic-bezier(.4,0,.2,1) infinite;"></path>
+            <path d="M 250,252 L 272,258" style="animation: lnC 6s cubic-bezier(.4,0,.2,1) infinite;"></path>
+            <path d="M 172,266 L 186,286" style="animation: lnD 6s cubic-bezier(.4,0,.2,1) infinite;"></path>
+            <path d="M 200,258 L 214,278" style="animation: lnE 6s cubic-bezier(.4,0,.2,1) infinite;"></path>
+            <path d="M 216,262 L 214,278" style="animation: lnF 6s cubic-bezier(.4,0,.2,1) infinite;"></path>
+            <path d="M 214,278 L 246,276" style="animation: lnA 6s cubic-bezier(.4,0,.2,1) infinite;"></path>
+            <path d="M 250,252 L 246,276" style="animation: lnB 6s cubic-bezier(.4,0,.2,1) infinite;"></path>
+            <path d="M 272,258 L 268,282" style="animation: lnC 6s cubic-bezier(.4,0,.2,1) infinite;"></path>
+            <path d="M 246,276 L 268,282" style="animation: lnD 6s cubic-bezier(.4,0,.2,1) infinite;"></path>
+            <path d="M 186,286 L 214,278" style="animation: lnE 6s cubic-bezier(.4,0,.2,1) infinite;"></path>
+            <path d="M 186,286 L 200,300" style="animation: lnF 6s cubic-bezier(.4,0,.2,1) infinite;"></path>
+            <path d="M 214,278 L 232,296" style="animation: lnA 6s cubic-bezier(.4,0,.2,1) infinite;"></path>
+            <path d="M 246,276 L 232,296" style="animation: lnB 6s cubic-bezier(.4,0,.2,1) infinite;"></path>
+            <path d="M 246,276 L 256,292" style="animation: lnC 6s cubic-bezier(.4,0,.2,1) infinite;"></path>
+            <path d="M 268,282 L 256,292" style="animation: lnD 6s cubic-bezier(.4,0,.2,1) infinite;"></path>
+            <path d="M 200,300 L 232,296" style="animation: lnE 6s cubic-bezier(.4,0,.2,1) infinite;"></path>
+            <path d="M 232,296 L 256,292" style="animation: lnF 6s cubic-bezier(.4,0,.2,1) infinite;"></path>
+          </g>
+          <g fill="#FFC107" style="transform-box: fill-box;">
+            <circle cx="176" cy="214" r="3" style="transform-box: fill-box; transform-origin: center; animation: ptA 6s cubic-bezier(.4,0,.2,1) infinite;"></circle>
+            <circle cx="206" cy="208" r="3" style="transform-box: fill-box; transform-origin: center; animation: ptB 6s cubic-bezier(.4,0,.2,1) infinite;"></circle>
+            <circle cx="240" cy="206" r="3" style="transform-box: fill-box; transform-origin: center; animation: ptC 6s cubic-bezier(.4,0,.2,1) infinite;"></circle>
+            <circle cx="268" cy="212" r="3" style="transform-box: fill-box; transform-origin: center; animation: ptD 6s cubic-bezier(.4,0,.2,1) infinite;"></circle>
+            <circle cx="166" cy="240" r="3" style="transform-box: fill-box; transform-origin: center; animation: ptE 6s cubic-bezier(.4,0,.2,1) infinite;"></circle>
+            <circle cx="196" cy="232" r="3" style="transform-box: fill-box; transform-origin: center; animation: ptA 6s cubic-bezier(.4,0,.2,1) infinite;"></circle>
+            <circle cx="228" cy="236" r="3" style="transform-box: fill-box; transform-origin: center; animation: ptB 6s cubic-bezier(.4,0,.2,1) infinite;"></circle>
+            <circle cx="262" cy="236" r="3" style="transform-box: fill-box; transform-origin: center; animation: ptC 6s cubic-bezier(.4,0,.2,1) infinite;"></circle>
+            <circle cx="172" cy="266" r="3" style="transform-box: fill-box; transform-origin: center; animation: ptD 6s cubic-bezier(.4,0,.2,1) infinite;"></circle>
+            <circle cx="200" cy="258" r="3" style="transform-box: fill-box; transform-origin: center; animation: ptE 6s cubic-bezier(.4,0,.2,1) infinite;"></circle>
+            <circle cx="250" cy="252" r="3" style="transform-box: fill-box; transform-origin: center; animation: ptA 6s cubic-bezier(.4,0,.2,1) infinite;"></circle>
+            <circle cx="272" cy="258" r="3" style="transform-box: fill-box; transform-origin: center; animation: ptB 6s cubic-bezier(.4,0,.2,1) infinite;"></circle>
+            <circle cx="186" cy="286" r="3" style="transform-box: fill-box; transform-origin: center; animation: ptC 6s cubic-bezier(.4,0,.2,1) infinite;"></circle>
+            <circle cx="214" cy="278" r="3" style="transform-box: fill-box; transform-origin: center; animation: ptD 6s cubic-bezier(.4,0,.2,1) infinite;"></circle>
+            <circle cx="246" cy="276" r="3" style="transform-box: fill-box; transform-origin: center; animation: ptE 6s cubic-bezier(.4,0,.2,1) infinite;"></circle>
+            <circle cx="268" cy="282" r="3" style="transform-box: fill-box; transform-origin: center; animation: ptA 6s cubic-bezier(.4,0,.2,1) infinite;"></circle>
+            <circle cx="200" cy="300" r="3" style="transform-box: fill-box; transform-origin: center; animation: ptB 6s cubic-bezier(.4,0,.2,1) infinite;"></circle>
+            <circle cx="232" cy="296" r="3" style="transform-box: fill-box; transform-origin: center; animation: ptC 6s cubic-bezier(.4,0,.2,1) infinite;"></circle>
+            <circle cx="256" cy="292" r="3" style="transform-box: fill-box; transform-origin: center; animation: ptD 6s cubic-bezier(.4,0,.2,1) infinite;"></circle>
+            <circle cx="216" cy="262" r="3" style="transform-box: fill-box; transform-origin: center; animation: ptE 6s cubic-bezier(.4,0,.2,1) infinite;"></circle>
+          </g>
+        </g>
+
+        <sc-if value="{{ showFaceBrackets }}" hint-placeholder-val="{{ true }}">
+          <g fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="animation: faceBrackets 6s cubic-bezier(.4,0,.2,1) infinite;">
+            <path d="M 128,158 L 128,134 L 152,134"></path>
+            <path d="M 274,134 L 298,134 L 298,158"></path>
+            <path d="M 128,296 L 128,320 L 152,320"></path>
+            <path d="M 274,320 L 298,320 L 298,296"></path>
+          </g>
+        </sc-if>
+
+        <g style="animation: phoneSlide 6s cubic-bezier(.4,0,.2,1) infinite;">
+          <g style="transform-origin: 341px 270px; animation: phoneWobble 2.8s cubic-bezier(.4,0,.6,1) infinite;">
+            <rect x="286" y="170" width="110" height="200" rx="22" fill="#0F3D24"></rect>
+            <rect x="396" y="212" width="4" height="28" rx="2" fill="#0a2e1a"></rect>
+            <rect x="294" y="178" width="94" height="184" rx="16" fill="#F8F4EC"></rect>
+            <rect x="326" y="185" width="30" height="6" rx="3" fill="#000000"></rect>
+
+            <g style="animation: screenScan 6s cubic-bezier(.4,0,.2,1) infinite;">
+              <rect x="302" y="200" width="78" height="112" rx="12" fill="#1A5C36"></rect>
+              <g fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M 310,220 L 310,208 L 322,208"></path>
+                <path d="M 360,208 L 372,208 L 372,220"></path>
+                <path d="M 310,292 L 310,304 L 322,304"></path>
+                <path d="M 360,304 L 372,304 L 372,292"></path>
+              </g>
+              <rect x="325" y="222" width="32" height="42" rx="14" fill="#E0E0E0"></rect>
+              <rect x="316" y="272" width="50" height="34" rx="17" fill="#E0E0E0"></rect>
+              <g fill="none" stroke="#FFC107" stroke-width="1.2" opacity=".85">
+                <path d="M 327,238 L 356,236"></path>
+                <path d="M 328,250 L 356,249"></path>
+                <path d="M 341,224 L 341,262"></path>
+              </g>
+              <rect x="308" y="332" width="66" height="6" rx="3" fill="#DDDDCC"></rect>
+              <rect x="308" y="332" width="66" height="6" rx="3" fill="#FFC107" style="transform-box: fill-box; transform-origin: left center; animation: progressFill 6s cubic-bezier(.4,0,.2,1) infinite;"></rect>
+            </g>
+
+            <g style="animation: screenDone 6s cubic-bezier(.4,0,.2,1) infinite;">
+              <g style="transform-box: fill-box; transform-origin: center; animation: checkPop 6s cubic-bezier(.34,1.56,.64,1) infinite;">
+                <circle cx="341" cy="248" r="22" fill="#FFFFFF" stroke="#1A5C36" stroke-width="2.5"></circle>
+                <path d="M 331,248 L 338,256 L 352,241" fill="none" stroke="#1A5C36" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+              </g>
+              <text x="341" y="292" text-anchor="middle" style="font-family: var(--font-body), system-ui, sans-serif; font-size: 10px; font-weight: 700; fill: #1A5C36; animation: labelIn 6s cubic-bezier(.4,0,.2,1) infinite;">Verificado</text>
+              <text x="341" y="306" text-anchor="middle" style="font-family: var(--font-body), system-ui, sans-serif; font-size: 8px; font-weight: 500; fill: #999999; animation: subLabelIn 6s cubic-bezier(.4,0,.2,1) infinite;">Identidad confirmada</text>
+            </g>
+          </g>
+        </g>
+      </g>
+    </svg>
+
+    <sc-if value="{{ showBadges }}" hint-placeholder-val="{{ true }}">
+      <div style="position: absolute; inset: 0; pointer-events: none;">
+        <div style="position: absolute; left: 28px; top: 64px; display: flex; align-items: center; gap: 7px; background: #FFFFFF; border-radius: 999px; padding: 8px 14px; box-shadow: 0 8px 20px rgba(15,61,36,0.25); animation: badgeFloat 4.2s cubic-bezier(.4,0,.6,1) 1s infinite;">
+          <svg width="13" height="13" viewBox="0 0 13 13" style="display: block;"><path d="M 3,7 L 5.4,9.4 L 10,4.4" fill="none" stroke="#1A5C36" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          <span style="font-size: 11px; font-weight: 700; color: #1A5C36; letter-spacing: .01em;">Verificado</span>
+        </div>
+        <div style="position: absolute; right: 26px; bottom: 52px; display: flex; align-items: center; gap: 7px; background: #FFC107; border-radius: 999px; padding: 8px 14px; box-shadow: 0 8px 20px rgba(15,61,36,0.28); animation: badgeFloat 3.8s cubic-bezier(.4,0,.6,1) .5s infinite;">
+          <span style="font-size: 11px; font-weight: 700; color: #1A5C36; letter-spacing: .01em;">Identidad confirmada</span>
+        </div>
+      </div>
+    </sc-if>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:580,&quot;height&quot;:620},&quot;lightBackground&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Escena&quot;},&quot;showBadges&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Escena&quot;},&quot;showFaceBrackets&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Escena&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const light = this.props.lightBackground ?? false;
+    return {
+      lightBackground: light,
+      darkBackground: !light,
+      showBadges: this.props.showBadges ?? true,
+      showFaceBrackets: this.props.showFaceBrackets ?? true,
+    };
+  }
+}
+</script>
+</body>
+</html>

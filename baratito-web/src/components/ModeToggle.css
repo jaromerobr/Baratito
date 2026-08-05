@@ -1,0 +1,55 @@
+/* Interruptor verde / amarillo. Vive en la barra superior, junto
+   al boton de descarga, como cualquier claro-oscuro. */
+.mode-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 6px 6px 8px;
+  border-radius: 100px;
+  transition: opacity 0.3s var(--ease);
+}
+.mode-toggle:hover {
+  opacity: 0.85;
+}
+
+.mode-track {
+  position: relative;
+  width: 46px;
+  height: 26px;
+  border-radius: 100px;
+  border: 1.5px solid var(--rule);
+  background: color-mix(in srgb, var(--fg) 8%, transparent);
+  flex: none;
+}
+
+.mode-knob {
+  position: absolute;
+  top: 2.5px;
+  left: 2.5px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #ffc107;
+  transition:
+    transform 0.4s var(--ease),
+    background 0.4s var(--ease);
+}
+/* Encendido = modo amarillo: la perilla cruza y se vuelve verde,
+   porque en ese modo el verde es el color que actua. */
+.mode-toggle[aria-checked='true'] .mode-knob {
+  transform: translateX(20px);
+  background: #14331e;
+}
+
+.mode-label {
+  font-size: 0.58rem;
+  color: var(--fg-faint);
+  min-width: 62px;
+  text-align: left;
+}
+
+@media (max-width: 720px) {
+  .mode-label {
+    display: none;
+  }
+}
