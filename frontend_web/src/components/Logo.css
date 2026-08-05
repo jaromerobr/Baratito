@@ -7,5 +7,12 @@
   display: block;
   object-fit: cover;
   object-position: center;
-  box-shadow: 0 8px 20px -10px rgba(0, 0, 0, 0.45);
+  /* Filo verde de 1px: la baldosa es del mismo amarillo que la
+     portada, y sin el borde el icono se funde con el fondo y solo
+     se lee la "B" flotando. No es una placa —eso ya lo quitamos—
+     sino la linea justa para que el cuadrado exista. Sobre verde
+     es practicamente invisible. */
+  box-shadow:
+    0 0 0 1px rgba(18, 51, 31, 0.28),
+    0 8px 20px -10px rgba(0, 0, 0, 0.45);
 }

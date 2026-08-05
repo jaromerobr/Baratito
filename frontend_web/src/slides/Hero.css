@@ -223,20 +223,32 @@
     font-size: 0.88rem;
   }
 
+  /* Sin overflow:hidden. Recortaba la parte de arriba del telefono
+     justo cuando la animacion lo hacia subir, y ese corte era lo
+     que se veia como si el mockup se borrara. */
   .hero-right {
     width: 100%;
-    /* La escala no encoge la caja de layout: los margenes negativos
-       recuperan el hueco que el telefono ya no ocupa. */
-    margin-top: 18px;
-    overflow: hidden;
+    margin-top: 12px;
   }
   .hero-phone {
+    /* La escala no encoge la caja de layout: los margenes negativos
+       recuperan el hueco que el telefono ya no ocupa. */
     --phone-scale: 0.66;
-    margin: -78px 0;
+    margin: -76px 0 -82px;
   }
+
+  /* Las etiquetas vuelven, mas pequenas y montadas sobre el borde
+     del aparato, que es donde hay sitio a este ancho. */
   .hero-phone .floater {
-    display: none;
+    padding: 6px 11px;
+    font-size: 0.6rem;
+    gap: 5px;
+    box-shadow: 0 12px 24px -12px rgba(0, 0, 0, 0.5);
   }
+  .hero-phone .floater[data-pos='tl'] { top: 20%;    left: -18%;  right: auto; }
+  .hero-phone .floater[data-pos='tr'] { top: 15%;    right: -16%; left: auto; }
+  .hero-phone .floater[data-pos='bl'] { bottom: 23%; left: -14%;  right: auto; }
+  .hero-phone .floater[data-pos='br'] { bottom: 18%; right: -12%; left: auto; }
 }
 
 /* Telefonos bajos (iPhone SE y similares): el mockup no cabe */

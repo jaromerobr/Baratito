@@ -182,7 +182,52 @@
   }
 }
 
-@media (max-width: 1240px) {
+/* Entre 900 y 1240px no hay hueco lateral: el texto ya ocupa el
+   ancho y las etiquetas caerian encima. */
+@media (max-width: 1240px) and (min-width: 901px) {
+  .cf-orbit {
+    display: none;
+  }
+}
+
+/* En telefono si hay sitio, pero arriba y abajo, no a los lados:
+   el contenido va centrado y deja dos bandas libres. Ahi flotan,
+   enmarcandolo, sin taparle una sola linea. */
+@media (max-width: 900px) {
+  .cf-orbit .floater {
+    padding: 6px 11px;
+    font-size: 0.6rem;
+    gap: 5px;
+    box-shadow: 0 12px 24px -12px rgba(0, 0, 0, 0.45);
+  }
+  .cf-orbit .floater[data-pos='tl'] {
+    top: calc(var(--header-h) + 14px);
+    left: 5%;
+    right: auto;
+    bottom: auto;
+  }
+  .cf-orbit .floater[data-pos='tr'] {
+    top: calc(var(--header-h) + 14px);
+    right: 5%;
+    left: auto;
+    bottom: auto;
+  }
+  .cf-orbit .floater[data-pos='bl'] {
+    bottom: 16px;
+    left: 5%;
+    right: auto;
+    top: auto;
+  }
+  .cf-orbit .floater[data-pos='br'] {
+    bottom: 16px;
+    right: 5%;
+    left: auto;
+    top: auto;
+  }
+}
+
+/* Telefonos bajos: las bandas libres desaparecen */
+@media (max-width: 900px) and (max-height: 720px) {
   .cf-orbit {
     display: none;
   }

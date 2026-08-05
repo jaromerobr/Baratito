@@ -210,6 +210,12 @@ body,
   height: 100%;
 }
 
+/* Refuerzo del meta color-scheme: la pagina declara su esquema y
+   pide al navegador que no la repinte por su cuenta. */
+:root {
+  color-scheme: only light;
+}
+
 body {
   font-family: var(--sans);
   font-weight: 700;

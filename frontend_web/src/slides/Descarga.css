@@ -270,8 +270,33 @@
   .dl-chat {
     width: min(100%, 310px);
   }
+  /* Las etiquetas se quedan, pero solo dos y montadas en las
+     esquinas del recuadro: las cuatro a este ancho se pisaban
+     entre ellas y tapaban los mensajes. */
   .dl-chat .floater {
+    padding: 6px 11px;
+    font-size: 0.6rem;
+    gap: 5px;
+    box-shadow: 0 12px 24px -12px rgba(0, 0, 0, 0.5);
+  }
+  /* Las dos de arriba se van: en movil los botones de tienda estan
+     pegados al recuadro y cualquier etiqueta ahi tapa "Google
+     Play". Las de abajo si tienen sitio, montadas en el filo. */
+  .dl-chat .floater[data-pos='tl'],
+  .dl-chat .floater[data-pos='tr'] {
     display: none;
+  }
+  .dl-chat .floater[data-pos='bl'] {
+    bottom: -16px;
+    left: -3%;
+    right: auto;
+    top: auto;
+  }
+  .dl-chat .floater[data-pos='br'] {
+    bottom: -16px;
+    right: -3%;
+    left: auto;
+    top: auto;
   }
   .dl-chat .chat {
     padding: 11px;
