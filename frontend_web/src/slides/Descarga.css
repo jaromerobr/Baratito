@@ -1,0 +1,228 @@
+/* Cierre siempre en verde profundo, en los dos modos. Sobre este
+   suelo el oro vuelve a ser el color de accion, sin importar que
+   hacia el amarillo en las pantallas anteriores. */
+.dl {
+  background: var(--bg-deep);
+  color: var(--fg-deep);
+
+  --fg: var(--fg-deep);
+  --fg-dim: var(--fg-deep-dim);
+  --fg-faint: var(--fg-deep-faint);
+  --rule: var(--rule-deep);
+  --accent-text: var(--accent-text-deep);
+
+  --surface: var(--surface-deep);
+  --surface-2: var(--surface-deep-2);
+  --on-surface: var(--on-surface-deep);
+  --on-surface-dim: var(--on-surface-deep-dim);
+  --surface-rule: var(--surface-deep-rule);
+
+  --accent: var(--brand);
+  --on-accent: var(--on-brand);
+  --cta-bg: var(--brand);
+  --cta-fg: var(--on-brand);
+  --cta-shadow: rgba(255, 193, 7, 0.9);
+  --mark-fg: var(--accent-text-deep);
+  --header-bg: #071c11;
+  /* Suelo oscuro: aqui el halo si va en oro, en los dos modos */
+  --glow-rgb: 255 193 7;
+}
+
+.dl-orb {
+  position: absolute;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--fg) 3%, transparent);
+  pointer-events: none;
+}
+.dl-orb-a {
+  width: 460px;
+  height: 460px;
+  top: -110px;
+  right: -90px;
+  animation: orbPulse 13s ease-in-out infinite;
+}
+.dl-orb-b {
+  width: 340px;
+  height: 340px;
+  bottom: -90px;
+  left: -70px;
+  animation: orbPulse 16s ease-in-out infinite 5s;
+}
+@keyframes orbPulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  50% {
+    transform: scale(1.14);
+    opacity: 1;
+  }
+}
+
+.dl-grid {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  align-items: center;
+  gap: 40px;
+  position: relative;
+  z-index: 2;
+}
+
+/* El logo en grande: aqui es donde se descarga, y aqui es donde
+   la marca tiene que quedar grabada. */
+.dl-badge {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 30px;
+}
+.dl-badge-words {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.dl-badge-words strong {
+  font-size: 1.3rem;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+.dl-badge-words .mono {
+  font-size: 0.58rem;
+  color: var(--accent-text);
+}
+
+.dl-title {
+  font-size: clamp(2.8rem, 6.4vw, 5.2rem);
+  letter-spacing: -0.045em;
+}
+
+/* La nube difusa la pone la clase .bloom; aqui solo el contenedor */
+.dl-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 40px;
+  position: relative;
+  isolation: isolate;
+}
+
+/* Los botones van por encima del resplandor */
+.store {
+  position: relative;
+  z-index: 1;
+}
+
+.store {
+  display: inline-flex;
+  align-items: center;
+  gap: 13px;
+  padding: 14px 24px;
+  border-radius: 16px;
+  transition:
+    transform 0.35s var(--ease),
+    background 0.35s var(--ease),
+    border-color 0.35s var(--ease);
+}
+.store:hover {
+  transform: translateY(-3px);
+}
+.store-ic {
+  font-size: 1.15rem;
+  line-height: 1;
+}
+.store-labels {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: left;
+}
+.store-top {
+  font-size: 0.52rem;
+  opacity: 0.65;
+}
+.store-name {
+  font-size: 0.95rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+.store-live {
+  background: var(--cta-bg);
+  color: var(--cta-fg);
+  box-shadow:
+    0 10px 30px -8px rgb(var(--glow-rgb) / 0.42),
+    0 26px 60px -22px rgb(var(--glow-rgb) / 0.45);
+}
+.store-live:hover {
+  box-shadow:
+    0 14px 38px -8px rgb(var(--glow-rgb) / 0.55),
+    0 34px 74px -22px rgb(var(--glow-rgb) / 0.55);
+}
+/* Superficie compartida con .btn-ghost del hero (ver index.css) */
+
+.dl-right {
+  display: flex;
+  justify-content: center;
+}
+/* El chat cierra la pagina: la conversacion termina en "trato
+   hecho", justo al lado del boton de descarga. */
+/* El chat flota, con las etiquetas orbitando por FUERA del
+   recuadro. Antes iban con las coordenadas del telefono —angosto
+   y alto— y sobre una caja ancha caian encima de la conversacion. */
+.dl-chat {
+  position: relative;
+  width: min(100%, 400px);
+  animation: chatBob 6s ease-in-out infinite;
+}
+@keyframes chatBob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-14px);
+  }
+}
+
+.dl-chat .floater[data-pos='tl'] { top: -30px;    left: -16%;  right: auto;  bottom: auto; }
+.dl-chat .floater[data-pos='bl'] { bottom: -26px; left: -10%;  right: auto;  top: auto; }
+.dl-chat .floater[data-pos='tr'] { top: -22px;    right: -12%; left: auto;   bottom: auto; }
+.dl-chat .floater[data-pos='br'] { bottom: -32px; right: -6%;  left: auto;   top: auto; }
+
+.dl-footer {
+  position: absolute;
+  bottom: 26px;
+  right: calc(var(--gut) + var(--rail));
+  text-align: right;
+  color: var(--fg-faint);
+  font-size: 0.55rem;
+}
+
+@media (max-width: 1080px) {
+  .dl-grid {
+    grid-template-columns: 1fr;
+    gap: 26px;
+    justify-items: center;
+    text-align: center;
+  }
+  .dl-badge,
+  .dl-buttons {
+    justify-content: center;
+  }
+  .dl-chat .floater {
+    display: none;
+  }
+  .dl-footer {
+    left: var(--gut);
+    right: var(--gut);
+    text-align: center;
+  }
+}
+
+/* El chat es largo: en pantallas bajas compite con los botones */
+@media (max-width: 1080px) and (max-height: 760px) {
+  .dl-right {
+    display: none;
+  }
+}

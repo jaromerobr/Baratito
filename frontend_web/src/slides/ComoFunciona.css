@@ -1,0 +1,209 @@
+/* El respiro claro del deck, y la pantalla donde se explica la
+   mecanica del dinero. Suelo hueso en los dos modos. */
+.cf {
+  background: var(--bg-flip);
+  color: var(--fg-flip);
+
+  --fg: var(--fg-flip);
+  --fg-dim: var(--fg-flip-dim);
+  --fg-faint: var(--fg-flip-faint);
+  --rule: var(--rule-flip);
+  --accent-text: var(--accent-text-flip);
+  --surface: #fffdf6;
+  --on-surface: var(--fg-flip);
+  --surface-rule: var(--rule-flip);
+  --header-bg: #12331f;
+  --header-fg: #f5e8c4;
+  --cta-bg: var(--brand);
+  --cta-fg: var(--on-brand);
+}
+
+/* Dos anillos girando muy lento: el pedido dando la vuelta. */
+.cf-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1.5px dashed var(--rule-flip);
+  opacity: 0.5;
+  pointer-events: none;
+}
+.cf-ring-a {
+  width: 640px;
+  height: 640px;
+  top: 50%;
+  left: 50%;
+  margin: -320px 0 0 -320px;
+  animation: cfSpin 90s linear infinite;
+}
+.cf-ring-b {
+  width: 940px;
+  height: 940px;
+  top: 50%;
+  left: 50%;
+  margin: -470px 0 0 -470px;
+  border-style: solid;
+  opacity: 0.28;
+  animation: cfSpin 140s linear infinite reverse;
+}
+@keyframes cfSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Los estados del pedido flotan en el vacio de la derecha */
+.cf-orbit {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.cf-orbit .floater[data-pos='tl'] { top: 23%; left: 52%; right: auto; bottom: auto; }
+.cf-orbit .floater[data-pos='tr'] { top: 34%; left: 72%; right: auto; bottom: auto; }
+.cf-orbit .floater[data-pos='bl'] { top: 45%; left: 58%; right: auto; bottom: auto; }
+.cf-orbit .floater[data-pos='br'] { top: 17%; left: 76%; right: auto; bottom: auto; }
+
+.cf-head {
+  max-width: 26ch;
+  position: relative;
+  z-index: 2;
+}
+.cf-eyebrow {
+  color: var(--accent-text-flip);
+  margin-bottom: 18px;
+}
+.cf-title {
+  font-size: clamp(1.9rem, 3.4vw, 3rem);
+  color: var(--fg-flip);
+}
+
+/* ---------- Los cuatro pasos ----------
+   Van en fila y unidos por una linea: es una secuencia, y la
+   linea es lo que dice que el paso 3 depende del 2. */
+.cf-steps {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  margin-top: 44px;
+  position: relative;
+  z-index: 2;
+  counter-reset: paso;
+}
+
+.cf-step {
+  position: relative;
+  padding: 0 26px 0 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.cf-step + .cf-step {
+  padding-left: 26px;
+}
+
+/* La linea que une los nodos, cortada en el primero y el ultimo
+   para que la secuencia tenga principio y fin visibles. */
+.cf-step::before {
+  content: '';
+  position: absolute;
+  top: 21px;
+  left: 0;
+  right: 0;
+  height: 1.5px;
+  background: var(--rule-flip);
+}
+.cf-step:first-child::before {
+  left: 21px;
+}
+.cf-step:last-child::before {
+  right: calc(100% - 21px);
+}
+
+.cf-node {
+  position: relative;
+  z-index: 1;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--surface);
+  border: 1.5px solid var(--rule-flip);
+  transition:
+    border-color 0.35s var(--ease),
+    transform 0.35s var(--ease);
+}
+.cf-step:hover .cf-node {
+  border-color: var(--brand);
+  transform: translateY(-4px);
+}
+.cf-icon {
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+.cf-num {
+  color: var(--accent-text-flip);
+  font-size: 0.58rem;
+  margin: 16px 0 6px;
+}
+.cf-step-title {
+  font-size: 1.12rem;
+  color: var(--fg-flip);
+  letter-spacing: -0.02em;
+}
+.cf-step-body {
+  margin-top: 9px;
+  font-size: 0.86rem;
+  font-weight: 700;
+  line-height: 1.5;
+  color: var(--fg-flip-dim);
+  max-width: 26ch;
+}
+
+.cf-foot {
+  margin-top: 40px;
+  color: var(--accent-text-flip);
+  position: relative;
+  z-index: 2;
+}
+
+@media (max-height: 800px) {
+  .cf-title {
+    font-size: clamp(1.7rem, 2.9vw, 2.4rem);
+  }
+  .cf-steps {
+    margin-top: 30px;
+  }
+  .cf-num {
+    margin: 12px 0 5px;
+  }
+  .cf-foot {
+    margin-top: 26px;
+  }
+}
+
+@media (max-width: 1240px) {
+  .cf-orbit {
+    display: none;
+  }
+}
+
+@media (max-width: 1000px) {
+  .cf-steps {
+    grid-template-columns: 1fr 1fr;
+    gap: 26px 0;
+  }
+  .cf-step::before {
+    display: none;
+  }
+  .cf-step,
+  .cf-step + .cf-step {
+    padding: 0 20px 0 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .cf-steps {
+    grid-template-columns: 1fr;
+  }
+}

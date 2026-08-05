@@ -1,30 +1,43 @@
-// Landing de Baratito — composición de la página.
-//
-// La experiencia:
-//   1. HeroStory: el teléfono protagonista, fijado durante 6 funcionalidades
-//      de scroll (GSAP ScrollTrigger).
-//   2. Cinta de marca + secciones informativas con reveals ligeros.
-//   3. Descarga (iOS / Android) y footer.
-import Nav from './components/Nav.jsx';
-import HeroStory from './components/HeroStory.jsx';
-import {
-  Marquee,
-  QuienesSomos,
-  QueBuscamos,
-  Descargar,
-  Footer,
-} from './components/Sections.jsx';
+import { useState } from 'react'
+import { useDeck } from './hooks/useDeck'
+import { SLIDES } from './data/content'
+import TopBar from './components/TopBar'
+import Rail from './components/Rail'
+import Hero from './slides/Hero'
+import Quienes from './slides/Quienes'
+import ComoFunciona from './slides/ComoFunciona'
+import Descarga from './slides/Descarga'
+import './styles/deck.css'
+
+const VIEWS = [Hero, Quienes, ComoFunciona, Descarga]
 
 export default function App() {
+  const { index, dir, goTo } = useDeck(SLIDES.length)
+  const [palette, setPalette] = useState('amarillo')
+  const tone = SLIDES[index].tone
+
   return (
-    <>
-      <Nav />
-      <HeroStory />
-      <Marquee />
-      <QuienesSomos />
-      <QueBuscamos />
-      <Descargar />
-      <Footer />
-    </>
-  );
+    <div className="deck" data-palette={palette} data-tone={tone}>
+      <TopBar onGo={goTo} palette={palette} onPalette={setPalette} />
+
+      <div className="deck-stage">
+        {VIEWS.map((View, i) => {
+          const offset = i - index
+          return (
+            <section
+              key={SLIDES[i].id}
+              className="slide"
+              data-state={offset === 0 ? 'active' : offset < 0 ? 'past' : 'future'}
+              aria-hidden={offset !== 0}
+              style={{ '--offset': offset, '--dir': dir }}
+            >
+              <View active={offset === 0} onGo={goTo} />
+            </section>
+          )
+        })}
+      </div>
+
+      <Rail slides={SLIDES} active={index} onGo={goTo} />
+    </div>
+  )
 }

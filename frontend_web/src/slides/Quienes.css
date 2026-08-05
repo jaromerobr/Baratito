@@ -1,0 +1,142 @@
+/* Segunda pantalla siempre en oro, en los dos modos. Redefine sus
+   tokens hacia dentro para que el ticker, las promesas y la escena
+   de verificacion se calculen contra el oro y no contra el modo. */
+.quienes {
+  background: var(--bg-alt);
+  color: var(--fg-alt);
+
+  --fg: var(--fg-alt);
+  --fg-dim: var(--fg-alt-dim);
+  --fg-faint: var(--fg-alt-faint);
+  --rule: var(--rule-alt);
+  --accent: var(--accent-alt);
+  --accent-text: var(--accent-text-alt);
+  --mark-fg: var(--mark-fg-alt);
+  --scene-bg: var(--scene-bg-alt);
+  --scene-glow: var(--scene-glow-alt);
+  --glow-rgb: var(--glow-rgb-alt);
+  --header-bg: #12331f;
+  --header-fg: #f5e8c4;
+
+  /* La cinta usa el mismo verde de la banda superior, para que se
+     lean como dos franjas de la misma pieza y no como dos verdes
+     distintos. El texto va en el oro que pediste. */
+  --ticker-bg: #12331f;
+  --ticker-fg: #f4b321;
+  --ticker-glow: 244 179 33;
+
+}
+
+/* Doble clase a proposito: `.slide-inner` declara el mismo
+   padding-top y deck.css se carga despues, asi que con una sola
+   clase perdia el pulso y el contenido se metia bajo la cinta. */
+.slide-inner.quienes {
+  padding-top: calc(var(--header-h) + var(--ticker-h) + 16px);
+}
+
+.quienes-grid {
+  display: grid;
+  grid-template-columns: 1fr 0.9fr;
+  align-items: center;
+  gap: 52px;
+  position: relative;
+  z-index: 2;
+}
+/* La escena de verificacion vive aqui, donde el texto la menciona */
+.quienes-right {
+  display: flex;
+  justify-content: center;
+}
+
+.quienes-eyebrow {
+  color: var(--accent-text);
+  margin-bottom: 22px;
+}
+
+.quienes-title {
+  font-size: var(--t-h2);
+  max-width: 15ch;
+}
+
+.quienes-lede {
+  margin-top: 20px;
+  max-width: 40ch;
+  font-size: var(--t-body);
+  font-weight: 700;
+  line-height: 1.55;
+  color: var(--fg-dim);
+}
+
+/* Rejilla de promesas con reglas finas, sin tarjetas redondeadas */
+.promesas {
+  list-style: none;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  margin-top: 40px;
+  border-top: 1px solid var(--rule);
+}
+.promesa {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 20px 24px 20px 0;
+  border-bottom: 1px solid var(--rule);
+}
+.promesa:nth-child(odd) {
+  border-right: 1px solid var(--rule);
+  padding-right: 26px;
+}
+.promesa:nth-child(even) {
+  padding-left: 26px;
+}
+.promesa-k {
+  color: var(--accent-text);
+  font-size: 0.58rem;
+}
+.promesa-t {
+  font-size: var(--t-h3);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+.promesa-d {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--fg-dim);
+  line-height: 1.45;
+}
+
+/* La cinta se come 58px de alto util: en pantallas de portatil el
+   bloque no cabia y el eyebrow se salia por arriba. */
+@media (max-height: 860px) {
+  .quienes-title {
+    font-size: clamp(1.8rem, 3.2vw, 2.7rem);
+  }
+  .quienes-eyebrow {
+    margin-bottom: 14px;
+  }
+  .quienes-lede {
+    margin-top: 14px;
+  }
+  .promesas {
+    margin-top: 26px;
+  }
+  .promesa {
+    padding-top: 14px;
+    padding-bottom: 14px;
+  }
+  /* La escena es lo mas alto de la fila: si no encoge, la leyenda
+     queda pegada al borde inferior. */
+  .quienes .kyc-stage {
+    width: min(100%, 396px);
+  }
+}
+
+@media (max-width: 1000px) {
+  .quienes-grid {
+    grid-template-columns: 1fr;
+  }
+  .quienes-right {
+    display: none;
+  }
+}

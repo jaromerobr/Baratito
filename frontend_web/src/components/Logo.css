@@ -1,0 +1,11 @@
+/* La baldosa sola, sin placa detras. */
+.logo-tile {
+  --logo-size: 44px;
+  width: var(--logo-size);
+  height: var(--logo-size);
+  border-radius: calc(var(--logo-size) * 0.24);
+  display: block;
+  object-fit: cover;
+  object-position: center;
+  box-shadow: 0 8px 20px -10px rgba(0, 0, 0, 0.45);
+}

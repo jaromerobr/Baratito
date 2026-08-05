@@ -1,0 +1,143 @@
+/* ============================================================
+   Marco del telefono con la captura real de la app.
+
+   El movimiento son tres capas que nunca coinciden: el aparato
+   flota (6s), gira levemente sobre su eje (9s) y un destello
+   cruza la pantalla (7s). Al ir a periodos distintos, el conjunto
+   no se siente en bucle.
+   ============================================================ */
+
+.phone {
+  --tilt: -12deg;
+  position: relative;
+  animation: phoneBob 6s ease-in-out infinite;
+}
+@keyframes phoneBob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-16px);
+  }
+}
+
+.phone-body {
+  width: 244px;
+  padding: 6px;
+  border-radius: 40px;
+  background: linear-gradient(150deg, #24382c, #0c1a12);
+  position: relative;
+  box-shadow:
+    0 46px 90px -32px rgba(0, 0, 0, 0.68),
+    0 0 0 1px rgba(255, 255, 255, 0.08);
+  animation: phoneTilt 9s ease-in-out infinite;
+}
+/* El giro incluye la escala, porque una transform reemplaza a la
+   otra: si la animacion no la llevara, --phone-scale se perderia. */
+@keyframes phoneTilt {
+  0%,
+  100% {
+    transform: perspective(1200px) rotateY(calc(var(--tilt) - 2deg))
+      rotateX(3deg) scale(var(--phone-scale, 1));
+  }
+  50% {
+    transform: perspective(1200px) rotateY(calc(var(--tilt) + 2deg))
+      rotateX(1deg) scale(var(--phone-scale, 1));
+  }
+}
+
+/* La altura la marca la propia imagen (width 100% + height auto),
+   no un aspect-ratio escrito a mano: asi la captura entra entera
+   pase lo que pase con las dimensiones del archivo. */
+.phone-screen {
+  position: relative;
+  width: 100%;
+  border-radius: 34px;
+  overflow: hidden;
+  background: #f2efe4;
+  line-height: 0;
+}
+
+.phone-shot {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Destello: reflejo de luz cruzando el cristal */
+.phone-glare {
+  position: absolute;
+  inset: -40% -80%;
+  pointer-events: none;
+  background: linear-gradient(
+    104deg,
+    transparent 42%,
+    rgba(255, 255, 255, 0.16) 47%,
+    rgba(255, 255, 255, 0.38) 50%,
+    rgba(255, 255, 255, 0.16) 53%,
+    transparent 58%
+  );
+  animation: phoneGlare 7s ease-in-out infinite;
+}
+@keyframes phoneGlare {
+  0%,
+  62% {
+    transform: translateX(-58%);
+  }
+  88%,
+  100% {
+    transform: translateX(58%);
+  }
+}
+
+/* ---------- Etiquetas flotantes alrededor del telefono ---------- */
+.floater {
+  position: absolute;
+  z-index: 4;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+  padding: 9px 15px;
+  border-radius: 100px;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  box-shadow: 0 20px 40px -18px rgba(0, 0, 0, 0.5);
+}
+
+/* Las etiquetas se apoyan en superficies solidas, nunca en
+   transparencias: sobre el oro el vidrio desaparece. */
+.floater[data-style='light'],
+.floater[data-style='glass'] {
+  background: var(--surface);
+  color: var(--on-surface);
+  border: 1px solid var(--surface-rule);
+}
+.floater[data-style='green'],
+.floater[data-style='deep'] {
+  background: var(--header-bg);
+  color: var(--header-fg);
+}
+.floater[data-style='gold'] {
+  background: var(--cta-bg);
+  color: var(--cta-fg);
+}
+
+.floater[data-pos='tl'] { top: 8%;     left: -22%;  animation: driftA 7s ease-in-out infinite; }
+.floater[data-pos='bl'] { bottom: 14%; left: -30%;  animation: driftB 7s ease-in-out infinite 0.6s; }
+.floater[data-pos='tr'] { top: 4%;     right: -26%; animation: driftC 7s ease-in-out infinite 1.2s; }
+.floater[data-pos='br'] { bottom: 7%;  right: -18%; animation: driftD 7s ease-in-out infinite 1.8s; }
+
+@keyframes driftA { 0%,100%{transform:translateY(0) rotate(-2.5deg)} 50%{transform:translateY(-13px) rotate(-2.5deg)} }
+@keyframes driftB { 0%,100%{transform:translateY(0) rotate(2deg)}    50%{transform:translateY(-17px) rotate(2deg)} }
+@keyframes driftC { 0%,100%{transform:translateY(0) rotate(-1.5deg)} 50%{transform:translateY(-11px) rotate(-1.5deg)} }
+@keyframes driftD { 0%,100%{transform:translateY(0) rotate(2.5deg)}  50%{transform:translateY(-15px) rotate(2.5deg)} }
+
+@media (max-width: 1200px) {
+  .floater[data-pos='tl'] { left: -8%; }
+  .floater[data-pos='bl'] { left: -12%; }
+  .floater[data-pos='tr'] { right: -8%; }
+  .floater[data-pos='br'] { right: -6%; }
+}

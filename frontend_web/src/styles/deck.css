@@ -1,0 +1,293 @@
+/* ============================================================
+   El deck: 4 slides a viewport completo.
+   Una rueda de scroll = una página entera. Sin scroll intermedio.
+
+   El chasis (barra, riel, conmutador) lee su color de --fg /
+   --fg-flip según la slide activa, así funciona en las tres
+   paletas sin reglas duplicadas.
+   ============================================================ */
+
+.deck {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg-main);
+  color: var(--fg);
+  transition:
+    background 0.9s var(--ease),
+    color 0.6s var(--ease);
+}
+
+/* El chasis (riel y banda) sigue el suelo de la slide activa.
+   Las slides ya redefinen sus propios tokens hacia dentro; esto
+   es solo para lo que flota por encima de todas ellas. */
+.deck[data-tone='alt'] {
+  background: var(--bg-alt);
+  --fg: var(--fg-alt);
+  --fg-dim: var(--fg-alt-dim);
+  --fg-faint: var(--fg-alt-faint);
+  --rule: var(--rule-alt);
+  --accent-text: var(--accent-text-alt);
+}
+.deck[data-tone='light'] {
+  background: var(--bg-flip);
+  --fg: var(--fg-flip);
+  --fg-dim: var(--fg-flip-dim);
+  --fg-faint: var(--fg-flip-faint);
+  --rule: var(--rule-flip);
+  --accent-text: var(--accent-text-flip);
+}
+.deck[data-tone='deep'] {
+  background: var(--bg-deep);
+  --fg: var(--fg-deep);
+  --fg-dim: var(--fg-deep-dim);
+  --fg-faint: var(--fg-deep-faint);
+  --rule: var(--rule-deep);
+  --accent-text: var(--accent-text-deep);
+}
+
+.deck-stage {
+  position: absolute;
+  inset: 0;
+}
+
+.slide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  transform: translate3d(0, calc(var(--offset) * 100%), 0);
+  transition: transform 0.9s var(--ease);
+  will-change: transform;
+}
+
+/* Capa de contenido: se mueve a otra velocidad que la slide,
+   así el cambio de página tiene profundidad en vez de ser un corte. */
+.slide-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  /* La banda del header ya no es transparente: el contenido se
+     centra en lo que queda debajo, no detras de ella. */
+  padding-top: var(--header-h);
+  opacity: 0;
+  transform: translate3d(0, calc(var(--offset) * -14%), 0);
+  transition:
+    opacity 0.62s var(--ease),
+    transform 0.9s var(--ease);
+}
+.slide[data-state='active'] .slide-inner {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  transition-delay: 0.12s;
+}
+
+.measure {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 calc(var(--gut) + var(--rail)) 0 var(--gut);
+}
+
+/* Entrada escalonada de los hijos de una slide activa */
+.rise {
+  opacity: 0;
+  transform: translateY(22px);
+  transition:
+    opacity 0.6s var(--ease),
+    transform 0.7s var(--ease);
+}
+.slide[data-state='active'] .rise {
+  opacity: 1;
+  transform: translateY(0);
+}
+.slide[data-state='active'] .rise:nth-child(1) { transition-delay: 0.18s; }
+.slide[data-state='active'] .rise:nth-child(2) { transition-delay: 0.26s; }
+.slide[data-state='active'] .rise:nth-child(3) { transition-delay: 0.34s; }
+.slide[data-state='active'] .rise:nth-child(4) { transition-delay: 0.42s; }
+.slide[data-state='active'] .rise:nth-child(5) { transition-delay: 0.5s; }
+
+/* ---------- Barra superior ----------
+   Banda verde de borde a borde, en los dos modos. Redefine sus
+   propios --fg / --rule para que el logo, el interruptor y el
+   boton se lean sobre verde sin importar el suelo de la pagina. */
+.topbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 60;
+  height: var(--header-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--gut);
+
+  background: var(--header-bg);
+  --fg: var(--header-fg);
+  --fg-dim: color-mix(in srgb, var(--header-fg) 70%, transparent);
+  --fg-faint: color-mix(in srgb, var(--header-fg) 46%, transparent);
+  --rule: color-mix(in srgb, var(--header-fg) 20%, transparent);
+  /* La banda es verde en los dos modos, asi que su halo es oro */
+  --glow-rgb: 255 193 7;
+  color: var(--header-fg);
+  transition: background 0.6s var(--ease);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+.brand-mark {
+  font-size: 1.18rem;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+/* Como la banda es verde en los dos modos, Descargar va siempre
+   en el oro del logo: no depende del modo, depende de la banda. */
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+/* Contorno, no relleno: el unico boton macizo de la pantalla debe
+   ser el del hero. En oro, pero hueco, el header sigue senalando
+   la accion sin competir con el llamado principal. Al pasar el
+   cursor si se rellena, que es cuando ya es la accion elegida. */
+.topbar-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 23px;
+  border-radius: 100px;
+  border: 1.5px solid var(--brand);
+  color: var(--brand);
+  font-size: 0.84rem;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  /* Halo contenido: enciende el boton sin ponerlo a la altura
+     del primario del hero, que sigue siendo el que manda. */
+  box-shadow: 0 8px 24px -10px rgb(var(--glow-rgb) / 0.45);
+  transition:
+    background 0.3s var(--ease),
+    color 0.3s var(--ease),
+    box-shadow 0.3s var(--ease),
+    transform 0.3s var(--ease);
+}
+.topbar-cta:hover {
+  transform: translateY(-2px);
+  background: var(--brand);
+  color: var(--on-brand);
+  box-shadow: 0 12px 30px -10px rgb(var(--glow-rgb) / 0.6);
+}
+
+/* ---------- Riel de progreso ---------- */
+.rail {
+  position: absolute;
+  top: 50%;
+  right: calc(var(--gut) - 6px);
+  transform: translateY(-50%);
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rail-item {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 7px 0;
+  color: var(--fg-faint);
+  transition: color 0.4s var(--ease);
+}
+.rail-item:hover,
+.rail-item[aria-current='true'] {
+  color: var(--accent-text);
+}
+
+.rail-num {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  font-variant-numeric: tabular-nums;
+  opacity: 0;
+  transform: translateX(6px);
+  transition:
+    opacity 0.35s var(--ease),
+    transform 0.35s var(--ease);
+}
+.rail-item:hover .rail-num,
+.rail-item[aria-current='true'] .rail-num {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.rail-tick {
+  width: 22px;
+  height: 1.5px;
+  background: currentColor;
+  transition:
+    width 0.45s var(--ease),
+    background 0.4s var(--ease);
+}
+.rail-item[aria-current='true'] .rail-tick {
+  width: 44px;
+  background: var(--accent-text);
+}
+
+/* ---------- Pista de scroll ---------- */
+.scroll-cue {
+  position: absolute;
+  bottom: 28px;
+  right: calc(var(--gut) + var(--rail));
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--fg-dim);
+  font-weight: 700;
+  pointer-events: none;
+}
+.scroll-cue-line {
+  width: 46px;
+  height: 1px;
+  background: currentColor;
+  position: relative;
+  overflow: hidden;
+}
+.scroll-cue-line::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--accent-text);
+  transform: translateX(-100%);
+  animation: cueSweep 2.6s var(--ease) infinite;
+}
+@keyframes cueSweep {
+  0% { transform: translateX(-100%); }
+  55% { transform: translateX(0); }
+  100% { transform: translateX(100%); }
+}
+
+@media (max-width: 900px) {
+  :root {
+    --rail: 0px;
+  }
+  .rail,
+  .scroll-cue {
+    display: none;
+  }
+  :root {
+    --header-h: 72px;
+    --ticker-h: 56px;
+  }
+}
