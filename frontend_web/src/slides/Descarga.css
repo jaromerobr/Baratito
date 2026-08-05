@@ -199,30 +199,125 @@
   font-size: 0.55rem;
 }
 
-@media (max-width: 1080px) {
+/* ============================================================
+   TELEFONO — una columna centrada. El chat se queda, porque es
+   el cierre de la historia, pero encoge y suelta las etiquetas
+   que lo orbitan: a este ancho caerian sobre los mensajes.
+   ============================================================ */
+@media (max-width: 900px) {
   .dl-grid {
     grid-template-columns: 1fr;
-    gap: 26px;
+    gap: 14px;
     justify-items: center;
     text-align: center;
   }
-  .dl-badge,
+  .dl-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+
+  .dl-badge {
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .dl-badge .logo-tile {
+    --logo-size: 48px;
+  }
+  .dl-badge-words {
+    align-items: flex-start;
+    text-align: left;
+  }
+  .dl-badge-words strong {
+    font-size: 1.05rem;
+  }
+  .dl-badge-words .mono {
+    font-size: 0.52rem;
+  }
+
+  .dl-title {
+    font-size: clamp(2rem, 9vw, 2.7rem);
+  }
+
+  /* Los dos botones caben en una fila si se aprietan: apilados se
+     comian 70px de alto y empujaban el chat fuera de pantalla. */
   .dl-buttons {
+    margin-top: 16px;
+    gap: 8px;
     justify-content: center;
+    flex-wrap: nowrap;
+  }
+  .store {
+    padding: 10px 13px;
+    gap: 8px;
+    border-radius: 14px;
+  }
+  .store-ic {
+    font-size: 0.95rem;
+  }
+  .store-top {
+    font-size: 0.44rem;
+  }
+  .store-name {
+    font-size: 0.78rem;
+    white-space: nowrap;
+  }
+
+  .dl-right {
+    width: 100%;
+  }
+  .dl-chat {
+    width: min(100%, 310px);
   }
   .dl-chat .floater {
     display: none;
   }
+  .dl-chat .chat {
+    padding: 11px;
+    border-radius: 16px;
+  }
+  .dl-chat .chat-msg {
+    font-size: 0.72rem;
+    padding: 6px 10px;
+    max-width: 88%;
+  }
+  .dl-chat .chat-msg[data-kind='sys'] {
+    font-size: 0.48rem;
+    padding: 2px 0;
+  }
+  .dl-chat .chat-head {
+    padding-bottom: 8px;
+  }
+  .dl-chat .chat-avatar {
+    width: 28px;
+    height: 28px;
+    font-size: 0.8rem;
+  }
+  .dl-chat .chat-who strong {
+    font-size: 0.78rem;
+  }
+  .dl-chat .chat-status {
+    font-size: 0.48rem;
+  }
+  .dl-chat .chat-log {
+    gap: 5px;
+    padding-top: 8px;
+  }
+
   .dl-footer {
     left: var(--gut);
     right: var(--gut);
+    bottom: 14px;
     text-align: center;
+    font-size: 0.5rem;
   }
 }
 
-/* El chat es largo: en pantallas bajas compite con los botones */
-@media (max-width: 1080px) and (max-height: 760px) {
+/* Telefonos bajos: el chat es lo primero que sobra */
+@media (max-width: 900px) and (max-height: 680px) {
   .dl-right {
     display: none;
   }
 }
+

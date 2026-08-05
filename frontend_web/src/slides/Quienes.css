@@ -132,11 +132,92 @@
   }
 }
 
-@media (max-width: 1000px) {
+/* ============================================================
+   TELEFONO — la escena de verificacion NO se esconde: es la
+   prueba visual del argumento de esta pantalla. Para que quepa,
+   las cuatro promesas dejan de ser una rejilla con descripciones
+   y pasan a ser pastillas: el mismo dato en una linea en vez de
+   en cuatro.
+   ============================================================ */
+@media (max-width: 900px) {
   .quienes-grid {
     grid-template-columns: 1fr;
+    gap: 16px;
+    align-content: center;
   }
+
+  .quienes-eyebrow {
+    margin-bottom: 10px;
+  }
+  .quienes-title {
+    font-size: clamp(1.6rem, 7.4vw, 2.1rem);
+    max-width: 18ch;
+  }
+  .quienes-lede {
+    margin-top: 12px;
+    font-size: 0.9rem;
+    line-height: 1.45;
+    max-width: 36ch;
+  }
+
+  /* Pastillas: se van los bordes de rejilla, el label y el cuerpo */
+  .promesas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-top: 16px;
+    border-top: none;
+  }
+  .promesa,
+  .promesa:nth-child(odd),
+  .promesa:nth-child(even) {
+    border: 1.5px solid var(--rule);
+    border-radius: 100px;
+    padding: 7px 14px;
+    gap: 0;
+  }
+  .promesa-k,
+  .promesa-d {
+    display: none;
+  }
+  .promesa-t {
+    font-size: 0.78rem;
+    font-weight: 800;
+  }
+
+  .quienes-right {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+  }
+  .quienes .kyc {
+    gap: 10px;
+  }
+  .quienes .kyc-stage {
+    width: min(100%, 268px);
+    border-radius: 20px;
+  }
+  .quienes .kyc-caption {
+    font-size: 0.55rem;
+  }
+  .quienes .kyc-badge {
+    padding: 6px 11px;
+    font-size: 0.62rem;
+  }
+  .quienes .kyc-badge-a {
+    left: 12px;
+    top: 30px;
+  }
+  .quienes .kyc-badge-b {
+    right: 10px;
+    bottom: 24px;
+  }
+}
+
+/* Telefonos bajos: sin sitio para texto y escena a la vez */
+@media (max-width: 900px) and (max-height: 680px) {
   .quienes-right {
     display: none;
   }
 }
+
