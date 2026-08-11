@@ -2,6 +2,7 @@
 /// estado de entrega, para que el vendedor califique al comprador al entregar.
 library;
 
+import 'order_status.dart';
 import 'order_tracking_model.dart';
 
 class SaleLine {
@@ -11,11 +12,17 @@ class SaleLine {
   const SaleLine({required this.title, required this.imageKey, required this.price});
 }
 
-class SaleGroup {
+/// El cálculo de estado (`currentStep`, `isRejected`, `needsProof`,
+/// `isDelivered`) vive en [OrderStatusFlow], compartido con `PedidoTracking`
+/// (vista comprador) — antes estaba duplicado línea por línea en ambas
+/// clases.
+class SaleGroup with OrderStatusFlow {
   final String checkoutId;
   final String buyerId;
   final String buyerName;
+  @override
   final String paymentStatus;
+  @override
   final String fulfillmentStatus;
   final DateTime createdAt;
   final List<SaleLine> items;
@@ -30,28 +37,9 @@ class SaleGroup {
     required this.items,
   });
 
-  bool get isRejected =>
-      fulfillmentStatus == 'rejected' || paymentStatus == 'cancelled';
-  bool get needsProof => paymentStatus == 'pending_payment';
-  bool get isDelivered => fulfillmentStatus == 'delivered';
-
-  int get currentStep {
-    if (needsProof) return -1;
-    if (paymentStatus == 'awaiting_confirmation') return 0;
-    switch (fulfillmentStatus) {
-      case 'received':
-        return 2;
-      case 'reviewing':
-        return 3;
-      case 'delivering':
-        return 4;
-      case 'delivered':
-        return 5;
-      default:
-        return 1;
-    }
-  }
-
+  /// Etiqueta corta del estado (texto dirigido al vendedor: a diferencia de
+  /// `PedidoTracking.statusLabel`, NO dice "tu comprobante" — el vendedor no
+  /// es quien lo sube, solo está esperando a que el comprador pague).
   String get statusLabel {
     if (isRejected) return 'Rechazado';
     if (needsProof) return 'Esperando pago';

@@ -3,6 +3,8 @@ library;
 
 import 'package:flutter/material.dart';
 
+import 'order_status.dart';
+
 /// Las 6 etapas visibles de la línea de tiempo del comprador, en orden.
 class OrderStages {
   static const List<String> labels = [
@@ -70,14 +72,20 @@ class PedidoLine {
 }
 
 /// Un pedido completo (checkout) con su estado de pago + entrega.
-class PedidoTracking {
+///
+/// El cálculo de la etapa actual (`currentStep`, `isRejected`, `needsProof`,
+/// `isDelivered`) vive en [OrderStatusFlow] — es el mismo cálculo que usa
+/// `SaleGroup` (vista vendedor) para el mismo par de columnas del backend.
+class PedidoTracking with OrderStatusFlow {
   /// Id del checkout.
   final String id;
 
   /// Estado del pago: pending_payment | awaiting_confirmation | paid | cancelled.
+  @override
   final String paymentStatus;
 
   /// Estado de entrega: pending | received | reviewing | delivering | delivered | rejected.
+  @override
   final String fulfillmentStatus;
 
   final String? rejectedReason;
@@ -148,35 +156,10 @@ class PedidoTracking {
     );
   }
 
-  bool get isRejected =>
-      fulfillmentStatus == 'rejected' || paymentStatus == 'cancelled';
-
-  /// El comprador aún no ha subido comprobante válido.
-  bool get needsProof => paymentStatus == 'pending_payment';
-
-  /// Índice (0..5) de la etapa alcanzada. -1 si falta el comprobante.
-  int get currentStep {
-    if (needsProof) return -1;
-    if (paymentStatus == 'awaiting_confirmation') return 0;
-    // paid → depende del fulfillment.
-    switch (fulfillmentStatus) {
-      case 'received':
-        return 2;
-      case 'reviewing':
-        return 3;
-      case 'delivering':
-        return 4;
-      case 'delivered':
-        return 5;
-      case 'pending':
-      default:
-        return 1; // pago aceptado
-    }
-  }
-
-  bool get isDelivered => fulfillmentStatus == 'delivered';
-
-  /// Etiqueta corta del estado para chips/listas.
+  /// Etiqueta corta del estado para chips/listas (texto dirigido al
+  /// comprador: "tu comprobante"). No se unifica con `SaleGroup.statusLabel`
+  /// porque el vendedor no es quien sube el comprobante — ver nota en el
+  /// commit / registro PE-S15.
   String get statusLabel {
     if (isRejected) return 'Rechazado';
     if (needsProof) return 'Falta tu comprobante';
