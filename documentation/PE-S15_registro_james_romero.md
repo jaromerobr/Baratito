@@ -375,9 +375,13 @@ Comando ejecutado: `flutter test` (Flutter 3.41.9, Dart 3.11.5)
 
 ## Commit
 
-Rama: `feat/publish-rules-tests`
+**Rama:** `feat/publish-rules-tests`
 
-- Refactor a `domain` + 26 pruebas:
-  https://github.com/jaromerobr/Baratito/commit/8476eda
-- Migración RLS y este registro:
-  https://github.com/jaromerobr/Baratito/commits/feat/publish-rules-tests
+Se trabaja en rama y no directamente sobre `main` según
+`documentation/estrategia-ramas.md`: todo cambio entra por Pull Request
+revisado por al menos 1 integrante del equipo.
+
+**Commit:** `973fb63` — *PE-S15 - James Romero - pruebas de publicacion y gate
+de verificacion de identidad*
+
+**Link:** https://github.com/jaromerobr/Baratito/commit/973fb63
