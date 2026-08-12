@@ -4,7 +4,12 @@ library;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../data/verification_repository.dart';
+import '../../domain/publish_permission.dart';
 import '../../domain/verification_model.dart';
+
+// The gate enum + the publish rule live in `domain`; re-exported here so the
+// existing UI imports keep working.
+export '../../domain/publish_permission.dart' show VerifyGate, PublishPermission;
 
 final verificationRepositoryProvider =
     Provider<VerificationRepository>((ref) => VerificationRepository());
@@ -15,9 +20,6 @@ final myVerificationProvider =
   ref.watch(authStateProvider); // re-fetch on login/logout
   return ref.watch(verificationRepositoryProvider).getMyLatest();
 });
-
-/// Whether the user can publish/buy, and why not.
-enum VerifyGate { loading, notLoggedIn, notSubmitted, pending, rejected, verified }
 
 /// Resolves the gate from the profile flag + the latest request status.
 final verifyGateProvider = Provider<VerifyGate>((ref) {

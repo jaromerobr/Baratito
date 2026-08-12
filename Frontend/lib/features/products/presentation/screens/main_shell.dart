@@ -85,7 +85,7 @@ class _MainShellState extends ConsumerState<MainShell> {
 
     // Gate: solo usuarios verificados (o admins) pueden publicar.
     final gate = ref.read(verifyGateProvider);
-    if (isAdmin || gate == VerifyGate.verified) {
+    if (PublishPermission.canPublish(gate: gate, isAdmin: isAdmin)) {
       context.push('/publish');
     } else {
       ScaffoldMessenger.of(context).showSnackBar(

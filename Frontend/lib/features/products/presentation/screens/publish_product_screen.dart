@@ -15,6 +15,7 @@ import '../../../../core/theme/app_colors.dart';
 import 'package:baratito/core/theme/app_palette.dart';
 import '../../data/product_repository.dart';
 import '../../domain/product_model.dart';
+import '../../domain/publish_validation.dart';
 import '../providers/products_provider.dart';
 
 class PublishProductScreen extends ConsumerStatefulWidget {
@@ -70,7 +71,7 @@ class _PublishProductScreenState extends ConsumerState<PublishProductScreen> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-    if (_images.isEmpty) {
+    if (!PublishValidation.hasEnoughPhotos(_images.length)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Agrega al menos una foto')),
       );
@@ -131,11 +132,7 @@ class _PublishProductScreenState extends ConsumerState<PublishProductScreen> {
                 controller: _titleCtrl,
                 maxLength: 100,
                 decoration: _dec('Ej. iPhone 13 Pro 128GB'),
-                validator: (v) {
-                  final t = v?.trim() ?? '';
-                  if (t.length < 5) return 'Mínimo 5 caracteres';
-                  return null;
-                },
+                validator: PublishValidation.title,
               ),
               _label('Descripción'),
               TextFormField(
@@ -153,11 +150,7 @@ class _PublishProductScreenState extends ConsumerState<PublishProductScreen> {
                   FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
                 ],
                 decoration: _dec('Ej. 380.00'),
-                validator: (v) {
-                  final p = double.tryParse((v ?? '').replaceAll(',', '.'));
-                  if (p == null || p < 0) return 'Ingresa un precio válido';
-                  return null;
-                },
+                validator: PublishValidation.price,
               ),
               _label('Categoría'),
               categoriesAsync.when(
